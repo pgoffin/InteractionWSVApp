@@ -1,9 +1,19 @@
 module.exports = {
-  typeOfWSV: 'timeline',
+  entitySpanClass: '.entity',
+
+  // typeOfWSV: 'timelineChart',
+  typeOfWSV: 'stockLineChart',
   positionType: 'right',
 
+  // time line chart constants
   timelineSize: { width: 100,
                   height: 20},
+
+  // stock line chart constants
+  numberOfMarks: 31,
+  stockLineChartSize: { markWidth: 6,
+                        heightWordScaleVis: 20},
+
 
   menuElement: { gridElement: '#grid',
                  closeElement: '#close',

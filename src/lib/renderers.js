@@ -244,54 +244,54 @@ module.exports = {
 				.attr('class', 'lineChart');
 		}
 
-		var x = d3.scale.linear()
+		var x = d3.scaleLinear()
 			.domain([0, data[0].values.length-1])
 		  	.range([margin.left, widthVis-margin.right-margin.left]);
 
 
-		var y = d3.scale.linear()
+		var y = d3.scaleLinear()
 			.domain([d3.min(data[0].values, function(d) { return d.close }), d3.max(data[0].values, function(d) { return d.close })])
 			//.domain([-15, 18])
 			.range([heightVis - margin.top - margin.bottom, margin.bottom]);
 
-		var color = d3.scale.ordinal()
+		var color = d3.scaleOrdinal()
 				.domain(data.map(function(d) { return d.id; }))
 				.range(["#000","#3182bd","#e6550d"]);
 
-		var line = d3.svg.line()
+		var line = d3.line()
 			.x(function(d, i) { return x(i); })
 			.y(function(d, i) { return y(d.close); });
 
-		var aboveArea = d3.svg.area()
+		var aboveArea = d3.area()
 			.x(function(d, i) { return x(i); })
 			.y0(function(d, i) { return y(Math.max(d.close, 0)); })
 			.y1(function(d, i) { return y(0); });
 
-		var belowArea = d3.svg.area()
+		var belowArea = d3.area()
 			.x(function(d, i) { return x(i); })
 			.y0(function(d, i) { return y(Math.min(d.close, 0)); })
 			.y1(function(d, i) { return y(0); });
 
-		var zeroLine = d3.svg.line()
+		var zeroLine = d3.line()
 			.x(function(d, i) { return x(i); })
 			.y(function(d, i) { return y(0); });
 
-		var baseLine = d3.svg.line()
+		var baseLine = d3.line()
 			.x(function(d, i) { return x(d.x); })
 			.y(function(d, i) { return y(0); });
 
-		var dropLine = d3.svg.line()
+		var dropLine = d3.line()
 			.x(function(d, i) { return x(d.x); })
 			.y(function(d, i) { return d.y; });
 
-		var bottomLine = d3.svg.line()
+		var bottomLine = d3.line()
 			.x(function(d, i) { return x(d.x); })
 			.y(function(d, i) { return 21; }); //FIXME: redefine in terms of heightVis & margin
 
-		var voronoi = d3.geom.voronoi()
+		var voronoi = d3.voronoi()
 			.x(function(d) { return x(d[0]); })
 			.y(function(d) { return y(d[1]); })
-			.clipExtent([[-margin.left, -margin.top], [widthVis + margin.right, heightVis + margin.bottom]]);
+			.extent([[-margin.left, -margin.top], [widthVis + margin.right, heightVis + margin.bottom]]);
 
 		var maxX = d3.scan(data[0].values, function(a,b){return b.close - a.close});
 		var maxY = d3.max(data[0].values, function(d){return d.close});

@@ -1,7 +1,10 @@
 const constants = require('../constants');
 const menuItems = require('./menuItems');
 
-import Measurements from '../measurements'
+import Measurements from '../measurements';
+import { layout } from './layout';
+import { text } from '../components';
+
 
 class ContextualMenu {
 
@@ -39,8 +42,6 @@ class ContextualMenu {
 
     this._text = theText;
 
-    const styleAttr = 'width:width;height:height;'
-
     const menuDiv = document.createElement("div");
     menuDiv.setAttribute('class', 'mouse tooltip');
 
@@ -74,7 +75,7 @@ class ContextualMenu {
       elementLayoutDiv.appendChild(elementImg);
 
       elementLayoutDiv.addEventListener('click', () => {
-        // unseclect current selected menu item
+        // unselect current selected menu item
         this.unSelectMenuItem();
 
         // add class to selected menu item
@@ -89,20 +90,7 @@ class ContextualMenu {
       });
 
 
-      // $(anElement).click(function() {
-      //
-      //   this.unSelectMenuItem();
-      //
-      //   // add class to selected menu item
-      //   this.__selectedMenuItem = anElement;
-      //   $(this.__selectedMenuItem).addClass('currentSeletedLayout');
-      //
-      //   let interactionFN = window[elementInteraction];
-      //
-      //   // is object a function?
-      //   if (typeof interactionFN === "function") this.interactionFN();
-      //
-      // })
+
     }
   }
 
@@ -147,6 +135,9 @@ class ContextualMenu {
 
     this.computePositionMenu(elementMenuIsCalledOn);
     this.positionMenu();
+
+
+    text.currentEntity = elementMenuIsCalledOn;
   }
 
 
@@ -178,15 +169,15 @@ class ContextualMenu {
 
       this.resetLayoutIcon();
 
-      // tmpCurrentEntity = null;
-      console.log('set tmpCurrentEntity to null')
+      console.log('set currentEntity to null')
+      text.currentEntity = null;
     }
   }
 
 
   computePositionMenu(elementMenuIsCalledOn: HTMLElement) {
     // compute the tooltip position
-    this._theEntityBBox = Measurements.get_BBox_entity(elementMenuIsCalledOn, $(elementMenuIsCalledOn).parent());
+    this._theEntityBBox = Measurements.get_BBox_entity($(elementMenuIsCalledOn).parent());;
     this._widthTooltip = $('.tooltip')[0].getBoundingClientRect().width;
     this._heightTooltip = $('.tooltip')[0].getBoundingClientRect().height;
     this._tooltip_left = this._theEntityBBox.left - this._widthTooltip - this._tooltipOffset;
@@ -233,6 +224,18 @@ class ContextualMenu {
 
   grid_layout() {
     console.log('menu item grid_layout pushed')
+
+    if (layout.currentLayout != constants.gridElement) {
+      console.log('set layout to "' + constants.gridElement + '"')
+
+      layout.changeLayout(constants.gridElement);
+
+// is this needed
+      layout.currentLayout = constants.gridElement;
+    }
+
+
+
   }
 
   column_layout() {
@@ -255,7 +258,7 @@ class ContextualMenu {
     console.log('menu item lastDataValue_sort pushed')
 
     lastValueSort()
-		updateLayout('lastValue');
+    updateLayout('lastValue');
   }
 
   entityName_sort() {

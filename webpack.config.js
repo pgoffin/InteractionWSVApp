@@ -20,8 +20,12 @@ module.exports = {
       info: true,
       exclude: ["vendors*.js"]
     }),
+    // new HtmlWebpackPlugin({
+    //   template: './src/template/_indexTimeline.html',
+    //   filename: "../../index.html"
+    // }),
     new HtmlWebpackPlugin({
-      template: './src/template/_index.html',
+      template: './src/template/_indexStock.html',
       filename: "../../index.html"
     }),
     new ScriptExtHtmlWebpackPlugin({
