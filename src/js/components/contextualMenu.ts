@@ -78,6 +78,11 @@ class ContextualMenu {
         // unselect current selected menu item
         this.unSelectMenuItem();
 
+        // add the class 'selected' if no wsv has been selected (selected wsvs are the gathered ones)
+				if (!($('.entity.selected').length > 1)) {
+					$('.entity').addClass('selected');
+				}
+
         // add class to selected menu item
         this._selectedMenuItem = anElement;
         $(this._selectedMenuItem).addClass('currentSeletedLayout');
@@ -225,10 +230,10 @@ class ContextualMenu {
   grid_layout() {
     console.log('menu item grid_layout pushed')
 
-    if (layout.currentLayout != constants.gridElement) {
-      console.log('set layout to "' + constants.gridElement + '"')
+    if (layout.currentLayout != constants.menuElement.gridElement) {
+      console.log('set layout to "' + constants.menuElement.gridElement + '"')
 
-      layout.changeLayout(constants.gridElement);
+      layout.changeLayout(constants.menuElement.gridElement, '');
 
 // is this needed
       layout.currentLayout = constants.gridElement;

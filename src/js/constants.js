@@ -19,14 +19,13 @@ module.exports = {
                  closeElement: '#close',
                  orderByLastDataValueElement: '#order-by-lastDataValue',
                  orderByEntityNameElement: '#order-by-entityName',
-                 orderByDocPositionElement: '#order-by-docPosition'
-  },
+                 orderByDocPositionElement: '#order-by-docPosition'},
 
   closeInteraction: 'close',
   closeType: 'close',
 
   menuIconUrls: { gridIconUrl: '',
-                  closeIconUrl: './src/data/icons/close.svg'
+                  closeIconUrl: './src/data/icons/close.svg'},
 
-  }
+  defaultAllowedInteractions: ['sorting','dblclickOnWSVToGetBack','lineToWSVOrigin'],
 };

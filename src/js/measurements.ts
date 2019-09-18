@@ -204,6 +204,279 @@ class Measurements {
   }
 
 
+  /**
+  * Calculates the possible number of columns/rows above and below the current entity.
+  * @param  {[type]} aCurrentEntity               [description]
+  * @param  {[type]} aPositionType                [description]
+  * @param  {[type]} boundToWhat                  [description]
+  * @param  {[type]} arrayOfWSVMeasurementObjects [description]
+  * @param  {[type]} aCellWidth                   [description]
+  * @param  {[type]} aCellHeight                  [description]
+  * @param  {[type]} spaceBetweenGridCells        [description]
+  * @return {object}      - custom object including the number of columns to the left and right, and above and below
+  */
+  static spaceAvailability_numberColAndRows(aCurrentEntity, aPositionType, layoutType, boundToWhat, arrayOfWSVMeasurementObjects, aCellWidth, aCellHeight, spaceBetweenGridCells) {
+
+    //TODO layoutTpe variable not yet used, do I need to use it
+
+    let numberColAndRows = {leftNumbColumn: 0,
+                            rightNumbColumn: 0,
+                            currentEntityColumn: 1,
+                            aboveNumbRow: 0,
+                            belowNumbRow: 0};
+
+    let widthAvailableForInteraction = window.innerWidth;
+    let heightAvailableForInteraction = window.innerHeight;
+
+    let currentEntity_rightPosition = this.get_BBox_entity(aCurrentEntity).right
+    let currentWSV_BboxDimensions = this.get_BBox_wsv(aCurrentEntity, aPositionType)
+    let currentWSV_topPosition = currentWSV_BboxDimensions.top;
+    let currentWSV_bottomPosition = currentWSV_BboxDimensions.bottom;
+    let currentWSV_rightPosition = currentWSV_BboxDimensions.right;
+    let max_entityWidth = this.get_entityMaxWidth(arrayOfWSVMeasurementObjects);
+    let max_sparklineWidth = this.get_SparklineMaxWidth(arrayOfWSVMeasurementObjects);
+
+    // these is the bbox of the text, a wsv should not go over it
+    let bodyBbox = this.getBodyBBox();
+    let leftBuffer = bodyBbox.left;
+    let rightBuffer = widthAvailableForInteraction - bodyBbox.right;
+    let topBuffer = bodyBbox.top;
+    let bottomBuffer = bodyBbox.bottom;
+
+
+    let availableSpace_left = 0;
+    let availableSpaceForCurrentEntityColumn_left = 0;
+    let numbColumnsPossible_left = 0;
+    let availableSpace_right = 0;
+    let numbColumnsPossible_right = 0;
+    let availableSpace_above = 0;
+    let numRowsPossible_above = 0;
+    let availableSpace_below = 0;
+    let numRowsPossible_below = 0;
+
+    // set it to one because usually there is enough space
+    let currentEntityColumn_usable = 1;
+
+    if (layoutType === 'grid') {
+      if (boundToWhat === 'middleBound') {
+
+        // is there enough space available in the column where the current entity is
+        availableSpaceForCurrentEntityColumn_left = currentEntity_rightPosition - max_entityWidth - leftBuffer;
+        if (availableSpaceForCurrentEntityColumn_left < 0) {
+          currentEntityColumn_usable = 0;
+        }
+
+        numberColAndRows.currentEntityColumn = currentEntityColumn_usable;
+        console.log('IS IT OK: ' + numberColAndRows.currentEntityColumn);
+
+        // how many columns available to the left
+        availableSpace_left = currentEntity_rightPosition - max_entityWidth - spaceBetweenGridCells - leftBuffer;
+        if (availableSpace_left < 0) {
+          availableSpace_left = 0;
+        }
+
+        numbColumnsPossible_left = Math.floor(availableSpace_left / (aCellWidth + (2 * spaceBetweenGridCells)));
+        numberColAndRows.leftNumbColumn = numbColumnsPossible_left;
+
+        // how many columns available to the right
+        availableSpace_right = widthAvailableForInteraction - (currentEntity_rightPosition + max_sparklineWidth + spaceBetweenGridCells) - rightBuffer;
+
+        numbColumnsPossible_right = Math.floor(availableSpace_right / (aCellWidth + (2 * spaceBetweenGridCells)));
+        numberColAndRows.rightNumbColumn = numbColumnsPossible_right;
+
+        // how many rows available above current entity
+        // top position relative to viewport
+        availableSpace_above = Math.max(0, (currentWSV_topPosition - $(window).scrollTop() - spaceBetweenGridCells));
+
+        numRowsPossible_above = Math.floor(availableSpace_above / (aCellHeight + (2 * spaceBetweenGridCells)));
+        numberColAndRows.aboveNumbRow = numRowsPossible_above;
+
+        // how many rows available below current entity
+        // bottom position relative to viewport
+        availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - $(window).scrollTop()) - spaceBetweenGridCells));
+
+        numRowsPossible_below = Math.floor(availableSpace_below / (aCellHeight + (2 * spaceBetweenGridCells)));
+        numberColAndRows.belowNumbRow = numRowsPossible_below;
+
+      } else if (boundToWhat === 'rightBound') {
+        //TODO
+      }
+
+    } else if (layoutType === 'column') {
+      if (boundToWhat === 'middleBound') {
+        // how many columns available to the left
+        availableSpace_left = currentEntity_rightPosition - max_entityWidth - spaceBetweenGridCells;
+        if (availableSpace_left < 0) {
+          availableSpace_left = 0;
+        }
+
+        // numbColumnsPossible_left = Math.floor(availableSpace_left / (aCellWidth + (2 * spaceBetweenGridCells)));
+        // numberColAndRows.leftNumbColumn = numbColumnsPossible_left;
+        numberColAndRows.leftNumbColumn = 0;
+
+        // how many columns available to the right
+        availableSpace_right = widthAvailableForInteraction - (currentEntity_rightPosition + max_sparklineWidth + spaceBetweenGridCells);
+
+        // numbColumnsPossible_right = Math.floor(availableSpace_right / (aCellWidth + (2 * spaceBetweenGridCells)));
+        // numberColAndRows.rightNumbColumn = numbColumnsPossible_right;
+        numberColAndRows.rightNumbColumn = 0;
+
+        // how many rows available above current entity
+        availableSpace_above = Math.max(0, (currentWSV_topPosition - $(window).scrollTop() - spaceBetweenGridCells));
+
+        numRowsPossible_above = Math.floor(availableSpace_above / (aCellHeight + (2 * spaceBetweenGridCells)));
+        numberColAndRows.aboveNumbRow = numRowsPossible_above;
+
+        // how many rows available below current entity
+        availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - $(window).scrollTop()) - spaceBetweenGridCells));
+
+        numRowsPossible_below = Math.floor(availableSpace_below / (aCellHeight + (2 * spaceBetweenGridCells)));
+        numberColAndRows.belowNumbRow = numRowsPossible_below;
+
+      } else if (boundToWhat === 'rightBound') {
+        //TODO
+      }
+
+    } else if (layoutType === 'column_panAligned') {
+      if (boundToWhat === 'middleBound') {
+        // how many columns available to the left
+        availableSpace_left = currentEntity_rightPosition - max_entityWidth - spaceBetweenGridCells;
+        if (availableSpace_left < 0) {
+          availableSpace_left = 0;
+        }
+
+        //numbColumnsPossible_left = Math.floor(availableSpace_left / (aCellWidth + (2 * spaceBetweenGridCells)));
+        // numberColAndRows.leftNumbColumn = numbColumnsPossible_left;
+        numberColAndRows.leftNumbColumn = 1;
+
+        // how many columns available to the right
+        availableSpace_right = widthAvailableForInteraction - (currentEntity_rightPosition + max_sparklineWidth + spaceBetweenGridCells);
+
+        // numbColumnsPossible_right = Math.floor(availableSpace_right / (aCellWidth + (2 * spaceBetweenGridCells)));
+        // numberColAndRows.rightNumbColumn = numbColumnsPossible_right;
+        numberColAndRows.rightNumbColumn = 1;
+
+        // how many rows available above current entity
+        availableSpace_above = Math.max(0, (currentWSV_topPosition - $(window).scrollTop() - spaceBetweenGridCells));
+
+        numRowsPossible_above = Math.floor(availableSpace_above / (aCellHeight + (2 * spaceBetweenGridCells)));
+        numberColAndRows.aboveNumbRow = numRowsPossible_above;
+
+        // how many rows available below current entity
+        availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - $(window).scrollTop()) - spaceBetweenGridCells));
+
+        numRowsPossible_below = Math.floor(availableSpace_below / (aCellHeight + (2 * spaceBetweenGridCells)));
+        numberColAndRows.belowNumbRow = numRowsPossible_below;
+
+      } else if (boundToWhat === 'rightBound') {
+        //TODO
+      }
+
+    } else if (layoutType === 'row') {
+      if (boundToWhat === 'middleBound') {
+        // how many columns available to the left
+        availableSpace_left = currentEntity_rightPosition - max_entityWidth - spaceBetweenGridCells - leftBuffer;
+        if (availableSpace_left < 0) {
+          availableSpace_left = 0;
+        }
+
+        numbColumnsPossible_left = Math.floor(availableSpace_left / (aCellWidth + (2 * spaceBetweenGridCells)));
+        numberColAndRows.leftNumbColumn = numbColumnsPossible_left;
+
+        // how many columns available to the right
+        availableSpace_right = widthAvailableForInteraction - (currentEntity_rightPosition + max_sparklineWidth + spaceBetweenGridCells) - rightBuffer;
+
+        numbColumnsPossible_right = Math.floor(availableSpace_right / (aCellWidth + (2 * spaceBetweenGridCells)));
+        numberColAndRows.rightNumbColumn = numbColumnsPossible_right;
+
+        // how many rows available above current entity
+        availableSpace_above = Math.max(0, (currentWSV_topPosition - $(window).scrollTop() - spaceBetweenGridCells));
+        numRowsPossible_above = Math.floor(availableSpace_above / (aCellHeight + (2 * spaceBetweenGridCells)));
+
+        availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - $(window).scrollTop()) - spaceBetweenGridCells));
+        numRowsPossible_below = Math.floor(availableSpace_below / (aCellHeight + (2 * spaceBetweenGridCells)));
+
+        if (numRowsPossible_above > 0) {
+          numberColAndRows.aboveNumbRow = 1;
+          numberColAndRows.belowNumbRow = 0;
+        } else if (numRowsPossible_below > 0) {
+          numberColAndRows.aboveNumbRow = 0;
+          numberColAndRows.belowNumbRow = 1;
+        }
+
+
+        // how many rows available below current entity
+
+        // numberColAndRows.belowNumbRow = numRowsPossible_below;
+
+      } else if (boundToWhat === 'rightBound') {
+        //TODO
+      }
+
+    } else if (layoutType === 'grid-no-overlap') {
+      if (boundToWhat === 'middleBound') {
+        // how many columns available to the left
+        availableSpace_left = currentEntity_rightPosition - max_entityWidth - spaceBetweenGridCells;
+        if (availableSpace_left < 0) {
+          availableSpace_left = 0;
+        }
+
+        numbColumnsPossible_left = Math.floor(availableSpace_left / (aCellWidth + (2 * spaceBetweenGridCells)));
+        numberColAndRows.leftNumbColumn = numbColumnsPossible_left;
+
+        // how many columns available to the right
+        availableSpace_right = widthAvailableForInteraction - (currentEntity_rightPosition + max_sparklineWidth + spaceBetweenGridCells);
+
+        numbColumnsPossible_right = Math.floor(availableSpace_right / (aCellWidth + (2 * spaceBetweenGridCells)));
+        numberColAndRows.rightNumbColumn = numbColumnsPossible_right;
+
+        // how many rows available above current entity
+        availableSpace_above = Math.max(0, (currentWSV_topPosition - $(window).scrollTop() - spaceBetweenGridCells));
+
+        numRowsPossible_above = Math.floor(availableSpace_above / (aCellHeight + (2 * spaceBetweenGridCells)));
+        numberColAndRows.aboveNumbRow = numRowsPossible_above;
+
+        // how many rows available below current entity
+        availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - $(window).scrollTop()) - spaceBetweenGridCells));
+
+        numRowsPossible_below = Math.floor(availableSpace_below / (aCellHeight + (2 * spaceBetweenGridCells)));
+        numberColAndRows.belowNumbRow = numRowsPossible_below;
+
+      } else if (boundToWhat === 'rightBound') {
+        //TODO
+      }
+
+    }
+
+    return numberColAndRows;
+  }
+
+
+  /**
+  * Gets the maximal width of the entities present in the document.
+  * @return {[type]} [description]
+  */
+  static get_entityMaxWidth(arrayOfWSVMeasurementObjects) {
+    var entityMaxWidth = Math.max.apply(null, arrayOfWSVMeasurementObjects.map(function() {
+      return this.entityBbox.width;
+    }));
+
+    return entityMaxWidth;
+  }
+
+
+  /**
+  * Gets the maximum sparkline among a collection of sparklines
+  * @param  {Array[objects]} arrayOfWSVMeasurementObjects [description]
+  * @return {float}                              [description]
+  */
+  static get_SparklineMaxWidth(arrayOfWSVMeasurementObjects) {
+    var sparklineMaxWidth = Math.max.apply(null, arrayOfWSVMeasurementObjects.map(function() {
+      return this.sparklineBbox.width;
+    }));
+
+    return sparklineMaxWidth;
+  }
 }
 
 

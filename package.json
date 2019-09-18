@@ -48,6 +48,9 @@
     "@types/html-webpack-plugin": "^3.2.1",
     "@types/jquery": "^3.3.31",
     "@types/mini-css-extract-plugin": "^0.8.0",
-    "@types/script-ext-html-webpack-plugin": "^2.1.1"
+    "@types/script-ext-html-webpack-plugin": "^2.1.1",
+    "lodash": "^4.17.15",
+    "velocity-animate": "^1.5.2",
+    "velocity-ui-pack": "^1.2.2"
   }
 }
