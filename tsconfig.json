@@ -5,8 +5,9 @@
     "target": "es2015",
     "moduleResolution": "node",
     "lib": [
-       "dom",
-       "es7"
+      "es7",
+      "dom",
+      "dom.iterable"
     ]
   },
   "awesomeTypescriptLoaderOptions": {

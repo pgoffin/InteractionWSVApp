@@ -1,0 +1,76 @@
+#document {
+  font-family: sans-serif;
+  margin: 5em 5em 0em
+}
+
+p {
+  max-width: 700px;
+}
+
+p.quote {
+  border: 1px solid lightgrey;
+  box-shadow: lightgrey 5px 5px 10px;
+  padding: 1em;
+  margin-left: 2em;
+  max-width: 500px;
+}
+
+p.longerQuote {
+  border: 1px solid lightgrey;
+  box-shadow: lightgrey 5px 5px 10px;
+  padding: 1em;
+  margin-left: 2em;
+  max-width: 600px;
+}
+
+p.question{
+  background-color: lightyellow;
+  padding: 1em;
+  border-radius: .3em;
+}
+
+img.wsv_inline {
+  height: 1.5em;
+  margin-bottom: -0.4em;
+}
+
+img.wsv_inline_icons {
+  height: 0.8em;
+  margin-bottom: -0.2em;
+}
+
+.makeButton {
+  border: 1px solid lightgrey;
+  box-shadow: lightgrey 3px 3px 5px;
+  padding: 0.1em;
+}
+
+#practice_article{
+  margin-left:-2%;
+  width: 105%;
+  height: 1100px;
+  border:0px;
+}
+
+.exampleWSV {
+  width: 600px;
+}
+
+.hasGif {
+  padding-bottom: 10px;
+}
+
+img.emphasize {
+  border: 1px solid lightgrey;
+  box-shadow: lightgrey 5px 5px 10px;
+  padding: 0.5em;
+}
+
+img.padded {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+li.moreSpace {
+  padding-top: 20px;
+}

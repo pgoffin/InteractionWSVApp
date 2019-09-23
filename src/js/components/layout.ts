@@ -33,7 +33,6 @@ class Layout {
 
 
     initializeLayout() {
-
       this._layoutInfo.spaceBetweenGridCells = 4;
     }
 

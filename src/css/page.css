@@ -1,0 +1,353 @@
+body {
+	font: 18px Helvetica;
+	margin: 20px;
+}
+
+
+#text {
+	line-height: 1.5;
+}
+
+
+.entity {
+	background-color: #E4FDFF;
+	/*cursor:default;*/
+}
+
+
+.entity:hover {
+	/*background: #228B22;*/
+	background: #B6CACC;
+}
+
+
+.currentEntity:not(.sparkline) {
+	/*border-style: solid;
+	border-width: 2px;
+	border-color: #A0B1B2;*/
+	background-color: #80f6ff;
+}
+
+
+.entity.selected {
+	border-style: solid;
+	border-width: 1px;
+	border-color: #1af0ff;
+}
+
+
+.newData {
+	fill: grey;
+	stroke: grey;
+}
+
+
+.originalData {
+	fill: blue;
+	stroke: blue;
+}
+
+
+.movedWSV {
+	stroke: green;
+}
+
+
+path {
+	fill: #000000;
+	stroke: #000000;
+}
+
+
+/*debugging*/
+/*.clonedWSV.sparklificated {
+	border-style: solid;
+	border-width: 1px;
+	border-color: red;
+}*/
+
+
+/*.test {
+	border-style: solid;
+	border-width: 2px;
+	border-color: blue;
+}*/
+
+
+.beingDragged {
+	background-color: #007780;
+
+	/*cursor: -moz-grabbing;
+	cursor: -webkit-grabbing;
+	cursor: grabbing;*/
+}
+
+
+.hide {
+	/*visibility: hidden;*/
+	display: none;
+}
+
+
+.hoverTrail {
+	fill: none;
+	stroke: blue;
+	stroke-width: 1.5px;
+}
+
+
+.wsvMovement {
+	fill: none;
+	stroke: green;
+	stroke-width: 1px;
+}
+
+
+.addBefore {
+	border-top-style: solid;
+	border-left-style: solid;
+	border-width: 2px;
+	border-color: #000000;
+}
+
+
+.addAfter {
+	border-bottom-style: solid;
+	border-right-style: solid;
+	border-width: 2px;
+	border-color: #000000;
+}
+
+
+/* the compare has only an influence on the background color of the entity */
+.compare .entity.clonedWSV {
+	/*border-style: solid;
+	border-width: 2px;
+	border-color: #000000*/
+
+	background-color: #00becc;
+	/*border-color: green;*/
+}
+
+
+.tooltip {
+	background: #000;
+	border-radius: 5px;
+	padding: 5px 5px;
+	position: absolute;
+	/*width: 105px;*/
+	text-align: center;
+	color: #FFF;
+	font-size: .75em;
+	z-index: 999;
+}
+
+
+/*.tooltip:before {
+	border: solid;
+	border-color: #000 transparent;
+	border-width: 6px 6px 0 6px;
+	top: -6px;
+	content: "";
+	/*left: calc(90% - 6px);*/
+	/*left: calc(100%);
+	position: absolute;
+	z-index: 999;
+}*/
+
+
+.tooltip.leftPos:not(.topPos):before {
+	width: 0;
+	height: 0;
+	border-bottom: 6px solid #000000;
+	border-right: 6px solid transparent;
+
+	position: absolute;
+	top: -6px;
+	left: calc(100%);
+	z-index: 999;
+
+	content: '';
+}
+
+
+.tooltip.rightPos:not(.topPos):before {
+	width: 0;
+	height: 0;
+	border-bottom: 6px solid #000000;
+	border-left: 6px solid transparent;
+
+	position: absolute;
+	top: -6px;
+	left: calc(0% - 6px);*/
+	z-index: 999;
+
+	content: '';
+}
+
+
+.tooltip.leftPos.topPos:before {
+	width: 0;
+	height: 0;
+	border-top: 6px solid #000000;
+	border-right: 6px solid transparent;
+
+	position: absolute;
+	top: calc(100%);
+	left: calc(100%);
+	z-index: 999;
+
+	content: '';
+}
+
+
+.tooltip.rightPos.topPos:before {
+	width: 0;
+	height: 0;
+	border-top: 6px solid #000000;
+	border-left: 6px solid transparent;
+
+	position: absolute;
+	top: calc(100%);
+	left: calc(0% - 6px);*/
+	z-index: 999;
+
+	content: '';
+}
+
+
+/* need to enable: In Chrome, navigate to chrome://flags and enable "experimental web platform features".  */
+/* http://gridbyexample.com/examples/ */
+.wrapper {
+	display: grid;
+	grid-template-columns: 20px 20px 20px 20px 20px;
+	grid-gap: 5px;
+	background-color: #000000;
+	color: #444;
+}
+
+
+.box {
+	background-color: #ffffff;
+	color: #444;
+
+	border-style: solid;
+	border-width: 1px;
+	border-color: #ffffff;
+
+	/*border-radius: 5px;
+	padding: 5px;*/
+	/*font-size: 150%;*/
+}
+
+
+.box:not(.notSelectable):hover {
+	background-color: #cccccc;
+}
+
+.box.notSelectable {
+	opacity: 0.75;
+}
+
+
+.box.currentSeletedLayout {
+	border-color: #1af0ff;
+}
+
+
+img.icon {
+	width: 20px;
+	height: auto;
+}
+
+
+
+/* suggested interactivity */
+/* https://css-tricks.com/examples/ShapesOfCSS/ */
+#triangle_left {
+	position: absolute;
+	top: calc(100% - 50%);
+
+	width: 0;
+	height: 0;
+	border-top: 15px solid transparent;
+	border-right: 30px solid #00becc;
+	border-bottom: 15px solid transparent;
+
+	/*background-color: #ffffff;*/
+	z-index: 999;
+}
+
+
+#triangle_right {
+	position: absolute;
+	top: calc(100% - 50%);
+
+	width: 0;
+	height: 0;
+	border-top: 15px solid transparent;
+	border-left: 30px solid #00becc;
+	border-bottom: 15px solid transparent;
+
+	/*background-color: #ffffff;*/
+
+	z-index: 999;
+}
+
+#triangle_left:active, #triangle_right:active {
+	box-shadow: 0 0 5px -1px rgba(0,0,0,0.6);
+}
+
+
+#orientation_circles {
+	position: absolute;
+
+	background-color: #ffffff;
+
+	z-index: 999;
+}
+
+
+.comparisonPossible {
+	background-color: #9fff80;
+}
+
+
+.whiteLayer {
+	box-shadow: 4px 4px 2px 0px rgba(0,0,0,0.75);
+	border: 1px solid black;
+}
+
+
+/* centering gif on resting pages */
+
+/*.condition {
+	display: block;
+	margin: auto;
+    width: 50%;
+}*/
+
+.condition {
+	display: flex;
+	/* align horizontal */
+    justify-content: center;
+    /* align vertical */
+	height: 100%;
+    align-items: center;
+}
+
+.conditionDescription p {
+	text-align: center;
+}
+
+
+#document {
+	visibility: hidden;
+}
+
+/*.conditionDescription {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(50%, 50%);
+}*/

@@ -1,6 +1,9 @@
 import * as d3 from "d3";
 import { contextualMenu } from './contextualMenu';
 import { layout } from './layout'
+import { wsvDataObject } from "../../../global";
+
+import WordScaleVisualization from "./wordScaleVisualization";
 
 // import historianData from "../../data/otherDataset"
 const historianData = require("../../data/otherDataset")
@@ -12,24 +15,79 @@ const renderers = require('../../lib/renderers');
 require('../../lib/jquery.sparklificator');
 
 
-class Text {
+
+interface Text {
+  _nameOfTextFile: string;
+  _isLayoutVisible: Boolean;
+  _currentWSV: WordScaleVisualization;
+  _listOfWSVs: Array<WordScaleVisualization>;
+  _dataForWSV: wsvDataObject
+}
+
+
+class Text implements Text {
 
   _nameOfTextFile: string = "";
 
   // if there is a layout then flag should be true
   _isLayoutVisible: Boolean = false;
 
-  _currentEntity: HTMLElement = null;
+  _currentWSV: WordScaleVisualization = null;
 
+  _listOfWSVs: Array<WordScaleVisualization> = [];
+
+  _dataForWSV: wsvDataObject = {};
+
+
+  // getter/setter
+  set nameOfTextFile(value: string) {
+      this._nameOfTextFile = value;
+  }
+  get nameOfTextFile(): string {
+      return this._nameOfTextFile;
+  }
+
+  set isLayoutVisible(value: Boolean) {
+      this._isLayoutVisible = value;
+  }
+  get isLayoutVisible(): Boolean {
+      return this._isLayoutVisible;
+  }
+
+  set currentWSV(value: WordScaleVisualization) {
+      this._currentWSV = value;
+  }
+  get currentWSV(): WordScaleVisualization {
+      return this._currentWSV;
+  }
+
+  set dataForWSV(value: wsvDataObject) {
+      this._dataForWSV = value;
+  }
+  get dataForWSV(): wsvDataObject {
+      return this._dataForWSV;
+  }
+
+  set listOfWSVs(value: Array<WordScaleVisualization>) {
+      this._listOfWSVs = value;
+  }
+  get listOfWSVs(): Array<WordScaleVisualization> {
+      return this._listOfWSVs;
+  }
 
 
   initializeText() {
     console.log('initializing some text')
 
-    this._nameOfTextFile = this.getTextFileName()
+    this.nameOfTextFile = this.getTextFileName();
+
+    // TODO Can this be done better?
+    this.dataForWSV = this.getDatasetFromDocumentTag();
+
+    this.createWSVList();
 
     // check if there is data for each entity if no data is available remove the entity tag
-    this.removeEntitiesWithNoData();
+    this.setEntitiesWithNoDataToClass('noClass');
     this.addWSV(constants.typeOfWSV);
 
     layout.initializeLayout();
@@ -39,13 +97,6 @@ class Text {
     this.addEventToEntities(contextualMenu);
   }
 
-  get currentEntity(): HTMLElement {
-    return this._currentEntity;
-  }
-
-  get isLayoutVisible() {
-    return this._isLayoutVisible;
-  }
 
 
   set currentEntity(anEntity: HTMLElement) {
@@ -74,35 +125,84 @@ class Text {
   }
 
 
+  /**
+  * Goes through each element tagges as entity, and creates a wsv and puts it into an array.
+  **/
+  private createWSVList(): void {
+
+    document.querySelectorAll(constants.entitySpanClass).forEach((value) => {
+
+      let aWSV = new WordScaleVisualization(value, this.dataForWSV);
+
+      this.listOfWSVs.push(aWSV);
+    });
+
+  }
 
 
-  /*
-    remove the entity tag for tagged entities that do not have any data
-   */
-  private removeEntitiesWithNoData(): void {
+  /**
+  * Adds a noData class to the entity tag for text tagged as entities but do not have any available data.
+  **/
+  private setEntitiesWithNoDataToClass(setToClass: string): void {
 
-    // const nameOfTextFile = this.getTextFileName();
-    const classThis = this;
+    // const wsvDataForDocument: wsvDataObject = this.dataForWSV;
 
-    $(constants.entitySpanClass).each(function(index, value) {
-      // does entity have data available?
-
-      let anEntity = classThis.getEntityFromDOMElement(value);
-      // this.dataset.wsvType get the value from the span tag "data-wsv-type"
-      let datasetType = classThis.getDataset(this.dataset.wsvType)
-
-      if ((typeof datasetType == 'undefined') || ((typeof datasetType[classThis._nameOfTextFile][anEntity] == 'undefined') || (datasetType[classThis._nameOfTextFile][anEntity].length == 0))) {
-        // console.log(anEntity)
-        // no data available remove the entity tag
-        $(value).contents().unwrap();
+    this.listOfWSVs.forEach((aWSV) => {
+      if ((typeof aWSV.wsvData == 'undefined') || (Object.getOwnPropertyNames(aWSV.wsvData).length === 0)) {
+        // no data available instead of removing the entity tag add
+        // $(value).contents().unwrap();
+        aWSV.entity.entityElement.classList.toggle(setToClass);
       }
     });
+
+    // document.querySelectorAll(constants.entitySpanClass).forEach((value) => {
+    // // $(constants.entitySpanClass).forEach((value) => {
+    //   // does entity have data available?
+    //
+    //   const anEntityName: string = this.getEntityFromDOMElement(value);
+    //
+    //   if ((typeof wsvDataForDocument == 'undefined') || ((typeof wsvDataForDocument[anEntityName] == 'undefined') || (wsvDataForDocument[anEntityName].length == 0))) {
+    //     // no data available instead of removing the entity tag add
+    //     // $(value).contents().unwrap();
+    //     value.classList.toggle('noData');
+    //   }
+    // });
   }
+
 
   // add wsvs to the taggedd elements in the text
   private addWSV(aTypeOfWSV: string): void {
 
-    const classThis = this;
+    let settings;
+    this.listOfWSVs.forEach((aWSV) => {
+      if (aWSV.typeOfWSV === 'stockLineChart' && aWSV.hasData) {
+
+        // sort the stockData array
+        let transformedStockData = aWSV.wsvData.map((element) => {
+          return {close: element.changeToFirst, date: new Date(element.date)};
+        });
+
+        transformedStockData.sort(function(a: Object, b: Object) {
+          return a.date - b.date;
+        });
+
+        // sorted data, ascending
+        let dataObject = [{id: 0, values: transformedStockData}];
+
+        settings = {data: dataObject,
+                    renderer: renderers.stockPriceSparkline,
+                    position: constants.positionType,
+                    paddingWidth: true,
+                    paddingHeight: true,
+                    width: (constants.stockLineChartSize.markWidth * constants.numberOfMarks),
+                    height: constants.stockLineChartSize.heightWordScaleVis };
+      } else if (aTypeOfWSV === 'timelineChart') {
+
+      } else if (aTypeOfWSV === 'eyetrackingChart') {
+
+      }
+    });
+
 
     $(constants.entitySpanClass).each(function(index, value) {
 
@@ -213,6 +313,18 @@ class Text {
       return historianData;
     } else if (aWSVType == 'stockData') {
       return stockData;
+    }
+  }
+
+  private getDatasetFromDocumentTag() {
+    let docDiv = document.getElementById('document');
+    let whatData = docDiv.dataset.wsvType
+    let aTextTitle = this.nameOfTextFile;
+
+    if (whatData == 'historianData') {
+      return historianData[aTextTitle];
+    } else if (whatData == 'stockData') {
+      return stockData[aTextTitle];
     }
   }
 
