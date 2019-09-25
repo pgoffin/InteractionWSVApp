@@ -28,6 +28,10 @@ body {
 	background-color: #ffdf80;
 }
 
+.entity.noClass {
+	background-color: transparent;
+}
+
 /* .entity {
 	font-weight: bold;
 	color: rgb(188, 69, 80);

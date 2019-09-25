@@ -3,14 +3,14 @@ const menuItems = require('./menuItems');
 
 import Measurements from '../measurements';
 import { layout } from './layout';
-import { text } from '../components';
+// import { text } from '../components';
 
 
 class ContextualMenu {
 
   private _isContextMenuSetUp: Boolean = false;
 
-  private _text: Text;
+  // private _text: Text;
 
   private _tooltipOffset: number = -5;
   private _theEntityBBox;
@@ -38,9 +38,10 @@ class ContextualMenu {
 // ['#grid', '#close', '#order-by-lastDataValue', '#order-by-entityName', '#order-by-docPosition','#selector', '#selector-ok', '#row', '#column', '#grid-no-overlap'];
 
 
-  initializeContextualMenu(theText: Text) {
+  // initializeContextualMenu(theText: Text) {
+  initializeContextualMenu() {
 
-    this._text = theText;
+    // this._text = theText;
 
     const menuDiv = document.createElement("div");
     menuDiv.setAttribute('class', 'mouse tooltip');
@@ -140,9 +141,6 @@ class ContextualMenu {
 
     this.computePositionMenu(elementMenuIsCalledOn);
     this.positionMenu();
-
-
-    text.currentEntity = elementMenuIsCalledOn;
   }
 
 
@@ -168,7 +166,8 @@ class ContextualMenu {
   hideContextualMenu() {
     // // Don't hide if a layout is being displayed
     // var isLayoutVisible = ($('.clonedWSV').length === 0) ? false : true;
-    if(!this._text.isLayoutVisible) {
+    // if(!this._text.isLayoutVisible) {
+    if(!layout.isLayoutVisible) {
       $('.tooltip').removeClass('wrapper')
       $('.tooltip').addClass('hide');
 

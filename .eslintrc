@@ -5,7 +5,7 @@
   "plugins": ["@typescript-eslint"],
   "rules": {
     "@typescript-eslint/rule-name": "error"
-  }
+  },
 
   "env": {
     "browser": true,

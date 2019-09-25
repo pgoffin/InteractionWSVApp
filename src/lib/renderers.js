@@ -3,6 +3,7 @@
 **/
 
 module.exports = {
+	
 	/**
 	* Builds a classic sparkline (word-scale visualization) without or with interaction.
 	* this.element and this.options is alvailable in the renderer if needed

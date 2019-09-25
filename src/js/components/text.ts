@@ -10,6 +10,7 @@ const historianData = require("../../data/otherDataset")
 const stockData = require("../../data/wsvDataFile")
 const constants = require('../constants');
 
+// to run sparklificator
 require('webpack-jquery-ui/widgets');
 const renderers = require('../../lib/renderers');
 require('../../lib/jquery.sparklificator');
@@ -21,7 +22,8 @@ interface Text {
   _isLayoutVisible: Boolean;
   _currentWSV: WordScaleVisualization;
   _listOfWSVs: Array<WordScaleVisualization>;
-  _dataForWSV: wsvDataObject
+  _dataForWSV: wsvDataObject;
+  _currentEntity: HTMLElement;
 }
 
 
@@ -37,6 +39,8 @@ class Text implements Text {
   _listOfWSVs: Array<WordScaleVisualization> = [];
 
   _dataForWSV: wsvDataObject = {};
+
+  _currentEntity: HTMLElement;
 
 
   // getter/setter
@@ -75,6 +79,10 @@ class Text implements Text {
       return this._listOfWSVs;
   }
 
+  get currentEntity(): HTMLElement {
+      return this._currentEntity;
+  }
+
 
   initializeText() {
     console.log('initializing some text')
@@ -82,13 +90,13 @@ class Text implements Text {
     this.nameOfTextFile = this.getTextFileName();
 
     // TODO Can this be done better?
-    this.dataForWSV = this.getDatasetFromDocumentTag();
+    this.dataForWSV = this.getDatasetUsingDocumentTag();
 
     this.createWSVList();
 
     // check if there is data for each entity if no data is available remove the entity tag
-    this.setEntitiesWithNoDataToClass('noClass');
-    this.addWSV(constants.typeOfWSV);
+    // this.setEntitiesWithNoDataToClass('noClass');
+    // this.addWSV(constants.typeOfWSV);
 
     layout.initializeLayout();
 
@@ -126,13 +134,13 @@ class Text implements Text {
 
 
   /**
-  * Goes through each element tagges as entity, and creates a wsv and puts it into an array.
+  * Goes through each element tagged as entity, and creates a wsv and puts it into an array.
   **/
   private createWSVList(): void {
 
     document.querySelectorAll(constants.entitySpanClass).forEach((value) => {
 
-      let aWSV = new WordScaleVisualization(value, this.dataForWSV);
+      let aWSV = new WordScaleVisualization(value, this.dataForWSV, value.dataset.wsvRenderer);
 
       this.listOfWSVs.push(aWSV);
     });
@@ -140,134 +148,101 @@ class Text implements Text {
   }
 
 
-  /**
-  * Adds a noData class to the entity tag for text tagged as entities but do not have any available data.
-  **/
-  private setEntitiesWithNoDataToClass(setToClass: string): void {
-
-    // const wsvDataForDocument: wsvDataObject = this.dataForWSV;
-
-    this.listOfWSVs.forEach((aWSV) => {
-      if ((typeof aWSV.wsvData == 'undefined') || (Object.getOwnPropertyNames(aWSV.wsvData).length === 0)) {
-        // no data available instead of removing the entity tag add
-        // $(value).contents().unwrap();
-        aWSV.entity.entityElement.classList.toggle(setToClass);
-      }
-    });
-
-    // document.querySelectorAll(constants.entitySpanClass).forEach((value) => {
-    // // $(constants.entitySpanClass).forEach((value) => {
-    //   // does entity have data available?
-    //
-    //   const anEntityName: string = this.getEntityFromDOMElement(value);
-    //
-    //   if ((typeof wsvDataForDocument == 'undefined') || ((typeof wsvDataForDocument[anEntityName] == 'undefined') || (wsvDataForDocument[anEntityName].length == 0))) {
-    //     // no data available instead of removing the entity tag add
-    //     // $(value).contents().unwrap();
-    //     value.classList.toggle('noData');
-    //   }
-    // });
-  }
-
-
-  // add wsvs to the taggedd elements in the text
-  private addWSV(aTypeOfWSV: string): void {
-
-    let settings;
-    this.listOfWSVs.forEach((aWSV) => {
-      if (aWSV.typeOfWSV === 'stockLineChart' && aWSV.hasData) {
-
-        // sort the stockData array
-        let transformedStockData = aWSV.wsvData.map((element) => {
-          return {close: element.changeToFirst, date: new Date(element.date)};
-        });
-
-        transformedStockData.sort(function(a: Object, b: Object) {
-          return a.date - b.date;
-        });
-
-        // sorted data, ascending
-        let dataObject = [{id: 0, values: transformedStockData}];
-
-        settings = {data: dataObject,
-                    renderer: renderers.stockPriceSparkline,
-                    position: constants.positionType,
-                    paddingWidth: true,
-                    paddingHeight: true,
-                    width: (constants.stockLineChartSize.markWidth * constants.numberOfMarks),
-                    height: constants.stockLineChartSize.heightWordScaleVis };
-      } else if (aTypeOfWSV === 'timelineChart') {
-
-      } else if (aTypeOfWSV === 'eyetrackingChart') {
-
-      }
-    });
+  // /**
+  // * Adds a noData class to the entity tag for text tagged as entities but do not have any available data.
+  // **/
+  // private setEntitiesWithNoDataToClass(setToClass: string): void {
+  //
+  //   // const wsvDataForDocument: wsvDataObject = this.dataForWSV;
+  //
+  //   this.listOfWSVs.forEach((aWSV) => {
+  //     if ((typeof aWSV.wsvData == 'undefined') || (Object.getOwnPropertyNames(aWSV.wsvData).length === 0)) {
+  //       // no data available instead of removing the entity tag add
+  //       // $(value).contents().unwrap();
+  //       aWSV.entity.entityElement.classList.toggle(setToClass);
+  //     }
+  //   });
+  //
+  //   // document.querySelectorAll(constants.entitySpanClass).forEach((value) => {
+  //   // // $(constants.entitySpanClass).forEach((value) => {
+  //   //   // does entity have data available?
+  //   //
+  //   //   const anEntityName: string = this.getEntityFromDOMElement(value);
+  //   //
+  //   //   if ((typeof wsvDataForDocument == 'undefined') || ((typeof wsvDataForDocument[anEntityName] == 'undefined') || (wsvDataForDocument[anEntityName].length == 0))) {
+  //   //     // no data available instead of removing the entity tag add
+  //   //     // $(value).contents().unwrap();
+  //   //     value.classList.toggle('noData');
+  //   //   }
+  //   // });
+  // }
 
 
-    $(constants.entitySpanClass).each(function(index, value) {
-
-      let anEntity = classThis.getEntityFromDOMElement(value);
-      let datasetType = classThis.getDataset(this.dataset.wsvType);
-      let entityData = datasetType[classThis._nameOfTextFile][anEntity]
-
-      let settings;
-      if (aTypeOfWSV === 'timelineChart') {
-
-        const startPointDate = Date.parse('1 January 1850');
-        // const endPointDate = Date.parse('1 January 1970');
-
-        let dataObject = entityData;
-
-        let startDate = Date.parse(dataObject.dates[0]);
-        let endDate = Date.parse(dataObject.dates[1]);
-
-        dataObject.numberOfDays = Math.round((endDate - startDate)/(1000*60*60*24))
-        dataObject.startPoint = Math.round((startDate - startPointDate)/(1000*60*60*24))
-
-        settings = {data: dataObject,
-                    renderer: renderers.buildWikiChart,
-                    position: constants.positionType,
-                    paddingWidth: true,
-                    paddingHeight: true,
-                    width: constants.timelineSize.width,
-                    height: constants.timelineSize.height };
-
-      } else if (aTypeOfWSV === 'stockLineChart') {
-
-        var theData;
-        // anEntity = $.trim(d3.select(value).html())
-
-        // var theDataset = eval(aDataset);
-        if ((typeof entityData !== 'undefined') && (entityData.length !== 0)) {
-
-          // sort the stockData array
-          var transformedStockData = entityData.map(function(element) {
-            return {close: element.changeToFirst, date: new Date(element.date)};
-          });
-
-          transformedStockData.sort(function(a, b) {
-            return a.date - b.date;
-          });
-
-          // sorted data, ascending
-          theData = [{id: 0, values: transformedStockData}];
-        }
-
-
-        settings = {data: theData,
-                    renderer: renderers.stockPriceSparkline,
-                    // renderer: classicSparkline,
-                    position: constants.positionType,
-                    paddingWidth: true,
-                    paddingHeight: true,
-                    width: (constants.stockLineChartSize.markWidth * constants.numberOfMarks),
-                    height: constants.stockLineChartSize.heightWordScaleVis };
-      }
-
-      $(value).sparklificator();
-      $(value).sparklificator('option', settings);
-    });
-  }
+  // // add wsvs to the taggedd elements in the text
+  // private addWSV(aTypeOfWSV: string): void {
+  //
+  //   let settings;
+  //   this.listOfWSVs.forEach((aWSV) => {
+  //     if (aWSV.typeOfWSV === 'stockLineChart' && aWSV.hasData) {
+  //
+  //       // sort the stockData array
+  //       let transformedStockData = aWSV.wsvData.map((element) => {
+  //         return {close: element.changeToFirst, date: new Date(element.date)};
+  //       });
+  //
+  //       transformedStockData.sort(function(a: Object, b: Object) {
+  //         return a.date - b.date;
+  //       });
+  //
+  //       // sorted data, ascending
+  //       let dataObject = [{id: 0, values: transformedStockData}];
+  //
+  //       settings = {data: dataObject,
+  //                   renderer: renderers.stockPriceSparkline,
+  //                   position: constants.positionType,
+  //                   paddingWidth: true,
+  //                   paddingHeight: true,
+  //                   width: (constants.stockLineChartSize.markWidth * constants.numberOfMarks),
+  //                   height: constants.stockLineChartSize.heightWordScaleVis };
+  //     } else if (aTypeOfWSV === 'timelineChart') {
+  //
+  //     } else if (aTypeOfWSV === 'eyetrackingChart') {
+  //
+  //     }
+  //   });
+  //
+  //
+  //   $(constants.entitySpanClass).each(function(index, value) {
+  //
+  //     let anEntity = classThis.getEntityFromDOMElement(value);
+  //     let datasetType = classThis.getDataset(this.dataset.wsvType);
+  //     let entityData = datasetType[classThis._nameOfTextFile][anEntity]
+  //
+  //     let settings;
+  //     if (aTypeOfWSV === 'timelineChart') {
+  //
+  //       const startPointDate = Date.parse('1 January 1850');
+  //       // const endPointDate = Date.parse('1 January 1970');
+  //
+  //       let dataObject = entityData;
+  //
+  //       let startDate = Date.parse(dataObject.dates[0]);
+  //       let endDate = Date.parse(dataObject.dates[1]);
+  //
+  //       dataObject.numberOfDays = Math.round((endDate - startDate)/(1000*60*60*24))
+  //       dataObject.startPoint = Math.round((startDate - startPointDate)/(1000*60*60*24))
+  //
+  //       settings = {data: dataObject,
+  //                   renderer: renderers.buildWikiChart,
+  //                   position: constants.positionType,
+  //                   paddingWidth: true,
+  //                   paddingHeight: true,
+  //                   width: constants.timelineSize.width,
+  //                   height: constants.timelineSize.height };
+  //
+  //     }
+  //   });
+  // }
 
 
   private addEventToEntities(aContextualMenu: ContextualMenu) {
@@ -280,6 +255,7 @@ class Text implements Text {
 
         if (this.currentEntity !== event.currentTarget) {
           aContextualMenu.showContextMenu(event.currentTarget);
+          this.currentEntity = event.currentTarget
         }
 
         // tmpCurrentEntity = this;
@@ -316,7 +292,8 @@ class Text implements Text {
     }
   }
 
-  private getDatasetFromDocumentTag() {
+
+  private getDatasetUsingDocumentTag() {
     let docDiv = document.getElementById('document');
     let whatData = docDiv.dataset.wsvType
     let aTextTitle = this.nameOfTextFile;

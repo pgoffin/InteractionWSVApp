@@ -27,6 +27,7 @@ class Layout {
                    viewportBottom: 0};
 
     _currentLayout: string = '';
+    _isLayoutVisible: Boolean = false;
 
     _measurementArray = [];
     _WSV_cloned = [];
@@ -36,10 +37,11 @@ class Layout {
       this._layoutInfo.spaceBetweenGridCells = 4;
     }
 
+
+    // getter/setter
     get currentLayout(): string {
       return this._currentLayout;
     }
-
     set currentLayout(aLayout: string) {
       this._currentLayout = aLayout;
     }
@@ -47,7 +49,6 @@ class Layout {
     get measurementArray() {
       return this._measurementArray;
     }
-
     set measurementArray(anArray) {
       this._measurementArray = anArray;
     }
@@ -55,9 +56,15 @@ class Layout {
     set layoutInfo(keyValuePair) {
       this._layoutInfo[keyValuePair[0]] = keyValuePair[1];
     }
-
     get layoutInfo() {
       return this._layoutInfo;
+    }
+
+    get isLayoutVisible(): Boolean {
+      return this._isLayoutVisible;
+    }
+    set isLayoutVisible(aLayout: Boolean) {
+      this._isLayoutVisible = aLayout;
     }
 
 

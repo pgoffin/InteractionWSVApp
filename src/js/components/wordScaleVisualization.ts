@@ -1,15 +1,23 @@
-import { wsvDataObject } from "../../../global";
+import { wsvDataObject, rawStockPriceSparklineData, renderFunc, WsVisualizationType } from "../../../global";
 import Entity from './entity';
+import wsvFactoryClass from './wsvFactoryClass'
 
 const constants = require('../constants');
+
+// to run sparklificator
+require('webpack-jquery-ui/widgets');
+const renderers = require('../../lib/renderers');
+require('../../lib/jquery.sparklificator');
 
 
 interface WordScaleVisualization {
   _entity: Entity;
 
   // _wordScaleVis: ;
+  _typeOfWSV: string;
+  _renderer: renderFunc;
 
-  _wsvData: wsvDataObject;
+  _rawWSVData: Array<rawStockPriceSparklineData>;
 }
 
 
@@ -18,28 +26,48 @@ class WordScaleVisualization implements WordScaleVisualization {
 
   _entity: Entity = null;
 
-  _wsvData: wsvDataObject = null;
+  _rawWSVData: Array<rawStockPriceSparklineData> = [];
   _hasData: Boolean = false;
 
   _typeOfWSV: string = '';
 
-  _wordScaleVis;
+  _renderer: renderFunc;
 
-  constructor(anElement: HTMLElement, data: wsvDataObject) {
+  _transformedData: wsvDataObject = null;
+
+  _rendereAsClass: string = '';
+
+  _visualization: HTMLElement = null;
+
+  _wsv: HTMLElement = null;
+
+  _wsvClass: WsVisualizationType;
+
+
+
+  constructor(anElement: HTMLElement, data: wsvDataObject, theRenderer: string) {
     this.entity = new Entity(anElement);
 
-    this.wsvData = data[this.entity.entityName.trim()];
+    this.rawWSVData = data[this.entity.entityName.trim()];
 
-    if (!((typeof this.wsvData == 'undefined') || (Object.getOwnPropertyNames(this.wsvData).length === 0))) {
+    this.renderer = renderers[theRenderer];
+    this._rendereAsClass = theRenderer.charAt(0).toUpperCase() + theRenderer.slice(1);
+
+    if (!((typeof this.rawWSVData == 'undefined') || (this.rawWSVData.length == 0))) {
       this.hasData = true;
+
+      this.wsvClass = wsvFactoryClass(this._rendereAsClass, this.renderer, this.rawWSVData, constants.positionType, true, true)
+
+      $(this.entity.entityElement).sparklificator();
+      $(this.entity.entityElement).sparklificator('option', this.wsvClass.settings);
+    } else {
+      this.entity.entityElement.classList.toggle('noClass')
     }
 
     this.typeOfWSV = constants.typeOfWSV;
 
-    if (this.hasData) {
-      this.wordScaleVis = 
-    }
   }
+
 
   // getter/setter
   set entity(value: Entity) {
@@ -49,11 +77,11 @@ class WordScaleVisualization implements WordScaleVisualization {
       return this._entity;
   }
 
-  set wsvData(value: wsvDataObject) {
-      this._wsvData = value;
+  set rawWSVData(value: Array<rawStockPriceSparklineData>) {
+      this._rawWSVData = value;
   }
-  get wsvData(): wsvDataObject {
-      return this._wsvData;
+  get rawWSVData(): Array<rawStockPriceSparklineData> {
+      return this._rawWSVData;
   }
 
   set hasData(value: Boolean) {
@@ -70,12 +98,36 @@ class WordScaleVisualization implements WordScaleVisualization {
       return this._typeOfWSV;
   }
 
-  set wordScaleVis(value: any) {
-      this._wordScaleVis = value;
+  set renderer(value: renderFunc) {
+      this._renderer = value;
   }
-  get wordScaleVis(): any {
-      return this._wordScaleVis;
+  get renderer(): renderFunc {
+      return this._renderer;
   }
+
+  set wsvClass(value: WsVisualizationType) {
+      this._wsvClass = value;
+  }
+  get wsvClass(): WsVisualizationType {
+      return this._wsvClass;
+  }
+
+
+  // applySparklificator() {
+  //
+  //   let settings = {data: dataObject,
+  //                   renderer: renderers[this.renderer],
+  //                   position: constants.positionType,
+  //                   paddingWidth: true,
+  //                   paddingHeight: true,
+  //                   width: (constants.stockLineChartSize.markWidth * constants.numberOfMarks),
+  //                   height: constants.stockLineChartSize.heightWordScaleVis};
+  //
+  //   $(this.entity.entityElement).sparklificator();
+  //   $(this.entity.entityElement).sparklificator('option', settings);
+  // }
+
+
 }
 
 export default WordScaleVisualization;
