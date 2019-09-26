@@ -39,7 +39,8 @@ class ContextualMenu {
 
 
   // initializeContextualMenu(theText: Text) {
-  initializeContextualMenu() {
+  // initializeContextualMenu() {
+  constructor() {
 
     // this._text = theText;
 
@@ -285,4 +286,5 @@ class ContextualMenu {
 
 }
 
-export let contextualMenu = new ContextualMenu()
+// export let contextualMenu = new ContextualMenu();
+export default ContextualMenu;

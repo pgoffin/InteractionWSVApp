@@ -1,5 +1,6 @@
 import * as d3 from "d3";
-import { contextualMenu } from './contextualMenu';
+// import { contextualMenu } from './contextualMenu';
+import ContextualMenu from './contextualMenu';
 import { layout } from './layout'
 import { wsvDataObject } from "../../../global";
 
@@ -11,9 +12,9 @@ const stockData = require("../../data/wsvDataFile")
 const constants = require('../constants');
 
 // to run sparklificator
-require('webpack-jquery-ui/widgets');
-const renderers = require('../../lib/renderers');
-require('../../lib/jquery.sparklificator');
+// require('webpack-jquery-ui/widgets');
+// const renderers = require('../../lib/renderers');
+// require('../../lib/jquery.sparklificator');
 
 
 
@@ -41,6 +42,8 @@ class Text implements Text {
   _dataForWSV: wsvDataObject = {};
 
   _currentEntity: HTMLElement;
+
+  _theContextualMenu: ContextualMenu;
 
 
   // getter/setter
@@ -100,9 +103,9 @@ class Text implements Text {
 
     layout.initializeLayout();
 
-    contextualMenu.initializeContextualMenu(this);
+    this._theContextualMenu = new ContextualMenu();
 
-    this.addEventToEntities(contextualMenu);
+    // this.addEventToEntities(contextualMenu);
   }
 
 
@@ -140,7 +143,7 @@ class Text implements Text {
 
     document.querySelectorAll(constants.entitySpanClass).forEach((value) => {
 
-      let aWSV = new WordScaleVisualization(value, this.dataForWSV, value.dataset.wsvRenderer);
+      let aWSV = new WordScaleVisualization(value, this.dataForWSV, value.dataset.wsvRenderer, this);
 
       this.listOfWSVs.push(aWSV);
     });
@@ -318,4 +321,4 @@ class Text implements Text {
 }
 
 
-export let text = new Text()
+export default Text;

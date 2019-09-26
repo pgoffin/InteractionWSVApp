@@ -1,11 +1,12 @@
 
-import { text } from '../components'
+import Text from '../components/text'
 
 class App {
 
   loadApp() {
-
-    text.initializeText()
+;
+    let aText = new Text()
+    aText.initializeText()
 
   }
 

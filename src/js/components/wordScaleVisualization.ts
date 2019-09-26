@@ -1,6 +1,7 @@
 import { wsvDataObject, rawStockPriceSparklineData, renderFunc, WsVisualizationType } from "../../../global";
 import Entity from './entity';
-import wsvFactoryClass from './wsvFactoryClass'
+import wsvFactoryClass from './wsvFactoryClass';
+import Text from './text';
 
 const constants = require('../constants');
 
@@ -43,16 +44,20 @@ class WordScaleVisualization implements WordScaleVisualization {
 
   _wsvClass: WsVisualizationType;
 
+  _refToText: Text;
 
 
-  constructor(anElement: HTMLElement, data: wsvDataObject, theRenderer: string) {
-    this.entity = new Entity(anElement);
+
+  constructor(anElement: HTMLElement, data: wsvDataObject, theRenderer: string, referenceToText: Text) {
+    this._refToText = referenceToText;
+    this.entity = new Entity(anElement, this._refToText);
 
     this.rawWSVData = data[this.entity.entityName.trim()];
 
     this.renderer = renderers[theRenderer];
     this._rendereAsClass = theRenderer.charAt(0).toUpperCase() + theRenderer.slice(1);
 
+    // create the visualization part of the wsv if there is data available
     if (!((typeof this.rawWSVData == 'undefined') || (this.rawWSVData.length == 0))) {
       this.hasData = true;
 
