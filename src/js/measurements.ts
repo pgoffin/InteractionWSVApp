@@ -480,4 +480,4 @@ class Measurements {
 }
 
 
-export default Measurements;
+export default Measurements

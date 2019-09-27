@@ -1,5 +1,5 @@
 export interface wsvDataObject {
-  [key: string]: Array<object>;
+  [key: string]: Array<rawWsvData>;
 }
 
 export interface renderFunc {
@@ -21,6 +21,11 @@ export interface WsVisualizationType {
   _height: number;
 }
 
-export interface rawStockPriceSparklineData {
-   [key: string]: string|number;
+
+export interface rawWsvData {
+   [key: string]: string|number|Date;
+}
+
+export interface LayoutType {
+
 }

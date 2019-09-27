@@ -1,4 +1,4 @@
-import { renderFunc, WsVisualizationType, rawStockPriceSparklineData } from "../../../global";
+import { renderFunc, WsVisualizationType, rawWsvData } from "../../../global";
 
 const constants = require('../constants');
 
@@ -10,7 +10,7 @@ class StockPriceSparkline implements WsVisualizationType {
 
   _settings: object = {};
 
-  _rawWsvData: Array<rawStockPriceSparklineData> = [];
+  _rawWsvData: Array<rawWsvData> = [];
   _transformedWsvData: Array<object> = [];
 
   _numberOfMarks: number;
@@ -20,7 +20,7 @@ class StockPriceSparkline implements WsVisualizationType {
   _height: number;
 
 
-  constructor(aRenderer: renderFunc, aRawData: Array<rawStockPriceSparklineData>, aPosition: string, aPaddingWidth: Boolean, aPaddingHeight: Boolean) {
+  constructor(aRenderer: renderFunc, aRawData: Array<rawWsvData>, aPosition: string, aPaddingWidth: Boolean, aPaddingHeight: Boolean) {
     this.renderer = aRenderer;
     this.rawWsvData = aRawData;
 
@@ -51,10 +51,10 @@ class StockPriceSparkline implements WsVisualizationType {
       return this._renderer;
   }
 
-  set rawWsvData(value: Array<rawStockPriceSparklineData>) {
+  set rawWsvData(value: Array<rawWsvData>) {
       this._rawWsvData = value;
   }
-  get rawWsvData(): Array<rawStockPriceSparklineData> {
+  get rawWsvData(): Array<rawWsvData> {
       return this._rawWsvData;
   }
 
@@ -73,14 +73,14 @@ class StockPriceSparkline implements WsVisualizationType {
   }
 
 
-  transformRawData(aRawData: Array<rawStockPriceSparklineData>): Array<rawStockPriceSparklineData> {
+  transformRawData(aRawData: Array<rawWsvData>): Array<rawWsvData> {
 
     // sort the stockData array
-    let transformedStockData = aRawData.map((element: rawStockPriceSparklineData) => {
+    let transformedStockData = aRawData.map((element: rawWsvData) => {
       return {close: element.changeToFirst, date: new Date(element.date)};
     });
 
-    transformedStockData.sort((a: rawStockPriceSparklineData, b: rawStockPriceSparklineData) => {
+    transformedStockData.sort((a: rawWsvData, b: rawWsvData) => {
       return a.date - b.date;
     });
 

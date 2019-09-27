@@ -1,6 +1,6 @@
-import { wsvDataObject, rawStockPriceSparklineData, renderFunc, WsVisualizationType } from "../../../global";
+import { wsvDataObject, rawWsvData, renderFunc, WsVisualizationType } from "../../../global";
 import Entity from './entity';
-import wsvFactoryClass from './wsvFactoryClass';
+import wsvRendererFactoryClass from './wsvRendererFactoryClass';
 import Text from './text';
 
 const constants = require('../constants');
@@ -18,7 +18,7 @@ interface WordScaleVisualization {
   _typeOfWSV: string;
   _renderer: renderFunc;
 
-  _rawWSVData: Array<rawStockPriceSparklineData>;
+  _rawWSVData: Array<rawWsvData>;
 }
 
 
@@ -27,7 +27,7 @@ class WordScaleVisualization implements WordScaleVisualization {
 
   _entity: Entity = null;
 
-  _rawWSVData: Array<rawStockPriceSparklineData> = [];
+  _rawWSVData: Array<rawWsvData> = [];
   _hasData: Boolean = false;
 
   _typeOfWSV: string = '';
@@ -61,7 +61,7 @@ class WordScaleVisualization implements WordScaleVisualization {
     if (!((typeof this.rawWSVData == 'undefined') || (this.rawWSVData.length == 0))) {
       this.hasData = true;
 
-      this.wsvClass = wsvFactoryClass(this._rendereAsClass, this.renderer, this.rawWSVData, constants.positionType, true, true)
+      this.wsvClass = wsvRendererFactoryClass(this._rendereAsClass, this.renderer, this.rawWSVData, constants.positionType, true, true)
 
       $(this.entity.entityElement).sparklificator();
       $(this.entity.entityElement).sparklificator('option', this.wsvClass.settings);
@@ -82,10 +82,10 @@ class WordScaleVisualization implements WordScaleVisualization {
       return this._entity;
   }
 
-  set rawWSVData(value: Array<rawStockPriceSparklineData>) {
+  set rawWSVData(value: Array<rawWsvData>) {
       this._rawWSVData = value;
   }
-  get rawWSVData(): Array<rawStockPriceSparklineData> {
+  get rawWSVData(): Array<rawWsvData> {
       return this._rawWSVData;
   }
 
@@ -118,21 +118,6 @@ class WordScaleVisualization implements WordScaleVisualization {
   }
 
 
-  // applySparklificator() {
-  //
-  //   let settings = {data: dataObject,
-  //                   renderer: renderers[this.renderer],
-  //                   position: constants.positionType,
-  //                   paddingWidth: true,
-  //                   paddingHeight: true,
-  //                   width: (constants.stockLineChartSize.markWidth * constants.numberOfMarks),
-  //                   height: constants.stockLineChartSize.heightWordScaleVis};
-  //
-  //   $(this.entity.entityElement).sparklificator();
-  //   $(this.entity.entityElement).sparklificator('option', settings);
-  // }
-
-
 }
 
-export default WordScaleVisualization;
+export default WordScaleVisualization

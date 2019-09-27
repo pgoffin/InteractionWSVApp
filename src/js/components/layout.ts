@@ -1,12 +1,12 @@
 const constants = require('../constants');
 
-import { text } from '../components';
+import Text from '../components/text';
 import Measurements from '../measurements';
-
+import layoutFactoryClass from './layoutFactoryClass';
 let dl = require('../../lib/datalib.min.js');
 import * as d3 from "d3";
 const _countby = require('lodash/countby');
-// const Velocity = require('velocity-animate');
+
 import 'velocity-animate';
 import 'velocity-ui-pack';
 
@@ -68,7 +68,7 @@ class Layout {
     }
 
 
-    changeLayout(type, why)  {
+    changeLayout(layoutType, why)  {
       // getBoundingClientRect() gives position relative to the viewport
       // offset() gives and sets position relative to the document
       // offset().top - $(window).scrollTop() = getBoundingClientRect().top
@@ -176,7 +176,7 @@ class Layout {
 
 
 
-      let rowAndColumnNumbers = Measurements.spaceAvailability_numberColAndRows(currentWSV, constants.positionType, type, 'middleBound', this.measurementArray, this.layoutInfo.cell_dimensions.width, this.layoutInfo.cell_dimensions.height, this.layoutInfo.spaceBetweenGridCells);
+      let rowAndColumnNumbers = Measurements.spaceAvailability_numberColAndRows(currentWSV, constants.positionType, layoutType, 'middleBound', this.measurementArray, this.layoutInfo.cell_dimensions.width, this.layoutInfo.cell_dimensions.height, this.layoutInfo.spaceBetweenGridCells);
 
       this.layoutInfo = ['rowAndColumnNumbers', rowAndColumnNumbers];
 
@@ -190,6 +190,9 @@ class Layout {
       let numUsedRowsAbove: number;
       let aboveIndex: number;
       let belowIndex: number;
+
+      let theLayout = layoutFactoryClass(layoutType);
+
 
       switch(type) {
         case '#grid':
@@ -1406,4 +1409,4 @@ class Layout {
 
 }
 
-export let layout = new Layout()
+export default Layout

@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 // import { contextualMenu } from './contextualMenu';
 import ContextualMenu from './contextualMenu';
-import { layout } from './layout'
+import Layout from './layout'
 import { wsvDataObject } from "../../../global";
 
 import WordScaleVisualization from "./wordScaleVisualization";
@@ -44,6 +44,8 @@ class Text implements Text {
   _currentEntity: HTMLElement;
 
   _theContextualMenu: ContextualMenu;
+
+  _theLayout: Layout;
 
 
   // getter/setter
@@ -101,11 +103,9 @@ class Text implements Text {
     // this.setEntitiesWithNoDataToClass('noClass');
     // this.addWSV(constants.typeOfWSV);
 
-    layout.initializeLayout();
+    this._theLayout = new Layout();
 
-    this._theContextualMenu = new ContextualMenu();
-
-    // this.addEventToEntities(contextualMenu);
+    this._theContextualMenu = new ContextualMenu(this);
   }
 
 
@@ -321,4 +321,4 @@ class Text implements Text {
 }
 
 
-export default Text;
+export default Text

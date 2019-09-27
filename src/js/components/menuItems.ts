@@ -1,4 +1,10 @@
 
+interface menuItemType {
+  element: string;
+  elementType: string;
+  elementInteraction: string;
+  iconUrl: string;
+}
 
 module.exports = {
 

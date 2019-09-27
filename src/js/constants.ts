@@ -28,4 +28,4 @@ module.exports = {
                   closeIconUrl: './src/data/icons/close.svg'},
 
   defaultAllowedInteractions: ['sorting','dblclickOnWSVToGetBack','lineToWSVOrigin'],
-};
+}

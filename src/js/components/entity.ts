@@ -61,11 +61,11 @@ class Entity implements Entity {
     });
 
 
-    this.entityElement.addEventListener('mouseleave', e => {
+    this.entityElement.addEventListener('mouseleave', () => {
       console.log('mouseleave');
         this._refToText._theContextualMenu.startMenuHideTimer();
     });
   }
 }
 
-export default Entity;
+export default Entity

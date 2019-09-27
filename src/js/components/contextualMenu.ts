@@ -2,15 +2,13 @@ const constants = require('../constants');
 const menuItems = require('./menuItems');
 
 import Measurements from '../measurements';
-import { layout } from './layout';
-// import { text } from '../components';
+// import Layout from './layout';
+import Text from '../components/text';
 
 
 class ContextualMenu {
 
   private _isContextMenuSetUp: Boolean = false;
-
-  // private _text: Text;
 
   private _tooltipOffset: number = -5;
   private _theEntityBBox;
@@ -24,7 +22,7 @@ class ContextualMenu {
   private _menuHideTimer = null;
   private _menuHideDelay: number = 2000;
 
-  private _menuItems = menuItems.menuItems;
+  private _menuItems: Array<menuItemType> = menuItems.menuItems;
 
   private _visibleMenuItems: string[] = [constants.menuElement.gridElement,
                                         constants.menuElement.closeElement,
@@ -33,23 +31,28 @@ class ContextualMenu {
                                         constants.menuElement.orderByDocPositionElement];
 
   // selected menu item
-  private _selectedMenuItem = null;
+  private _selectedMenuItem: string;
+
+  _refToText: Text;
+
+  // _refToLayout: Layout;
+
+  // [key: string]: () => void;
 
 // ['#grid', '#close', '#order-by-lastDataValue', '#order-by-entityName', '#order-by-docPosition','#selector', '#selector-ok', '#row', '#column', '#grid-no-overlap'];
 
 
-  // initializeContextualMenu(theText: Text) {
-  // initializeContextualMenu() {
-  constructor() {
 
-    // this._text = theText;
+  constructor(referenceToText: Text) {
+
+    this._refToText = referenceToText;
 
     const menuDiv = document.createElement("div");
     menuDiv.setAttribute('class', 'mouse tooltip');
 
-    this._menuItems.forEach((anElement) => {
+    this._menuItems.forEach((anElement: menuItemType) => {
       if (this._visibleMenuItems.includes(anElement.element)) {
-        this.createMenuElement(menuDiv, anElement.element, anElement.elementType, anElement.elementInteraction, anElement.iconUrl);
+        this.createMenuElement(menuDiv, anElement);
       }
     });
 
@@ -58,21 +61,21 @@ class ContextualMenu {
   }
 
 
-  createMenuElement(aMenuDiv, anElement, elementType, elementInteraction, iconUrl) {
+  createMenuElement(aMenuDiv: HTMLElement, anElement: menuItemType) {
 
     const styleAttr = 'width:width;height:height;'
 
-    if (this._visibleMenuItems.includes(anElement)) {
+    if (this._visibleMenuItems.includes(anElement.element)) {
       var elementLayoutDiv = document.createElement("div");
-      elementLayoutDiv.setAttribute('class', 'box ' + elementType);
-      elementLayoutDiv.setAttribute('id', elementInteraction);
+      elementLayoutDiv.setAttribute('class', 'box ' + anElement.elementType);
+      elementLayoutDiv.setAttribute('id', anElement.elementInteraction);
       aMenuDiv.appendChild(elementLayoutDiv);
 
       var elementImg = document.createElement("img");
       elementImg.setAttribute('class', 'icon');
-      elementImg.setAttribute('src', iconUrl);
-      elementImg.setAttribute('alt', elementInteraction);
-      elementImg.setAttribute('title', elementInteraction);
+      elementImg.setAttribute('src', anElement.iconUrl);
+      elementImg.setAttribute('alt', anElement.elementInteraction);
+      elementImg.setAttribute('title', anElement.elementInteraction);
       elementImg.setAttribute('style', styleAttr);
       elementLayoutDiv.appendChild(elementImg);
 
@@ -86,10 +89,10 @@ class ContextualMenu {
 				}
 
         // add class to selected menu item
-        this._selectedMenuItem = anElement;
+        this._selectedMenuItem = anElement.element;
         $(this._selectedMenuItem).addClass('currentSeletedLayout');
 
-        let interactionFN = this[elementInteraction];
+        let interactionFN = this[anElement.elementInteraction];
 
         // is object a function?
         if (typeof interactionFN === "function") interactionFN();
@@ -165,17 +168,15 @@ class ContextualMenu {
 
   // Hides the menu immediately
   hideContextualMenu() {
-    // // Don't hide if a layout is being displayed
-    // var isLayoutVisible = ($('.clonedWSV').length === 0) ? false : true;
-    // if(!this._text.isLayoutVisible) {
-    if(!layout.isLayoutVisible) {
+    // Don't hide if a layout is being displayed
+    if(!this._refToText._theLayout.isLayoutVisible) {
       $('.tooltip').removeClass('wrapper')
       $('.tooltip').addClass('hide');
 
       this.resetLayoutIcon();
 
       console.log('set currentEntity to null')
-      text.currentEntity = null;
+      this._refToText.currentEntity = null;
     }
   }
 
@@ -230,13 +231,13 @@ class ContextualMenu {
   grid_layout() {
     console.log('menu item grid_layout pushed')
 
-    if (layout.currentLayout != constants.menuElement.gridElement) {
+    if (this._refToText._theLayout.currentLayout != constants.menuElement.gridElement) {
       console.log('set layout to "' + constants.menuElement.gridElement + '"')
 
-      layout.changeLayout(constants.menuElement.gridElement, '');
+      this._refToText._theLayout.changeLayout(constants.menuElement.gridElement, '');
 
 // is this needed
-      layout.currentLayout = constants.gridElement;
+      this._refToText._theLayout.currentLayout = constants.gridElement;
     }
 
 
@@ -287,4 +288,4 @@ class ContextualMenu {
 }
 
 // export let contextualMenu = new ContextualMenu();
-export default ContextualMenu;
+export default ContextualMenu

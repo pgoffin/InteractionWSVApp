@@ -56,6 +56,7 @@
     "@types/script-ext-html-webpack-plugin": "^2.1.1",
     "@typescript-eslint/eslint-plugin": "^2.3.1",
     "babel-eslint": "^10.0.3",
+    "circular-dependency-plugin": "^5.2.0",
     "lodash": "^4.17.15",
     "velocity-animate": "^1.5.2",
     "velocity-ui-pack": "^1.2.2"
