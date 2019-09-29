@@ -2,9 +2,10 @@ import * as d3 from "d3";
 // import { contextualMenu } from './contextualMenu';
 import ContextualMenu from './contextualMenu';
 import Layout from './layout'
-import { wsvDataObject } from "../../../global";
+import { wsvDataObject } from '../../../global';
 
 import WordScaleVisualization from "./wordScaleVisualization";
+import Entity from './entity';
 
 // import historianData from "../../data/otherDataset"
 const historianData = require("../../data/otherDataset")
@@ -24,7 +25,7 @@ interface Text {
   _currentWSV: WordScaleVisualization;
   _listOfWSVs: Array<WordScaleVisualization>;
   _dataForWSV: wsvDataObject;
-  _currentEntity: HTMLElement;
+  _currentEntity: Entity;
 }
 
 
@@ -41,7 +42,7 @@ class Text implements Text {
 
   _dataForWSV: wsvDataObject = {};
 
-  _currentEntity: HTMLElement;
+  _currentEntity: Entity;
 
   _theContextualMenu: ContextualMenu;
 
@@ -84,7 +85,10 @@ class Text implements Text {
       return this._listOfWSVs;
   }
 
-  get currentEntity(): HTMLElement {
+  set currentEntity(value: Entity)  {
+      this._currentEntity = value;
+  }
+  get currentEntity(): Entity {
       return this._currentEntity;
   }
 
@@ -103,27 +107,27 @@ class Text implements Text {
     // this.setEntitiesWithNoDataToClass('noClass');
     // this.addWSV(constants.typeOfWSV);
 
-    this._theLayout = new Layout();
+    this._theLayout = new Layout(this);
 
     this._theContextualMenu = new ContextualMenu(this);
   }
 
 
 
-  set currentEntity(anEntity: HTMLElement) {
-    if (this.isCurrentEntitySet()) {
-      $(this._currentEntity).removeClass('currentEntity');
-    }
-
-    this._currentEntity = anEntity;
-    $(this._currentEntity).addClass('currentEntity');
-    $(this._currentEntity).next('.sparkline').addClass('currentEntity');
-    $(this._currentEntity).css('z-index', 6);
-
-    if ($(this._currentEntity).hasClass('selected')) {
-      $(this._currentEntity).removeClass('selected');
-    }
-  }
+  // set currentEntity(anEntity: HTMLElement) {
+  //   if (this.isCurrentEntitySet()) {
+  //     $(this._currentEntity).removeClass('currentEntity');
+  //   }
+  //
+  //   this._currentEntity = anEntity;
+  //   $(this._currentEntity).addClass('currentEntity');
+  //   $(this._currentEntity).next('.sparkline').addClass('currentEntity');
+  //   $(this._currentEntity).css('z-index', 6);
+  //
+  //   if ($(this._currentEntity).hasClass('selected')) {
+  //     $(this._currentEntity).removeClass('selected');
+  //   }
+  // }
 
 
   // check if currentEntity is set
@@ -248,29 +252,29 @@ class Text implements Text {
   // }
 
 
-  private addEventToEntities(aContextualMenu: ContextualMenu) {
-
-    // instead of mouseover use mouseenter and mouseleave, see http://stackoverflow.com/questions/6274495/changing-opacity-with-jquery
-    $(constants.entitySpanClass).mouseenter((event) => {
-      console.log('mouseenter');
-
-      if ((this.isLayoutVisible && $(event.currentTarget).hasClass('currentEntity')) || !this.isLayoutVisible) {
-
-        if (this.currentEntity !== event.currentTarget) {
-          aContextualMenu.showContextMenu(event.currentTarget);
-          this.currentEntity = event.currentTarget
-        }
-
-        // tmpCurrentEntity = this;
-        this.currentEntity = event.currentTarget;
-      }
-    });
-
-    $(constants.entitySpanClass).mouseleave(function() {
-      console.log('mouseleave');
-      aContextualMenu.startMenuHideTimer();
-    });
-  }
+  // private addEventToEntities(aContextualMenu: ContextualMenu) {
+  //
+  //   // instead of mouseover use mouseenter and mouseleave, see http://stackoverflow.com/questions/6274495/changing-opacity-with-jquery
+  //   $(constants.entitySpanClass).mouseenter((event) => {
+  //     console.log('mouseenter');
+  //
+  //     if ((this.isLayoutVisible && $(event.currentTarget).hasClass('currentEntity')) || !this.isLayoutVisible) {
+  //
+  //       if (this.currentEntity !== event.currentTarget) {
+  //         aContextualMenu.showContextMenu(event.currentTarget);
+  //         this.currentEntity = event.currentTarget
+  //       }
+  //
+  //       // tmpCurrentEntity = this;
+  //       this.currentEntity = event.currentTarget;
+  //     }
+  //   });
+  //
+  //   $(constants.entitySpanClass).mouseleave(function() {
+  //     console.log('mouseleave');
+  //     aContextualMenu.startMenuHideTimer();
+  //   });
+  // }
 
 
   /**

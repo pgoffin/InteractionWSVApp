@@ -32,9 +32,12 @@ class Layout {
     _measurementArray = [];
     _WSV_cloned = [];
 
+    _refToText: Text;
 
-    initializeLayout() {
+    constructor(theRefToText: Text) {
       this._layoutInfo.spaceBetweenGridCells = 4;
+
+      this._refToText = theRefToText;
     }
 
 
@@ -68,7 +71,7 @@ class Layout {
     }
 
 
-    changeLayout(layoutType, why)  {
+    changeLayout(layoutType: string, why)  {
       // getBoundingClientRect() gives position relative to the viewport
       // offset() gives and sets position relative to the document
       // offset().top - $(window).scrollTop() = getBoundingClientRect().top
@@ -191,7 +194,7 @@ class Layout {
       let aboveIndex: number;
       let belowIndex: number;
 
-      let theLayout = layoutFactoryClass(layoutType);
+      let theLayout = layoutFactoryClass(layoutType, this.layoutInfo, );
 
 
       switch(type) {

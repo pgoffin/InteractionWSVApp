@@ -4,6 +4,7 @@ const menuItems = require('./menuItems');
 import Measurements from '../measurements';
 // import Layout from './layout';
 import Text from '../components/text';
+import Entity from '../components/entity';
 
 
 class ContextualMenu {
@@ -92,10 +93,15 @@ class ContextualMenu {
         this._selectedMenuItem = anElement.element;
         $(this._selectedMenuItem).addClass('currentSeletedLayout');
 
-        let interactionFN = this[anElement.elementInteraction];
+        if (anElement.elementType === 'layout') {
+          this._refToText._theLayout.changeLayout(anElement.elementInteraction, '')
+        }
 
-        // is object a function?
-        if (typeof interactionFN === "function") interactionFN();
+
+        // let interactionFN = this[anElement.elementInteraction];
+        //
+        // // is object a function?
+        // if (typeof interactionFN === "function") interactionFN();
 
       });
 
@@ -117,7 +123,7 @@ class ContextualMenu {
 
 
   // Perform initial setup on the context menu (attaching listeners, etc.), done once only!
-  setupContextMenu() {
+  setupContextMenu(entityMenuCalledOn: Entity) {
     let classThis = this;
     $('.tooltip').mouseenter(function() {
       console.log('adding mouseenter event handler')
@@ -126,7 +132,7 @@ class ContextualMenu {
 
     $('.tooltip').mouseleave(function() {
       console.log('adding mouseleave event handler')
-      classThis.startMenuHideTimer();
+      classThis.startMenuHideTimer(entityMenuCalledOn);
     });
 
     this._isContextMenuSetUp = true;
@@ -137,7 +143,7 @@ class ContextualMenu {
 
     console.log('running showContextMenu');
 
-    if (!this._isContextMenuSetUp) this.setupContextMenu();
+    if (!this._isContextMenuSetUp) this.setupContextMenu(elementMenuIsCalledOn);
 
     this.stopMenuHideTimer()
 
@@ -149,12 +155,12 @@ class ContextualMenu {
 
 
   // Starts the menu hide timer
-  startMenuHideTimer() {
+  startMenuHideTimer(refToEntity: Entity) {
     console.log('START menu hide timer');
 
     if (this._menuHideTimer) clearTimeout(this._menuHideTimer);
 
-    this._menuHideTimer = setTimeout(() => this.hideContextualMenu(), this._menuHideDelay);
+    this._menuHideTimer = setTimeout(() => this.hideContextualMenu(refToEntity), this._menuHideDelay);
   }
 
 
@@ -167,7 +173,7 @@ class ContextualMenu {
 
 
   // Hides the menu immediately
-  hideContextualMenu() {
+  hideContextualMenu(refToEntity: Entity) {
     // Don't hide if a layout is being displayed
     if(!this._refToText._theLayout.isLayoutVisible) {
       $('.tooltip').removeClass('wrapper')
@@ -176,7 +182,8 @@ class ContextualMenu {
       this.resetLayoutIcon();
 
       console.log('set currentEntity to null')
-      this._refToText.currentEntity = null;
+      // this._refToText.currentEntity = null;
+      refToEntity.unSetAsCurrentEntity();
     }
   }
 

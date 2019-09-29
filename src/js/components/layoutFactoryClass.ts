@@ -1,11 +1,11 @@
 // import { renderFunc } from "../../../global";
 
-// import StockPriceSparkline from './stockPriceSparkline'
+import GridLayout from './gridLayout'
 
-const layouts: any = {};
+const layouts: any = {GridLayout};
 
-export default function layoutFactoryClass(aLayoutName) {
+export default function layoutFactoryClass(aLayoutName: string, initialLayoutInfo) {
 
-  return new layouts[aLayoutName]()
+  return new layouts[aLayoutName](initialLayoutInfo)
 
 }

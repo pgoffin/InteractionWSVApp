@@ -1,25 +1,41 @@
 import { LayoutType } from "../../../global";
 
 const constants = require('../constants');
-
+const _countby = require('lodash/countby');
 
 
 
 class GridLayout implements LayoutType {
 
-  constructor() {
+  _layoutInfo;
 
+
+  constructor(anInitialLayoutInfo) {
+    this._layoutInfo = anInitialLayoutInfo;
+
+    this.createLayout();
   }
+
+
+  // getter/setter
+  get layoutInfo() {
+    return this._layoutInfo;
+  }
+  set layoutInfo(value) {
+    this._layoutInfo = value;
+  }
+
 
   createLayout() {
 
     this.layoutInfo.type = 'grid';
 
-    numOfColumns = rowAndColumnNumbers.leftNumbColumn + rowAndColumnNumbers.currentEntityColumn + rowAndColumnNumbers.rightNumbColumn;
-    numCells_above = numOfColumns * rowAndColumnNumbers.aboveNumbRow;
-    numCells_below = numOfColumns * rowAndColumnNumbers.belowNumbRow;
+    this.layoutInfo.numberOfColumns = this.layoutInfo.rowAndColumnNumbers.leftNumbColumn + this.layoutInfo.rowAndColumnNumbers.currentEntityColumn + this.layoutInfo.rowAndColumnNumbers.rightNumbColumn;
 
-    this.layoutInfo.numberOfColumns = numOfColumns;
+    let numCells_above = this.layoutInfo.numberOfColumns * this.layoutInfo.rowAndColumnNumbers.aboveNumbRow;
+    let numCells_below = this.layoutInfo.numberOfColumns * this.layoutInfo.rowAndColumnNumbers.belowNumbRow;
+
+    // this.layoutInfo.numberOfColumns = numOfColumns;
 
     // update the counts variable
     let counts = _countby(this._WSV_cloned, function(v) { return v.aboveOrBelow} );
