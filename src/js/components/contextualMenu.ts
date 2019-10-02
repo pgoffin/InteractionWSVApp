@@ -139,17 +139,17 @@ class ContextualMenu {
   }
 
 
-  showContextMenu(elementMenuIsCalledOn: HTMLElement) {
+  showContextMenu(entityMenuIsCalledOn: Entity) {
 
     console.log('running showContextMenu');
 
-    if (!this._isContextMenuSetUp) this.setupContextMenu(elementMenuIsCalledOn);
+    if (!this._isContextMenuSetUp) this.setupContextMenu(entityMenuIsCalledOn);
 
     this.stopMenuHideTimer()
 
     $('.tooltip').removeClass('hide').addClass('wrapper');
 
-    this.computePositionMenu(elementMenuIsCalledOn);
+    this.computePositionMenu(entityMenuIsCalledOn);
     this.positionMenu();
   }
 
@@ -188,9 +188,9 @@ class ContextualMenu {
   }
 
 
-  computePositionMenu(elementMenuIsCalledOn: HTMLElement) {
+  computePositionMenu(entityMenuIsCalledOn: Entity) {
     // compute the tooltip position
-    this._theEntityBBox = Measurements.get_BBox_entity($(elementMenuIsCalledOn).parent());;
+    this._theEntityBBox = Measurements.get_BBox_entity($(entityMenuIsCalledOn.entityElement).parent());;
     this._widthTooltip = $('.tooltip')[0].getBoundingClientRect().width;
     this._heightTooltip = $('.tooltip')[0].getBoundingClientRect().height;
     this._tooltip_left = this._theEntityBBox.left - this._widthTooltip - this._tooltipOffset;

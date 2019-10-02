@@ -1,6 +1,6 @@
 const constants = require('../constants');
 
-import Text from '../components/text';
+import Text from './text';
 import Measurements from '../measurements';
 import WordScaleVisualization from './wordScaleVisualization';
 import Entity from './entity';
@@ -8,6 +8,7 @@ import layoutFactoryClass from './layoutFactoryClass';
 let dl = require('../../lib/datalib.min.js');
 import * as d3 from "d3";
 const _countby = require('lodash/countby');
+const _cloneDeep = require('lodash/clonedeep');
 
 import 'velocity-animate';
 import 'velocity-ui-pack';
@@ -35,6 +36,8 @@ class Layout {
     _WSV_cloned = [];
 
     _refToText: Text;
+
+    _theLayout: Layout;
 
     constructor(theRefToText: Text) {
       this._layoutInfo.spaceBetweenGridCells = 4;
@@ -102,58 +105,16 @@ class Layout {
       });
 
       this._refToText._listOfClonedWSVs = [...wsvsWithoutCurrentWSV];
+      // order first by above or below, then use distance to to the currentEntity
+      this._refToText._listOfClonedWSVs.sort(dl.comparator(['+aboveOrBelow', '-distanceToCurrEntity']));
 
+
+      let rowAndColumnNumbers = Measurements.spaceAvailability_numberColAndRows(currentEntity, constants.positionType, layoutType, 'middleBound', this._refToText.listOfWSVs, this.layoutInfo.cell_dimensions.width, this.layoutInfo.cell_dimensions.height, this.layoutInfo.spaceBetweenGridCells);
+
+      this.layoutInfo = ['rowAndColumnNumbers', rowAndColumnNumbers];
+
+      this._theLayout = layoutFactoryClass(layoutType, this, this.layoutInfo, this._refToText);
     }
-
-    measurementArray_withoutCurrEntity.each(function() {
-      // aboveOrBelow decides if wsv is placed above or below the current entity
-      this.aboveOrBelow = (this.entityBbox.top > bbox_currEntity.bottom) ? 'below' : 'above';
-
-      this.docPosition = {'left': this.entityBbox.left + this.entityBbox.width/2.0,
-                          'top': this.entityBbox.top + this.entityBbox.height/2.0}
-
-      if (constants.positionType === 'right') {
-        this.middleBoundOffset = bbox_currEntity.width - this.entityBbox.width;
-
-        this.offset_whiteLayer = cellDimensions.width - this.sparklineBbox.width - this.entityBbox.width;
-      }
-
-      // also check if 'selected'
-      // if selected the wsv (.sparklificated) is pushed into wsv_cloned
-      if ($(this.anEntity).hasClass('selected')) {
-        // add a distance value between entity and currentEntity
-        this.distanceToCurrEntity = bbox_currEntity.top - this.entityBbox.top;
-
-        // push info about the data
-        let wsv_data = Layout.getWSVData(this.anEntity[0]);
-
-        if (typeof wsv_data.values != 'undefined') {
-
-        let max_value = Math.max.apply(null, wsv_data.values.map(function(v, i) {
-          return v.close;
-        }));
-
-        this.max_data_value = max_value;
-
-        this.last_data_value = wsv_data.values[wsv_data.values.length - 1]['close']
-
-        let min_value = Math.min.apply(null, wsv_data.values.map(function(v, i) {
-          return v.close;
-        }));
-
-        this.min_data_value = min_value;
-
-        } else {
-
-          this.max_data_value = 0;
-          this.min_data_value = 0;
-        }
-
-        this.entityName = this.anEntity.text().toLowerCase();
-
-        classThis._WSV_cloned.push(this);
-      }
-    });
 
 
 
@@ -1135,7 +1096,7 @@ class Layout {
     } else if (constants.typeOfWSV === 'stockLineChart') {
 
       // theData = d3.select(element.wsv).selectAll('g path').data()[0];
-      theData = d3.select(theEntity[0].parentElement).selectAll('g.wsv').data()
+      theData = d3.select(theEntity._entityBelongsToWsv._wsv).selectAll('g.wsv').data()
 
       settings = {data: theData,
                   renderer: renderers.stockPriceSparkline,
@@ -1172,8 +1133,10 @@ class Layout {
                   height: heightWordScaleVis };
     }
 
-    let clonedEntity = theEntity.clone();
-    clonedEntity.insertAfter(theEntity[0].parentElement);
+    // let clonedEntity = theEntity.clone();
+    let clonedEntity = _cloneDeep(theEntity).entityElement
+    theEntity._entityBelongsToWsv._wsv.parentNode.insertBefore(clonedEntity, theEntity._entityBelongsToWsv._wsv.nextSibling)
+    // clonedEntity.insertAfter(theEntity._entityBelongsToWsv._wsv);
     clonedEntity.addClass('clonedWSV');
 
     clonedEntity.sparklificator();

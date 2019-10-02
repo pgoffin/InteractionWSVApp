@@ -66,7 +66,7 @@ class Entity implements Entity {
       //
       //   if (this._refToText.currentEntity !== element) {
       //
-        this._refToText._theContextualMenu.showContextMenu(this.entityElement);
+        this._refToText._theContextualMenu.showContextMenu(this);
 
         this.setAsCurrentEntity()
             // }
@@ -135,7 +135,6 @@ class Entity implements Entity {
 
     return theBbox;
   }
-
 
 
 }

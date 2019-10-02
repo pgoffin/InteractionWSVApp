@@ -1,4 +1,4 @@
-
+import WordScaleVisualization from './wordScaleVisualization';
 
 
 
@@ -215,7 +215,7 @@ class Measurements {
   * @param  {[type]} spaceBetweenGridCells        [description]
   * @return {object}      - custom object including the number of columns to the left and right, and above and below
   */
-  static spaceAvailability_numberColAndRows(aCurrentEntity, aPositionType, layoutType, boundToWhat, arrayOfWSVMeasurementObjects, aCellWidth, aCellHeight, spaceBetweenGridCells) {
+  static spaceAvailability_numberColAndRows(aCurrentEntity, aPositionType, layoutType, boundToWhat, arrayOfWSVs, aCellWidth, aCellHeight, spaceBetweenGridCells) {
 
     //TODO layoutTpe variable not yet used, do I need to use it
 
@@ -227,14 +227,16 @@ class Measurements {
 
     let widthAvailableForInteraction = window.innerWidth;
     let heightAvailableForInteraction = window.innerHeight;
-
-    let currentEntity_rightPosition = this.get_BBox_entity(aCurrentEntity).right
-    let currentWSV_BboxDimensions = this.get_BBox_wsv(aCurrentEntity, aPositionType)
+    //
+    // let currentEntity_rightPosition = this.get_BBox_entity(aCurrentEntity).right
+    // let currentWSV_BboxDimensions = this.get_BBox_wsv(aCurrentEntity, aPositionType)
+    let currentEntity_rightPosition = aCurrentEntity._entityBbox.right;
+    let currentWSV_BboxDimensions = aCurrentEntity._entityBelongsToWsv._wsvBBox;
     let currentWSV_topPosition = currentWSV_BboxDimensions.top;
     let currentWSV_bottomPosition = currentWSV_BboxDimensions.bottom;
     let currentWSV_rightPosition = currentWSV_BboxDimensions.right;
-    let max_entityWidth = this.get_entityMaxWidth(arrayOfWSVMeasurementObjects);
-    let max_sparklineWidth = this.get_SparklineMaxWidth(arrayOfWSVMeasurementObjects);
+    let max_entityWidth = this.get_entityMaxWidth(arrayOfWSVs);
+    let max_sparklineWidth = this.get_SparklineMaxWidth(arrayOfWSVs);
 
     // these is the bbox of the text, a wsv should not go over it
     let bodyBbox = this.getBodyBBox();
@@ -257,7 +259,7 @@ class Measurements {
     // set it to one because usually there is enough space
     let currentEntityColumn_usable = 1;
 
-    if (layoutType === 'grid') {
+    if (layoutType === 'GridLayout') {
       if (boundToWhat === 'middleBound') {
 
         // is there enough space available in the column where the current entity is
@@ -457,8 +459,8 @@ class Measurements {
   * @return {[type]} [description]
   */
   static get_entityMaxWidth(arrayOfWSVMeasurementObjects) {
-    var entityMaxWidth = Math.max.apply(null, arrayOfWSVMeasurementObjects.map(function() {
-      return this.entityBbox.width;
+    var entityMaxWidth = Math.max.apply(null, arrayOfWSVMeasurementObjects.map((aWSV: WordScaleVisualization) => {
+      return aWSV.entity._entityBbox.width;
     }));
 
     return entityMaxWidth;
@@ -471,8 +473,8 @@ class Measurements {
   * @return {float}                              [description]
   */
   static get_SparklineMaxWidth(arrayOfWSVMeasurementObjects) {
-    var sparklineMaxWidth = Math.max.apply(null, arrayOfWSVMeasurementObjects.map(function() {
-      return this.sparklineBbox.width;
+    var sparklineMaxWidth = Math.max.apply(null, arrayOfWSVMeasurementObjects.map((aWSV: WordScaleVisualization) => {
+      return aWSV._wsvVisualizationBBox.width;
     }));
 
     return sparklineMaxWidth;

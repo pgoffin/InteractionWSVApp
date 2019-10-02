@@ -37,6 +37,7 @@ class WordScaleVisualization implements WordScaleVisualization {
   _transformedData: wsvDataObject = null;
 
   _rendererAsClass: string = '';
+  _rendererString: string;
 
   _visualization: HTMLElement = null;
   _wsvVisualizationBBox;
@@ -48,11 +49,16 @@ class WordScaleVisualization implements WordScaleVisualization {
 
   _refToText: Text;
 
-  _aboveOrBelow;
+  _aboveOrBelow: string;
   _docPosition;
-  _middleBoundOffset;
-  _offset_whiteLayer;
-  _distanceToCurrEntity;
+  _middleBoundOffset: number;
+  _offset_whiteLayer: number;
+  _distanceToCurrEntity: number;
+
+  _backgroundElement;
+  _entityBoxClonedObject;
+  _theClonedWSV;
+  _wsvBoxClonedObject;
 
 
 
@@ -63,12 +69,8 @@ class WordScaleVisualization implements WordScaleVisualization {
     this.rawWSVData = data;
 
     this.renderer = renderers[theRenderer];
+    this._rendererString = theRenderer;
     this._rendererAsClass = theRenderer.charAt(0).toUpperCase() + theRenderer.slice(1);
-
-    // create the visualization part of the wsv
-    // if there is data available
-    // if (!((typeof this.rawWSVData == 'undefined') || (this.rawWSVData.length == 0))) {
-    //   this.hasData = true;
 
     this.wsvClass = wsvRendererFactoryClass(this._rendererAsClass, this.renderer, this.rawWSVData, constants.positionType, true, true)
 
@@ -78,11 +80,6 @@ class WordScaleVisualization implements WordScaleVisualization {
     this._wsv = this.entity.entityElement.parentElement;
 
     this._visualization = this._wsv.querySelector('span.sparkline');
-
-    // } else {
-    //   this.entity.entityElement.classList.add('noWSV');
-    //   this._wsv = null;
-    // }
 
     this.typeOfWSV = constants.typeOfWSV;
 
@@ -193,6 +190,16 @@ class WordScaleVisualization implements WordScaleVisualization {
     theBbox.height = bbox.height;
 
     return theBbox;
+  }
+
+
+  cloneWSV(): WordScaleVisualization {
+
+    let cloneEntityElement = this.entity.entityElement.cloneNode(true)
+    let insertedClonedEntityNode = this._wsv.parentNode.insertBefore(cloneEntityElement, this._wsv.nextSibling)
+
+    let clonedWSV = new WordScaleVisualization(insertedClonedEntityNode, this._rawWSVData, this._rendererString, this._refToText)
+    return clonedWSV;
   }
 
 }

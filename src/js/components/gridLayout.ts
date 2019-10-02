@@ -1,4 +1,10 @@
 import { LayoutType } from "../../../global";
+import Text from './text';
+import WordScaleVisualization from './wordScaleVisualization';
+import Layout from './layout';
+import Entity from './entity';
+import Measurements from '../measurements';
+
 
 const constants = require('../constants');
 const _countby = require('lodash/countby');
@@ -9,11 +15,17 @@ class GridLayout implements LayoutType {
 
   _layoutInfo;
 
+  _refToText: Text;
 
-  constructor(anInitialLayoutInfo) {
+  _layout;
+
+
+  constructor(anInitialLayoutInfo, aRefToText: Text, theLayout: Layout) {
     this._layoutInfo = anInitialLayoutInfo;
+    this._refToText = aRefToText;
+    this._layout = theLayout;
 
-    this.createLayout();
+    this.createLayout('');
   }
 
 
@@ -26,52 +38,61 @@ class GridLayout implements LayoutType {
   }
 
 
-  createLayout() {
+  createLayout(why) {
 
-    this.layoutInfo.type = 'grid';
+    const currentEntity: Entity = this._refToText.currentEntity;
+    const bbox_currEntity = currentEntity._entityBbox;
+    const bbox_currWSV = currentEntity._entityBelongsToWsv._wsvBBox
 
-    this.layoutInfo.numberOfColumns = this.layoutInfo.rowAndColumnNumbers.leftNumbColumn + this.layoutInfo.rowAndColumnNumbers.currentEntityColumn + this.layoutInfo.rowAndColumnNumbers.rightNumbColumn;
+    const layoutInfo = this.layoutInfo;
 
-    let numCells_above = this.layoutInfo.numberOfColumns * this.layoutInfo.rowAndColumnNumbers.aboveNumbRow;
-    let numCells_below = this.layoutInfo.numberOfColumns * this.layoutInfo.rowAndColumnNumbers.belowNumbRow;
+    layoutInfo.type = 'grid';
+
+    layoutInfo.numberOfColumns = layoutInfo.rowAndColumnNumbers.leftNumbColumn + layoutInfo.rowAndColumnNumbers.currentEntityColumn + layoutInfo.rowAndColumnNumbers.rightNumbColumn;
+
+    const numCells_above = layoutInfo.numberOfColumns * layoutInfo.rowAndColumnNumbers.aboveNumbRow;
+    const numCells_below = layoutInfo.numberOfColumns * layoutInfo.rowAndColumnNumbers.belowNumbRow;
 
     // this.layoutInfo.numberOfColumns = numOfColumns;
 
     // update the counts variable
-    let counts = _countby(this._WSV_cloned, function(v) { return v.aboveOrBelow} );
+    const counts = _countby(this._refToText._listOfClonedWSVs, function(v: WordScaleVisualization) { return v._aboveOrBelow} );
     Layout.setUndefinedCountToZero(counts)
-    this.layoutInfo.counts = counts
+    layoutInfo.counts = counts
 
     // get top left cornerDiffs
-    numUsedRowsAbove = Math.ceil(counts.above/numOfColumns);
-    topLeftCorner_left = 0;
+    const numUsedRowsAbove = Math.ceil(counts.above/layoutInfo.numberOfColumns);
+    let topLeftCorner_left = 0;
 
-    if (rowAndColumnNumbers.currentEntityColumn == 0) {
-      topLeftCorner_left = bbox_currEntity.left + (this.layoutInfo.cell_dimensions.width + (2*this.layoutInfo.spaceBetweenGridCells));
+    if (layoutInfo.rowAndColumnNumbers.currentEntityColumn == 0) {
+      topLeftCorner_left = bbox_currEntity.left + (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells));
 
     } else {
-      topLeftCorner_left = bbox_currEntity.left - (rowAndColumnNumbers.leftNumbColumn * (this.layoutInfo.cell_dimensions.width + (2*this.layoutInfo.spaceBetweenGridCells)));
+      topLeftCorner_left = bbox_currEntity.left - (layoutInfo.rowAndColumnNumbers.leftNumbColumn * (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)));
     }
 
-    let topLeftCorner_top = bbox_currWSV.top - (numUsedRowsAbove * (this.layoutInfo.cell_dimensions.height + (2*this.layoutInfo.spaceBetweenGridCells)));
+    let topLeftCorner_top = bbox_currWSV.top - (numUsedRowsAbove * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)));
 
-    this.layoutInfo.topLeftCorner_left = topLeftCorner_left;
-    this.layoutInfo.topLeftCorner_top = topLeftCorner_top;
+    layoutInfo.topLeftCorner_left = topLeftCorner_left;
+    layoutInfo.topLeftCorner_top = topLeftCorner_top;
 
 
-    aboveIndex = Layout.getGridStartIndex(counts.above, numOfColumns)
+    let aboveIndex = Layout.getGridStartIndex(counts.above, layoutInfo.numberOfColumns)
     this.layoutInfo.startIndex_above = aboveIndex;
 
-    belowIndex = 0;
-    this.layoutInfo.startIndex_below = belowIndex;
-    let classThis = this;
-    $.each(this._WSV_cloned, function(index, value) {
+    let mySequence = [];
+    let belowIndex = 0;
+    layoutInfo.startIndex_below = 0;
+    // let classThis = this;
+    // $.each(this._refToText._listOfClonedWSVs, function(index, value) {
+    this._refToText._listOfClonedWSVs.forEach((aWSV, index) => {
 
       // cloning the wsv, and changing the position from relative to absolute
       let aClonedWSV;
-      if (classThis.currentLayout == '') {
-        aClonedWSV = Layout.cloneEntityWithWSV(this.anEntity, this.middleBoundOffset, this.offset_whiteLayer, index);
-        this.anEntity.parent().css('opacity', 0.2);
+      if (this._layout.currentLayout == '') {
+        // aClonedWSV = Layout.cloneEntityWithWSV(aWSV.entity, aWSV._middleBoundOffset, aWSV._offset_whiteLayer, index);
+        aClonedWSV = aWSV.cloneWSV();
+        aWSV.entity.entityElement.parentElement.setAttribute('opacity', '0.2');
       } else {
         aClonedWSV = this.theClonedWSV;
         $(aClonedWSV).removeClass('hide');
@@ -84,17 +105,17 @@ class GridLayout implements LayoutType {
 
       let newTop = 0;
       let newLeft = 0;
-      if (this.aboveOrBelow === 'above') {
+      if (aWSV._aboveOrBelow === 'above') {
 
-        newTop = topLeftCorner_top + (Math.floor(aboveIndex/numOfColumns) * (classThis.layoutInfo.cell_dimensions.height + (2*classThis.layoutInfo.spaceBetweenGridCells)));
-        newLeft = topLeftCorner_left + ((aboveIndex % numOfColumns) * (classThis.layoutInfo.cell_dimensions.width + (2*classThis.layoutInfo.spaceBetweenGridCells))) + this.middleBoundOffset;
+        newTop = topLeftCorner_top + (Math.floor(aboveIndex/layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)));
+        newLeft = topLeftCorner_left + ((aboveIndex % layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells))) + aWSV._middleBoundOffset;
 
         aboveIndex += 1;
 
-      } else if (this.aboveOrBelow === 'below') {
+      } else if (aWSV._aboveOrBelow === 'below') {
 
-        newTop = (bbox_currWSV.bottom + (2*classThis.layoutInfo.spaceBetweenGridCells)) + (Math.floor(belowIndex/numOfColumns) * (classThis.layoutInfo.cell_dimensions.height + (2*classThis.layoutInfo.spaceBetweenGridCells)));
-        newLeft = topLeftCorner_left + ((belowIndex % numOfColumns) * (classThis.layoutInfo.cell_dimensions.width + (2*classThis.layoutInfo.spaceBetweenGridCells))) + this.middleBoundOffset;
+        newTop = (bbox_currWSV.bottom + (2*layoutInfo.spaceBetweenGridCells)) + (Math.floor(belowIndex/layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)));
+        newLeft = topLeftCorner_left + ((belowIndex % layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells))) + aWSV._middleBoundOffset;
         belowIndex += 1;
 
       } else {
@@ -110,8 +131,8 @@ class GridLayout implements LayoutType {
 
 
       let whiteBackgroundElement;
-      if (classThis.currentLayout == '') {
-        whiteBackgroundElement = Layout.addWhiteLayer((classThis.layoutInfo.cell_dimensions.width + (2*classThis.layoutInfo.spaceBetweenGridCells)), (classThis.layoutInfo.cell_dimensions.height + (2*classThis.layoutInfo.spaceBetweenGridCells)), (this.entityBbox.top), (this.entityBbox.left));
+      if (this._layout.currentLayout == '') {
+        whiteBackgroundElement = Layout.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
       } else {
         // the layout before might have hidden some of the whiteLayer, therefore unhide
         $('.whiteLayer').removeClass('hide');
@@ -146,25 +167,25 @@ class GridLayout implements LayoutType {
 
       } else {
 
-        mySequence.push({e: aClonedWSV, p: {left: (newLeft), top: (newTop)}, o: {
+        mySequence.push({e: aClonedWSV._wsv, p: {left: (newLeft), top: (newTop)}, o: {
           duration: 1000,
           sequenceQueue: false,
 
           complete: function() {
-            classThis._WSV_cloned[index].backgroundElement = whiteBackgroundElement;
-            classThis._WSV_cloned[index].entityBoxClonedObject = Measurements.get_BBox_entity(aClonedWSV);
-            classThis._WSV_cloned[index].theClonedWSV = aClonedWSV;
-            classThis._WSV_cloned[index].wsvBoxClonedObject = Measurements.get_BBox_wsv(aClonedWSV, constants.positionType);
+            aWSV._refToText._listOfClonedWSVs[index]._backgroundElement = whiteBackgroundElement;
+            aWSV._refToText._listOfClonedWSVs[index]._entityBoxClonedObject = Measurements.get_BBox_entity(aClonedWSV);
+            aWSV._refToText._listOfClonedWSVs[index]._theClonedWSV = aClonedWSV;
+            aWSV._refToText._listOfClonedWSVs[index]._wsvBoxClonedObject = Measurements.get_BBox_wsv(aClonedWSV, constants.positionType);
 
-            d3.select(aClonedWSV[0]).datum().x = classThis._WSV_cloned[index].wsvBoxClonedObject.left;
-            d3.select(aClonedWSV[0]).datum().y = classThis._WSV_cloned[index].wsvBoxClonedObject.top;
-            d3.select(aClonedWSV[0]).datum().middleBoundOffset = classThis._WSV_cloned[index].middleBoundOffset;
-            d3.select(aClonedWSV[0]).datum().originalIndex = index;
-            d3.select(aClonedWSV[0]).datum().backgroundElement = whiteBackgroundElement;
+            d3.select(aClonedWSV[0]).datum().x = aWSV._refToText._listOfClonedWSVs[index]._wsvBoxClonedObject.left;
+            d3.select(aClonedWSV[0]).datum().y = aWSV._refToText._listOfClonedWSVs[index]._wsvBoxClonedObject.top;
+            d3.select(aClonedWSV[0]).datum()._middleBoundOffset = aWSV._refToText._listOfClonedWSVs[index]._middleBoundOffset;
+            d3.select(aClonedWSV[0]).datum()._originalIndex = index;
+            d3.select(aClonedWSV[0]).datum()._backgroundElement = whiteBackgroundElement;
           }
         }});
 
-        mySequence.push({e: whiteBackgroundElement, p: {left: (newLeft - classThis.layoutInfo.spaceBetweenGridCells - this.offset_whiteLayer), top: (newTop - classThis.layoutInfo.spaceBetweenGridCells), opacity: 1}, o: {
+        mySequence.push({e: whiteBackgroundElement, p: {left: (newLeft - layoutInfo.spaceBetweenGridCells - aWSV._offset_whiteLayer), top: (newTop - layoutInfo.spaceBetweenGridCells), opacity: 1}, o: {
             duration: 1000,
             sequenceQueue: false
 
