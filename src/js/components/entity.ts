@@ -1,5 +1,5 @@
 import Text from './text';
-
+import WordScaleVisualization from './wordScaleVisualization';
 
 interface Entity {
   _entityName: string;
@@ -14,8 +14,12 @@ class Entity implements Entity {
   _entityName: string;
   _entityElement: HTMLElement;
   _refToText: Text;
-  _isSelected: Boolean
-  _isCurrentEntity: Boolean
+  _isSelected: Boolean;
+  _isCurrentEntity: Boolean;
+
+  _entityBbox;
+
+  _entityBelongsToWsv;
 
 
   // getter/setter
@@ -35,12 +39,16 @@ class Entity implements Entity {
 
 
 
-  constructor(anElement: HTMLElement, refToText: Text) {
+  constructor(anElement: HTMLElement, refToText: Text, theWSV: WordScaleVisualization) {
     this.entityName = anElement.innerText;
     this.entityElement = anElement;
     this._refToText = refToText;
     this._isSelected = false;
     this._isCurrentEntity = false;
+
+    this._entityBelongsToWsv = theWSV;
+
+    this._entityBbox = this.getBBoxOfEntity();
 
     this.addEventsToEntity()
   }
@@ -73,7 +81,7 @@ class Entity implements Entity {
   }
 
   setAsCurrentEntity() {
-    // only the entity get class 'currentEntity'
+    // only the entity gets class 'currentEntity'
     this.entityElement.classList.add('currentEntity');
     this.entityElement.setAttribute('z-index', '6');
 
@@ -82,6 +90,7 @@ class Entity implements Entity {
     }
 
     this._refToText.currentEntity = this;
+    this._refToText.currentWSV = this._entityBelongsToWsv;
 
     this._isCurrentEntity = true;
   }
@@ -99,6 +108,36 @@ class Entity implements Entity {
 
     this._isSelected = true
   }
+
+  // measurements
+  getBBoxOfEntity() {
+
+    let theBbox = { left: 0,
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    width: 0,
+                    height: 0};
+
+
+    // adapt top and bottom to give values according to the document
+    let bbox = this.entityElement.getBoundingClientRect();
+
+    // let scrollingOffset = $(window).scrollTop();
+    let scrollingOffset = document.body.scrollTop;
+
+    theBbox.left = bbox.left;
+    theBbox.top = bbox.top + scrollingOffset;
+    theBbox.right = bbox.right;
+    theBbox.bottom = bbox.bottom + scrollingOffset;
+    theBbox.width = bbox.width;
+    theBbox.height = bbox.height;
+
+    return theBbox;
+  }
+
+
+
 }
 
 export default Entity

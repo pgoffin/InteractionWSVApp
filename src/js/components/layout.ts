@@ -2,6 +2,8 @@ const constants = require('../constants');
 
 import Text from '../components/text';
 import Measurements from '../measurements';
+import WordScaleVisualization from './wordScaleVisualization';
+import Entity from './entity';
 import layoutFactoryClass from './layoutFactoryClass';
 let dl = require('../../lib/datalib.min.js');
 import * as d3 from "d3";
@@ -72,6 +74,96 @@ class Layout {
 
 
     changeLayout(layoutType: string, why)  {
+
+      const currentEntity: Entity = this._refToText.currentEntity;
+      const bbox_currEntity = currentEntity._entityBbox;
+      const bbox_currWSV = currentEntity._entityBelongsToWsv._wsvBBox
+
+      const wsvsWithoutCurrentWSV = this._refToText.listOfWSVs.filter(aWSV => aWSV != this._refToText._currentWSV)
+
+      const cellDimensions = this.getCellDimensions(wsvsWithoutCurrentWSV);
+      this.layoutInfo = ['cell_dimensions', cellDimensions];
+      this.layoutInfo = ['bbox_currentWSV', bbox_currWSV];
+
+      wsvsWithoutCurrentWSV.forEach(aWSV => {
+        let aEntityBBox = aWSV.entity._entityBbox;
+        aWSV._aboveOrBelow = (aEntityBBox.top > bbox_currEntity.bottom) ? 'below' : 'above';
+
+        aWSV._docPosition = {'left': aEntityBBox.left + aEntityBBox.width/2.0,
+                            'top': aEntityBBox.top + aEntityBBox.height/2.0};
+
+        if (constants.positionType === 'right') {
+          aWSV._middleBoundOffset = bbox_currEntity.width - aEntityBBox.width;
+
+          aWSV._offset_whiteLayer = cellDimensions.width - aWSV._wsvVisualizationBBox.width - aEntityBBox.width;
+        }
+
+        aWSV._distanceToCurrEntity = bbox_currEntity.top - aEntityBBox.top;
+      });
+
+      this._refToText._listOfClonedWSVs = [...wsvsWithoutCurrentWSV];
+
+    }
+
+    measurementArray_withoutCurrEntity.each(function() {
+      // aboveOrBelow decides if wsv is placed above or below the current entity
+      this.aboveOrBelow = (this.entityBbox.top > bbox_currEntity.bottom) ? 'below' : 'above';
+
+      this.docPosition = {'left': this.entityBbox.left + this.entityBbox.width/2.0,
+                          'top': this.entityBbox.top + this.entityBbox.height/2.0}
+
+      if (constants.positionType === 'right') {
+        this.middleBoundOffset = bbox_currEntity.width - this.entityBbox.width;
+
+        this.offset_whiteLayer = cellDimensions.width - this.sparklineBbox.width - this.entityBbox.width;
+      }
+
+      // also check if 'selected'
+      // if selected the wsv (.sparklificated) is pushed into wsv_cloned
+      if ($(this.anEntity).hasClass('selected')) {
+        // add a distance value between entity and currentEntity
+        this.distanceToCurrEntity = bbox_currEntity.top - this.entityBbox.top;
+
+        // push info about the data
+        let wsv_data = Layout.getWSVData(this.anEntity[0]);
+
+        if (typeof wsv_data.values != 'undefined') {
+
+        let max_value = Math.max.apply(null, wsv_data.values.map(function(v, i) {
+          return v.close;
+        }));
+
+        this.max_data_value = max_value;
+
+        this.last_data_value = wsv_data.values[wsv_data.values.length - 1]['close']
+
+        let min_value = Math.min.apply(null, wsv_data.values.map(function(v, i) {
+          return v.close;
+        }));
+
+        this.min_data_value = min_value;
+
+        } else {
+
+          this.max_data_value = 0;
+          this.min_data_value = 0;
+        }
+
+        this.entityName = this.anEntity.text().toLowerCase();
+
+        classThis._WSV_cloned.push(this);
+      }
+    });
+
+
+
+
+
+
+
+
+
+    OLD_changeLayout(layoutType: string, why)  {
       // getBoundingClientRect() gives position relative to the viewport
       // offset() gives and sets position relative to the document
       // offset().top - $(window).scrollTop() = getBoundingClientRect().top
@@ -102,9 +194,12 @@ class Layout {
 
       // remove_SuggestedInteractivity(type);
 
-      let currentWSV = $(text.currentEntity).parent();
+      // let currentWSV = this._refToText
+      // let currentWSV = $(text.currentEntity).parent();
 
-      let bbox_currEntity = Measurements.get_BBox_entity(currentWSV);
+      // let bbox_currEntity = Measurements.get_BBox_entity(currentWSV);
+      let bbox_currEntity = this._refToText.currentEntity.getBBoxOfEntity();
+
       let bbox_currWSV =  Measurements.get_BBox_wsv(currentWSV, constants.positionType);
 
 
@@ -1407,6 +1502,27 @@ class Layout {
     } else {
       return false;
     }
+  }
+
+
+  /**
+  * A cell is where the wsv (sparkline + entity) is embedded.
+  * The cell might have some padding, but the margin is not added (hidden) here
+  * @return {object} - custom object with the height and width of the cell
+  */
+  getCellDimensions(arrayOfWSVs: Array<WordScaleVisualization>): object {
+
+    // initialize the return object
+    const cellDimensions = {height: 0,
+                            width: 0}
+
+    // get the max wsv height
+    cellDimensions.height = Math.max.apply(null, arrayOfWSVs.map(aWSV => aWSV._wsvBBox.height));
+
+    // get the max wsv width
+    cellDimensions.width = Math.max.apply(null, arrayOfWSVs.map(aWSV => aWSV._wsvBBox.width));
+
+    return cellDimensions;
   }
 
 

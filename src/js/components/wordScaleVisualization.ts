@@ -28,7 +28,7 @@ class WordScaleVisualization implements WordScaleVisualization {
   _entity: Entity = null;
 
   _rawWSVData: Array<rawWsvData> = [];
-  _hasData: Boolean = false;
+  // _hasData: Boolean = false;
 
   _typeOfWSV: string = '';
 
@@ -36,40 +36,59 @@ class WordScaleVisualization implements WordScaleVisualization {
 
   _transformedData: wsvDataObject = null;
 
-  _rendereAsClass: string = '';
+  _rendererAsClass: string = '';
 
   _visualization: HTMLElement = null;
+  _wsvVisualizationBBox;
 
   _wsv: HTMLElement = null;
+  _wsvBBox;
 
   _wsvClass: WsVisualizationType;
 
   _refToText: Text;
 
+  _aboveOrBelow;
+  _docPosition;
+  _middleBoundOffset;
+  _offset_whiteLayer;
+  _distanceToCurrEntity;
 
 
-  constructor(anElement: HTMLElement, data: wsvDataObject, theRenderer: string, referenceToText: Text) {
+
+  constructor(anElement: HTMLElement, data: Array<rawWsvData>, theRenderer: string, referenceToText: Text) {
     this._refToText = referenceToText;
-    this.entity = new Entity(anElement, this._refToText);
+    this.entity = new Entity(anElement, this._refToText, this);
 
-    this.rawWSVData = data[this.entity.entityName.trim()];
+    this.rawWSVData = data;
 
     this.renderer = renderers[theRenderer];
-    this._rendereAsClass = theRenderer.charAt(0).toUpperCase() + theRenderer.slice(1);
+    this._rendererAsClass = theRenderer.charAt(0).toUpperCase() + theRenderer.slice(1);
 
-    // create the visualization part of the wsv if there is data available
-    if (!((typeof this.rawWSVData == 'undefined') || (this.rawWSVData.length == 0))) {
-      this.hasData = true;
+    // create the visualization part of the wsv
+    // if there is data available
+    // if (!((typeof this.rawWSVData == 'undefined') || (this.rawWSVData.length == 0))) {
+    //   this.hasData = true;
 
-      this.wsvClass = wsvRendererFactoryClass(this._rendereAsClass, this.renderer, this.rawWSVData, constants.positionType, true, true)
+    this.wsvClass = wsvRendererFactoryClass(this._rendererAsClass, this.renderer, this.rawWSVData, constants.positionType, true, true)
 
-      $(this.entity.entityElement).sparklificator();
-      $(this.entity.entityElement).sparklificator('option', this.wsvClass.settings);
-    } else {
-      this.entity.entityElement.classList.toggle('noClass')
-    }
+    $(this.entity.entityElement).sparklificator();
+    $(this.entity.entityElement).sparklificator('option', this.wsvClass.settings);
+
+    this._wsv = this.entity.entityElement.parentElement;
+
+    this._visualization = this._wsv.querySelector('span.sparkline');
+
+    // } else {
+    //   this.entity.entityElement.classList.add('noWSV');
+    //   this._wsv = null;
+    // }
 
     this.typeOfWSV = constants.typeOfWSV;
+
+    // bboxes
+    this._wsvVisualizationBBox = this.getBBoxOfSparkline();
+    this._wsvBBox = this.getBBoxOfWSV(constants.positionType);
 
   }
 
@@ -89,12 +108,12 @@ class WordScaleVisualization implements WordScaleVisualization {
       return this._rawWSVData;
   }
 
-  set hasData(value: Boolean) {
-      this._hasData = value;
-  }
-  get hasData(): Boolean {
-      return this._hasData;
-  }
+  // set hasData(value: Boolean) {
+  //     this._hasData = value;
+  // }
+  // get hasData(): Boolean {
+  //     return this._hasData;
+  // }
 
   set typeOfWSV(value: string) {
       this._typeOfWSV = value;
@@ -117,6 +136,64 @@ class WordScaleVisualization implements WordScaleVisualization {
       return this._wsvClass;
   }
 
+
+  getBBoxOfWSV(thePositionType: string) {
+    let theBbox = {left: 0,
+                   top: 0,
+                   right: 0,
+                   bottom: 0,
+                   width: 0,
+                   height: 0};
+
+    // adapt top and bottom to give values according to the document
+    let bboxWSV = this._wsv.getBoundingClientRect();
+
+    let scrollingOffset = document.body.scrollTop;
+    // let scrollingOffset = $(window).scrollTop();
+
+    // let bboxEntity = this.get_BBox_entity(theWSV);
+    // let bboxSparkline = this.get_BBox_sparkline(theWSV);
+    let bboxEntity = this.entity._entityBbox;
+    let bboxSparkline = this.getBBoxOfSparkline();
+
+    if (thePositionType === 'right') {
+      theBbox.left = bboxEntity.left;
+      theBbox.top = bboxWSV.top + scrollingOffset;
+      theBbox.right = bboxSparkline.right;
+      theBbox.bottom = bboxWSV.bottom + scrollingOffset;
+      theBbox.width = bboxSparkline.right - bboxEntity.left;
+      theBbox.height = bboxWSV.height;
+
+    } else {
+      console.log('position type not implemented');
+    }
+
+    return theBbox;
+  }
+
+
+  getBBoxOfSparkline() {
+    let theBbox = { left: 0,
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    width: 0,
+                    height: 0};
+
+    // adapt top and bottom to give values according to the document
+    let bbox = this._visualization.getBoundingClientRect();
+
+    let scrollingOffset = document.body.scrollTop;
+
+    theBbox.left = bbox.left;
+    theBbox.top = bbox.top + scrollingOffset;
+    theBbox.right = bbox.right;
+    theBbox.bottom = bbox.bottom + scrollingOffset;
+    theBbox.width = bbox.width;
+    theBbox.height = bbox.height;
+
+    return theBbox;
+  }
 
 }
 

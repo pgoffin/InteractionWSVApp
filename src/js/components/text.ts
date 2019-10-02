@@ -38,7 +38,9 @@ class Text implements Text {
 
   _currentWSV: WordScaleVisualization = null;
 
+  // only tagged entities and that have data are stored here
   _listOfWSVs: Array<WordScaleVisualization> = [];
+  _listOfClonedWSVs: Array<WordScaleVisualization>;
 
   _dataForWSV: wsvDataObject = {};
 
@@ -141,19 +143,29 @@ class Text implements Text {
 
 
   /**
-  * Goes through each element tagged as entity, and creates a wsv and puts it into an array.
+  * Goes through each element tagged as entity and that has data, and creates a wsv and puts it into an array.
   **/
   private createWSVList(): void {
 
     document.querySelectorAll(constants.entitySpanClass).forEach((value) => {
 
-      let aWSV = new WordScaleVisualization(value, this.dataForWSV, value.dataset.wsvRenderer, this);
+      // get data for the entity
+      let entityName = this.getEntityName(value);
+      let dataForEntity = this.dataForWSV[entityName]
 
-      this.listOfWSVs.push(aWSV);
+      if (!((typeof dataForEntity == 'undefined') || (dataForEntity.length == 0))) {
+        let aWSV = new WordScaleVisualization(value, dataForEntity, value.dataset.wsvRenderer, this);
+
+        this.listOfWSVs.push(aWSV);
+      }
     });
 
   }
 
+
+  private getEntityName(aHTMLElement: HTMLElement): string {
+    return aHTMLElement.innerText.trim()
+  }
 
   // /**
   // * Adds a noData class to the entity tag for text tagged as entities but do not have any available data.
@@ -286,18 +298,18 @@ class Text implements Text {
   }
 
 
-  /**
-  * Returns the dataset corresponding to the wsv type
-  * @param {string} aWSVType - the DOM element
-  * @returns {object}
-  **/
-  private getDataset(aWSVType: string): any {
-    if (aWSVType == 'historianData') {
-      return historianData;
-    } else if (aWSVType == 'stockData') {
-      return stockData;
-    }
-  }
+  // /**
+  // * Returns the dataset corresponding to the wsv type
+  // * @param {string} aWSVType - the DOM element
+  // * @returns {object}
+  // **/
+  // private getDataset(aWSVType: string): any {
+  //   if (aWSVType == 'historianData') {
+  //     return historianData;
+  //   } else if (aWSVType == 'stockData') {
+  //     return stockData;
+  //   }
+  // }
 
 
   private getDatasetUsingDocumentTag() {
