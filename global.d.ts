@@ -29,3 +29,12 @@ export interface rawWsvData {
 export interface LayoutType {
 
 }
+
+export interface BBox {
+  left: number,
+  top: number,
+  right: number,
+  bottom: number,
+  width: number,
+  height: number
+}

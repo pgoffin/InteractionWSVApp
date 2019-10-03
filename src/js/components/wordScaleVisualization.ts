@@ -56,9 +56,9 @@ class WordScaleVisualization implements WordScaleVisualization {
   _distanceToCurrEntity: number;
 
   _backgroundElement;
-  _entityBoxClonedObject;
+  // _entityBoxClonedObject;
   _theClonedWSV;
-  _wsvBoxClonedObject;
+  // _wsvBoxClonedObject;
 
 
 
@@ -198,7 +198,15 @@ class WordScaleVisualization implements WordScaleVisualization {
     let cloneEntityElement = this.entity.entityElement.cloneNode(true)
     let insertedClonedEntityNode = this._wsv.parentNode.insertBefore(cloneEntityElement, this._wsv.nextSibling)
 
-    let clonedWSV = new WordScaleVisualization(insertedClonedEntityNode, this._rawWSVData, this._rendererString, this._refToText)
+    let clonedWSV = new WordScaleVisualization(insertedClonedEntityNode, this._rawWSVData, this._rendererString, this._refToText);
+
+    clonedWSV.entity.entityElement.classList.add('cloned');
+    clonedWSV._wsv.classList.add('cloned');
+    clonedWSV._visualization.classList.add('cloned');
+
+    // clonedWSV._wsv.setStyle('z-index', '6');
+    // clonedWSV._wsv.style.zIndex = '6';
+
     return clonedWSV;
   }
 

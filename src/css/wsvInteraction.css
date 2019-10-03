@@ -1,0 +1,6 @@
+.whiteLayer {
+  position: absolute;
+  opacity: 0;
+  z-index: 4;
+  pointer-events: none;
+}

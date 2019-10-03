@@ -1,3 +1,4 @@
+import { BBox } from "../../../global";
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
 
@@ -16,10 +17,8 @@ class Entity implements Entity {
   _refToText: Text;
   _isSelected: Boolean;
   _isCurrentEntity: Boolean;
-
-  _entityBbox;
-
-  _entityBelongsToWsv;
+  _entityBbox: BBox;
+  _entityBelongsToWsv: WordScaleVisualization;
 
 
   // getter/setter
@@ -59,17 +58,11 @@ class Entity implements Entity {
     this.entityElement.addEventListener('mouseenter', () => {
       console.log('mouseenter');
 
-      // let element = e.currentTarget as HTMLElement;
       if (!this._refToText.isLayoutVisible) {
 
-      // if ((this._refToText.isLayoutVisible && element.classList.contains('currentEntity')) || !this._refToText.isLayoutVisible) {
-      //
-      //   if (this._refToText.currentEntity !== element) {
-      //
         this._refToText._theContextualMenu.showContextMenu(this);
 
         this.setAsCurrentEntity()
-            // }
       }
     });
 
@@ -80,10 +73,11 @@ class Entity implements Entity {
     });
   }
 
+
   setAsCurrentEntity() {
     // only the entity gets class 'currentEntity'
     this.entityElement.classList.add('currentEntity');
-    this.entityElement.setAttribute('z-index', '6');
+    // this.entityElement.setAttribute('z-index', '6');
 
     if (this.entityElement.classList.contains('selected')) {
       this.entityElement.classList.remove('selected');
@@ -94,6 +88,7 @@ class Entity implements Entity {
 
     this._isCurrentEntity = true;
   }
+
 
   unSetAsCurrentEntity() {
     this.entityElement.classList.remove('currentEntity')

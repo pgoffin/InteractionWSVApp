@@ -175,7 +175,7 @@ class ContextualMenu {
   // Hides the menu immediately
   hideContextualMenu(refToEntity: Entity) {
     // Don't hide if a layout is being displayed
-    if(!this._refToText._theLayout.isLayoutVisible) {
+    if(!this._refToText.isLayoutVisible) {
       $('.tooltip').removeClass('wrapper')
       $('.tooltip').addClass('hide');
 
@@ -241,7 +241,7 @@ class ContextualMenu {
     if (this._refToText._theLayout.currentLayout != constants.menuElement.gridElement) {
       console.log('set layout to "' + constants.menuElement.gridElement + '"')
 
-      this._refToText._theLayout.changeLayout(constants.menuElement.gridElement, '');
+      this._refToText._theLayout.changeLayout(constants.menuElement.gridElement);
 
 // is this needed
       this._refToText._theLayout.currentLayout = constants.gridElement;

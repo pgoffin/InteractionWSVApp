@@ -1,9 +1,9 @@
-import { LayoutType } from "../../../global";
+import { LayoutType, BBox } from "../../../global";
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
-import Layout from './layout';
 import Entity from './entity';
-import Measurements from '../measurements';
+// import Measurements from '../measurements';
+import Layout from './layout';
 
 
 const constants = require('../constants');
@@ -14,18 +14,18 @@ const _countby = require('lodash/countby');
 class GridLayout implements LayoutType {
 
   _layoutInfo;
-
   _refToText: Text;
+  _arrayOfWSVsWithouCurrentWSV;
 
-  _layout;
 
-
-  constructor(anInitialLayoutInfo, aRefToText: Text, theLayout: Layout) {
+  constructor(anInitialLayoutInfo, aRefToText: Text, anArrayOfWSVsWithouCurrentWSV) {
     this._layoutInfo = anInitialLayoutInfo;
-    this._refToText = aRefToText;
-    this._layout = theLayout;
 
-    this.createLayout('');
+    this._refToText = aRefToText;
+
+    this._arrayOfWSVsWithouCurrentWSV = anArrayOfWSVsWithouCurrentWSV;
+
+    this.createLayout();
   }
 
 
@@ -38,11 +38,11 @@ class GridLayout implements LayoutType {
   }
 
 
-  createLayout(why) {
+  createLayout() {
 
     const currentEntity: Entity = this._refToText.currentEntity;
-    const bbox_currEntity = currentEntity._entityBbox;
-    const bbox_currWSV = currentEntity._entityBelongsToWsv._wsvBBox
+    const bbox_currEntity: BBox = currentEntity._entityBbox;
+    const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox
 
     const layoutInfo = this.layoutInfo;
 
@@ -50,13 +50,8 @@ class GridLayout implements LayoutType {
 
     layoutInfo.numberOfColumns = layoutInfo.rowAndColumnNumbers.leftNumbColumn + layoutInfo.rowAndColumnNumbers.currentEntityColumn + layoutInfo.rowAndColumnNumbers.rightNumbColumn;
 
-    const numCells_above = layoutInfo.numberOfColumns * layoutInfo.rowAndColumnNumbers.aboveNumbRow;
-    const numCells_below = layoutInfo.numberOfColumns * layoutInfo.rowAndColumnNumbers.belowNumbRow;
-
-    // this.layoutInfo.numberOfColumns = numOfColumns;
-
     // update the counts variable
-    const counts = _countby(this._refToText._listOfClonedWSVs, function(v: WordScaleVisualization) { return v._aboveOrBelow} );
+    const counts = _countby(this._arrayOfWSVsWithouCurrentWSV, function(v: WordScaleVisualization) { return v._aboveOrBelow} );
     Layout.setUndefinedCountToZero(counts)
     layoutInfo.counts = counts
 
@@ -85,13 +80,16 @@ class GridLayout implements LayoutType {
     layoutInfo.startIndex_below = 0;
     // let classThis = this;
     // $.each(this._refToText._listOfClonedWSVs, function(index, value) {
-    this._refToText._listOfClonedWSVs.forEach((aWSV, index) => {
+    this._arrayOfWSVsWithouCurrentWSV.forEach((aWSV, index) => {
 
       // cloning the wsv, and changing the position from relative to absolute
       let aClonedWSV;
-      if (this._layout.currentLayout == '') {
+      // if (this._layout.currentLayout == '') {
+      if (!this._refToText.isLayoutVisible) {
         // aClonedWSV = Layout.cloneEntityWithWSV(aWSV.entity, aWSV._middleBoundOffset, aWSV._offset_whiteLayer, index);
         aClonedWSV = aWSV.cloneWSV();
+        aWSV._theClonedWSV = aClonedWSV;
+
         aWSV.entity.entityElement.parentElement.setAttribute('opacity', '0.2');
       } else {
         aClonedWSV = this.theClonedWSV;
@@ -123,16 +121,11 @@ class GridLayout implements LayoutType {
       }
 
 
-      // check if the wsv has been forced to move due to reordering
-      if (why === 'dragInBetween') {
-        Layout.visualizeMovedWSVs(this, {x: newLeft, y: newTop}, aClonedWSV);
-      }
-
-
-
       let whiteBackgroundElement;
-      if (this._layout.currentLayout == '') {
+      if (!this._refToText.isLayoutVisible) {
         whiteBackgroundElement = Layout.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
+
+        aWSV._theClonedWSV._backgroundElement = whiteBackgroundElement;
       } else {
         // the layout before might have hidden some of the whiteLayer, therefore unhide
         $('.whiteLayer').removeClass('hide');
@@ -140,58 +133,33 @@ class GridLayout implements LayoutType {
         whiteBackgroundElement = this.backgroundElement;
       }
 
-      if (why === 'dragInBetween') {
 
-        let old_leftTop = {x: this.wsvBoxClonedObject.left, y: this.wsvBoxClonedObject.top};
-        let new_leftTop = {x: newLeft, y: newTop};
-        let same = Layout.comparing2DCoordinates(old_leftTop, new_leftTop);
-        if (!same) {
-          mySequence.push({e: aClonedWSV, p: {left: (newLeft), top: (newTop)}, o: {
-            duration: 500,
+      mySequence.push({e: aClonedWSV._wsv, p: {left: (newLeft), top: (newTop)}, o: {
+        duration: 1000,
+        sequenceQueue: false,
 
-            complete: function() {
-              classThis._WSV_cloned[index].backgroundElement = whiteBackgroundElement;
-              classThis._WSV_cloned[index].entityBoxClonedObject = Measurements.get_BBox_entity(aClonedWSV);
-              classThis._WSV_cloned[index].theClonedWSV = aClonedWSV;
-              classThis._WSV_cloned[index].wsvBoxClonedObject = Measurements.get_BBox_wsv(aClonedWSV, constants.positionType);
+        complete: function(clonedWSV) {
 
-              d3.select(aClonedWSV[0]).datum().x = classThis._WSV_cloned[index].wsvBoxClonedObject.left;
-              d3.select(aClonedWSV[0]).datum().y = classThis._WSV_cloned[index].wsvBoxClonedObject.top;
-              d3.select(aClonedWSV[0]).datum().middleBoundOffset = classThis._WSV_cloned[index].middleBoundOffset;
-              d3.select(aClonedWSV[0]).datum().originalIndex = index;
-              d3.select(aClonedWSV[0]).datum().backgroundElement = whiteBackgroundElement;
-              $(aClonedWSV).removeClass('compare');
-            }
-          }});
+          // aWSV._refToText._listOfClonedWSVs[index]._backgroundElement = whiteBackgroundElement;
+          // aWSV._refToText._listOfClonedWSVs[index]._entityBoxClonedObject = Measurements.get_BBox_entity(aClonedWSV);
+          // aWSV._refToText._listOfClonedWSVs[index]._theClonedWSV = aClonedWSV;
+          // aWSV._refToText._listOfClonedWSVs[index]._wsvBoxClonedObject = Measurements.get_BBox_wsv(aClonedWSV, constants.positionType);
+
+          // d3.select(clonedWSV[0]).datum().x = aWSV._theClonedWSV._wsvBBox.left;
+          // d3.select(clonedWSV[0]).datum().y = aWSV._theClonedWSV._wsvBBox.top;
+
+          // d3.select(aClonedWSV[0]).datum().y = aWSV._refToText._listOfClonedWSVs[index]._wsvBoxClonedObject.top;
+          // d3.select(aClonedWSV[0]).datum()._middleBoundOffset = aWSV._refToText._listOfClonedWSVs[index]._middleBoundOffset;
+          // d3.select(aClonedWSV[0]).datum()._originalIndex = index;
+          // d3.select(aClonedWSV[0]).datum()._backgroundElement = whiteBackgroundElement;
         }
+      }});
 
-      } else {
-
-        mySequence.push({e: aClonedWSV._wsv, p: {left: (newLeft), top: (newTop)}, o: {
+      mySequence.push({e: whiteBackgroundElement, p: {left: (newLeft - layoutInfo.spaceBetweenGridCells - aWSV._offset_whiteLayer), top: (newTop - layoutInfo.spaceBetweenGridCells), opacity: 1}, o: {
           duration: 1000,
-          sequenceQueue: false,
-
-          complete: function() {
-            aWSV._refToText._listOfClonedWSVs[index]._backgroundElement = whiteBackgroundElement;
-            aWSV._refToText._listOfClonedWSVs[index]._entityBoxClonedObject = Measurements.get_BBox_entity(aClonedWSV);
-            aWSV._refToText._listOfClonedWSVs[index]._theClonedWSV = aClonedWSV;
-            aWSV._refToText._listOfClonedWSVs[index]._wsvBoxClonedObject = Measurements.get_BBox_wsv(aClonedWSV, constants.positionType);
-
-            d3.select(aClonedWSV[0]).datum().x = aWSV._refToText._listOfClonedWSVs[index]._wsvBoxClonedObject.left;
-            d3.select(aClonedWSV[0]).datum().y = aWSV._refToText._listOfClonedWSVs[index]._wsvBoxClonedObject.top;
-            d3.select(aClonedWSV[0]).datum()._middleBoundOffset = aWSV._refToText._listOfClonedWSVs[index]._middleBoundOffset;
-            d3.select(aClonedWSV[0]).datum()._originalIndex = index;
-            d3.select(aClonedWSV[0]).datum()._backgroundElement = whiteBackgroundElement;
-          }
-        }});
-
-        mySequence.push({e: whiteBackgroundElement, p: {left: (newLeft - layoutInfo.spaceBetweenGridCells - aWSV._offset_whiteLayer), top: (newTop - layoutInfo.spaceBetweenGridCells), opacity: 1}, o: {
-            duration: 1000,
-            sequenceQueue: false
-
-          }
-        });
-      }
+          sequenceQueue: false
+        }
+      });
 
     });
 
@@ -199,7 +167,7 @@ class GridLayout implements LayoutType {
 
     $('.sparklificated.clonedWSV.first .entity').css('background-color', 'rgb(255, 223, 128)');
 
-    // logStudyEvent('gathering', {'layout': 'grid', 'origin layout launch (entity)': $.trim($(currentEntity).text()), 'location %': topLeftCorner_top/document.body.scrollHeight});
+    this._refToText.isLayoutVisible = true;
   }
 }
 

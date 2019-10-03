@@ -1,12 +1,10 @@
-// import { renderFunc } from "../../../global";
-
 import GridLayout from './gridLayout'
-import Layout from './Layout'
+import Text from './text'
 
 const layouts: any = {GridLayout};
 
-export default function layoutFactoryClass(aLayoutName: string, theLayout: Layout, initialLayoutInfo, refToText: Text) {
+export default function layoutFactoryClass(aLayoutName: string, initialLayoutInfo, refToText: Text, arrayOfWSVsWithouCurrentWSV) {
 
-  return new layouts[aLayoutName](initialLayoutInfo, refToText, theLayout)
+  return new layouts[aLayoutName](initialLayoutInfo, refToText, arrayOfWSVsWithouCurrentWSV)
 
 }

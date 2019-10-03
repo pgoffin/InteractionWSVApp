@@ -30,7 +30,7 @@ class Layout {
                    viewportBottom: 0};
 
     _currentLayout: string = '';
-    _isLayoutVisible: Boolean = false;
+    // _isLayoutVisible: Boolean = false;
 
     _measurementArray = [];
     _WSV_cloned = [];
@@ -68,15 +68,8 @@ class Layout {
       return this._layoutInfo;
     }
 
-    get isLayoutVisible(): Boolean {
-      return this._isLayoutVisible;
-    }
-    set isLayoutVisible(aLayout: Boolean) {
-      this._isLayoutVisible = aLayout;
-    }
 
-
-    changeLayout(layoutType: string, why)  {
+    changeLayout(layoutType: string)  {
 
       const currentEntity: Entity = this._refToText.currentEntity;
       const bbox_currEntity = currentEntity._entityBbox;
@@ -104,16 +97,19 @@ class Layout {
         aWSV._distanceToCurrEntity = bbox_currEntity.top - aEntityBBox.top;
       });
 
-      this._refToText._listOfClonedWSVs = [...wsvsWithoutCurrentWSV];
+      // this._refToText._listOfClonedWSVs = [...wsvsWithoutCurrentWSV];
+      // // order first by above or below, then use distance to to the currentEntity
+      // this._refToText._listOfClonedWSVs.sort(dl.comparator(['+aboveOrBelow', '-distanceToCurrEntity']));
+
       // order first by above or below, then use distance to to the currentEntity
-      this._refToText._listOfClonedWSVs.sort(dl.comparator(['+aboveOrBelow', '-distanceToCurrEntity']));
+      wsvsWithoutCurrentWSV.sort(dl.comparator(['+aboveOrBelow', '-distanceToCurrEntity']));
 
 
       let rowAndColumnNumbers = Measurements.spaceAvailability_numberColAndRows(currentEntity, constants.positionType, layoutType, 'middleBound', this._refToText.listOfWSVs, this.layoutInfo.cell_dimensions.width, this.layoutInfo.cell_dimensions.height, this.layoutInfo.spaceBetweenGridCells);
 
       this.layoutInfo = ['rowAndColumnNumbers', rowAndColumnNumbers];
 
-      this._theLayout = layoutFactoryClass(layoutType, this, this.layoutInfo, this._refToText);
+      this._theLayout = layoutFactoryClass(layoutType, this.layoutInfo, this._refToText, wsvsWithoutCurrentWSV);
     }
 
 
@@ -1392,21 +1388,31 @@ class Layout {
   }
 
 
-  static addWhiteLayer(width, height, oldTop, oldLeft) {
+  static addWhiteLayer(width: number, height: number, oldTop: number, oldLeft: number) {
 
-    var whiteLayerBox = $("<div class='whiteLayer'></div>");
+    // var whiteLayerBox = $("<div class='whiteLayer'></div>");
+    //
+    // $('#text').append(whiteLayerBox);
 
-    $('#text').append(whiteLayerBox);
+    const whiteLayerDiv = document.createElement('div');
+    whiteLayerDiv.classList.add('whiteLayer');
+    document.getElementById('text').append(whiteLayerDiv);
 
-    $(whiteLayerBox).css('position', 'absolute');
-    $(whiteLayerBox).css('opacity', 0);
-    $(whiteLayerBox).width(width);
-    $(whiteLayerBox).height(height);
-    $(whiteLayerBox).offset({top: oldTop, left: oldLeft});
-    $(whiteLayerBox).css('z-index', 4);
-    $(whiteLayerBox).css('pointer-events', 'none');
+    whiteLayerDiv.style.width = width + 'px';
+    whiteLayerDiv.style.height = height + 'px';
 
-    return whiteLayerBox;
+    whiteLayerDiv.style.top = oldTop + 'px';
+    whiteLayerDiv.style.left = oldLeft + 'px';
+
+    // $(whiteLayerBox).css('position', 'absolute');
+    // $(whiteLayerBox).css('opacity', 0);
+    // $(whiteLayerBox).width(width);
+    // $(whiteLayerBox).height(height);
+    // $(whiteLayerBox).offset({top: oldTop, left: oldLeft});
+    // $(whiteLayerBox).css('z-index', 4);
+    // $(whiteLayerBox).css('pointer-events', 'none');
+
+    return whiteLayerDiv;
   }
 
 
