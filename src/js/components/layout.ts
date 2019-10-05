@@ -1,3 +1,5 @@
+import { NumberColAndRows } from "../../../global";
+
 const constants = require('../constants');
 
 import Text from './text';
@@ -32,12 +34,15 @@ class Layout {
     _currentLayout: string = '';
     // _isLayoutVisible: Boolean = false;
 
-    _measurementArray = [];
-    _WSV_cloned = [];
+    // _measurementArray = [];
+    // _WSV_cloned = [];
 
     _refToText: Text;
 
     _theLayout: Layout;
+
+    _arryOfWSVsThatHaveAClone: Array<WordScaleVisualization>;
+
 
     constructor(theRefToText: Text) {
       this._layoutInfo.spaceBetweenGridCells = 4;
@@ -54,12 +59,12 @@ class Layout {
       this._currentLayout = aLayout;
     }
 
-    get measurementArray() {
-      return this._measurementArray;
-    }
-    set measurementArray(anArray) {
-      this._measurementArray = anArray;
-    }
+    // get measurementArray() {
+    //   return this._measurementArray;
+    // }
+    // set measurementArray(anArray) {
+    //   this._measurementArray = anArray;
+    // }
 
     set layoutInfo(keyValuePair) {
       this._layoutInfo[keyValuePair[0]] = keyValuePair[1];
@@ -69,19 +74,27 @@ class Layout {
     }
 
 
-    changeLayout(layoutType: string)  {
+    changeLayout(layoutType: string, eventLocation)  {
 
-      const currentEntity: Entity = this._refToText.currentEntity;
+      let currentEntity: Entity = this._refToText.currentEntity;
+
+      // All possible falsy values in ECMA-/Javascript: null, undefined, NaN, empty string (""), 0, false.
+      if (!currentEntity) {
+        this.set_closestEntityAsCurrentEntity(eventLocation);
+        currentEntity = this._refToText.currentEntity
+      }
+
+
       const bbox_currEntity = currentEntity._entityBbox;
       const bbox_currWSV = currentEntity._entityBelongsToWsv._wsvBBox
 
-      const wsvsWithoutCurrentWSV = this._refToText.listOfWSVs.filter(aWSV => aWSV != this._refToText._currentWSV)
+      this._arryOfWSVsThatHaveAClone = this._refToText.listOfWSVs.filter(aWSV => aWSV != this._refToText._currentWSV);
 
-      const cellDimensions = this.getCellDimensions(wsvsWithoutCurrentWSV);
+      const cellDimensions = this.getCellDimensions(this._arryOfWSVsThatHaveAClone);
       this.layoutInfo = ['cell_dimensions', cellDimensions];
       this.layoutInfo = ['bbox_currentWSV', bbox_currWSV];
 
-      wsvsWithoutCurrentWSV.forEach(aWSV => {
+      this._arryOfWSVsThatHaveAClone.forEach(aWSV => {
         let aEntityBBox = aWSV.entity._entityBbox;
         aWSV._aboveOrBelow = (aEntityBBox.top > bbox_currEntity.bottom) ? 'below' : 'above';
 
@@ -102,18 +115,128 @@ class Layout {
       // this._refToText._listOfClonedWSVs.sort(dl.comparator(['+aboveOrBelow', '-distanceToCurrEntity']));
 
       // order first by above or below, then use distance to to the currentEntity
-      wsvsWithoutCurrentWSV.sort(dl.comparator(['+aboveOrBelow', '-distanceToCurrEntity']));
+      this._arryOfWSVsThatHaveAClone.sort(dl.comparator(['+aboveOrBelow', '-distanceToCurrEntity']));
 
 
-      let rowAndColumnNumbers = Measurements.spaceAvailability_numberColAndRows(currentEntity, constants.positionType, layoutType, 'middleBound', this._refToText.listOfWSVs, this.layoutInfo.cell_dimensions.width, this.layoutInfo.cell_dimensions.height, this.layoutInfo.spaceBetweenGridCells);
+      let rowAndColumnNumbers: NumberColAndRows = Measurements.spaceAvailability_numberColAndRows(currentEntity, constants.positionType, layoutType, 'middleBound', this._refToText.listOfWSVs, this.layoutInfo.cell_dimensions.width, this.layoutInfo.cell_dimensions.height, this.layoutInfo.spaceBetweenGridCells);
 
       this.layoutInfo = ['rowAndColumnNumbers', rowAndColumnNumbers];
+      this.layoutInfo = ['numberOfColumns', rowAndColumnNumbers.totalNumberOfColumns];
 
-      this._theLayout = layoutFactoryClass(layoutType, this.layoutInfo, this._refToText, wsvsWithoutCurrentWSV);
+      this._theLayout = layoutFactoryClass(layoutType, this.layoutInfo, this._refToText, this._arryOfWSVsThatHaveAClone);
     }
 
 
+    giveUpLayout() {
 
+      const giveUpAnimationSequence = [];
+
+      this._arryOfWSVsThatHaveAClone.forEach((aWSV, index) => {
+
+        let originalWSVBBox = aWSV._wsvBBox;
+        let whiteBackgroundElement = aWSV._theClonedWSV._backgroundElement;
+
+        giveUpAnimationSequence.push({e: aWSV._theClonedWSV._wsv,
+                                      p: {left: originalWSVBBox.left, top: originalWSVBBox.top},
+                                      o: {sequenceQueue: false,
+                                          duration: 800,
+                                          complete: clonedWSV => {
+                                            clonedWSV[0].remove();
+                                            aWSV._theClonedWSV = null;
+                                          }
+                                        }
+                                    });
+
+        if (Object.is(this._arryOfWSVsThatHaveAClone.length - 1, index)) {
+
+          giveUpAnimationSequence.push({e: whiteBackgroundElement,
+                                        p: {left: originalWSVBBox.left, top: originalWSVBBox.top, opacity: 0},
+                                        o: {sequenceQueue: false,
+                                            duration: 800,
+                                            complete: aBackgroundElement => {
+                                              aBackgroundElement[0].remove();
+                                              aWSV._backgroundElement = null;
+
+                                              document.querySelectorAll('.sparklificated.hasClone').forEach(anElement => {anElement.classList.remove('hasClone')});
+
+                                              document.querySelectorAll('.entity').forEach(anElement => {anElement.classList.remove('selected')});
+
+                                              this.cleanupAfterLayout();
+
+                                              // this._refToText._currentEntity.unSetAsCurrentEntity();
+                                              // this._refToText._isLayoutVisible = false;
+
+                                              // $('#text').css('color', 'rgb(51, 51, 51)');
+                                              //
+                                              // $('.sparklificated').css('opacity', 1);
+                                              // $('.sparkline').css('opacity', 1);
+                                              // $('.entity').css('opacity', 1);
+                                              //
+                                              // $('.entity').removeClass('selected');
+                                              // $('.entity').removeClass('currentEntity');
+                                              // $('.entity').removeClass('showInLayout');
+                                              //
+                                              // currentEntity = null;
+                                              //
+                                              // layoutType = null;
+
+                                              // hideDragBand();
+                                            }
+                                          }
+                                      });
+
+        } else {
+
+          giveUpAnimationSequence.push({e: whiteBackgroundElement,
+                                        p: {left: originalWSVBBox.left, top: originalWSVBBox.top, opacity: 0},
+                                        o: {sequenceQueue: false,
+                                            duration: 800,
+                                            complete: aBackgroundElement => {
+                                              aBackgroundElement[0].remove();
+                                              aWSV._backgroundElement = null;
+                                            }
+                                          }
+                                      });
+
+        }
+      });
+
+      $.Velocity.RunSequence(giveUpAnimationSequence);
+
+    }
+
+
+    cleanupAfterLayout() {
+      // this._refToText._currentEntity.unSetAsCurrentEntity();
+      this._refToText._isLayoutVisible = false;
+
+      // hide tooltip
+      // this._refToText._theContextualMenu.stopMenuHideTimer()
+      console.log('hide cleanupAfterLayout')
+      this._refToText._theContextualMenu.hideContextualMenu(this._refToText._currentEntity);
+
+      this._refToText._theContextualMenu.unSelectIcon();
+
+      // $('.currentSeletedLayout').removeClass('currentSeletedLayout')
+
+      // document.getElementById('triangle_left').classList.add('hide');
+      // document.getElementById('triangle_right').classList.add('hide');
+      // document.getElementById('orientation_circles').classList.add('hide');
+
+
+      // $('#triangle_left').addClass('hide');
+      // $('#triangle_right').addClass('hide');
+      // $('#orientation_circles').addClass('hide');
+      // $('#orientation_circles svg').remove();
+      // orientationCirclesData = [];
+
+      // layoutInfo.bandLength = 0;
+      // layoutInfo.startOffsetRowlayout = 0;
+      // layoutInfo.snapPositions = [];
+
+      // remove any trails
+      // removeTrail();
+    }
 
 
 
@@ -1492,6 +1615,87 @@ class Layout {
     cellDimensions.width = Math.max.apply(null, arrayOfWSVs.map(aWSV => aWSV._wsvBBox.width));
 
     return cellDimensions;
+  }
+
+
+  // get the closest entity to the dbclicked location
+  set_closestEntityAsCurrentEntity(anEventLocation) {
+
+    let closestEntity: Entity = null;
+    let closestDistance: number = 1000000;
+
+    this._refToText.listOfWSVs.forEach(aWSV => {
+
+      if (aWSV._wsvBBox.top > 0 && aWSV._wsvBBox.top < window.innerHeight) {
+        // wsv is visible
+        let distance = this.getDistancePointClosestWSVCorner(anEventLocation, aWSV._entity);
+
+        if (distance < closestDistance) {
+          closestEntity = aWSV._entity;
+          closestDistance = distance;
+        }
+      }
+    });
+
+    closestEntity.setAsCurrentEntity();
+  }
+
+
+  /**
+  * Gets the shortest distance between a point and the closest poinnt on the bbox of the wsv
+  * @param  {[type]} point  [description]
+  * @param  {[type]} entity [description]
+  * @return {number}        shortest ditance between the corner closest to the point and the point
+  */
+  getDistancePointClosestWSVCorner(point, entity: Entity) {
+    // entities are DOM elements
+    const wsvBBox = entity._entityBelongsToWsv._wsvBBox;
+
+    // does not matter which corner --> array of corner and not object
+    const wsvCorners = [{'left': wsvBBox.left, 'top': wsvBBox.top},
+                      {'left': wsvBBox.left + wsvBBox.width, 'top': wsvBBox.top},
+                      {'left': wsvBBox.left, 'top': wsvBBox.top + wsvBBox.height},
+                      {'left': wsvBBox.left + wsvBBox.width, 'top': wsvBBox.top + wsvBBox.height}];
+
+    let squaredDistance = 10000000;
+    wsvCorners.forEach(aCorner => {
+      let newSquaredDistance = ((point.x - aCorner.left) * (point.x - aCorner.left)) + ((point.y - aCorner.top) * (point.y - aCorner.top));
+
+      if (newSquaredDistance < squaredDistance) {
+        squaredDistance = newSquaredDistance
+      }
+    });
+
+    if (point.x > wsvBBox.left && point.x < wsvBBox.left + wsvBBox.width) {
+      var distanceToSegmentTop = Math.abs(point.y - wsvBBox.top);
+      var distanceToSegmentBottom = Math.abs(point.y - (wsvBBox.top + wsvBBox.height));
+
+      var distanceToSegmentTop_squared = distanceToSegmentTop * distanceToSegmentTop;
+      if (distanceToSegmentTop_squared < squaredDistance) {
+        squaredDistance = distanceToSegmentTop_squared;
+      }
+
+      var distanceToSegmentBottom_squared = distanceToSegmentBottom * distanceToSegmentBottom;
+      if (distanceToSegmentBottom_squared < squaredDistance) {
+        squaredDistance = distanceToSegmentBottom_squared;
+      }
+
+    } else if (point.y > wsvBBox.top && point.y < wsvBBox.top + wsvBBox.height) {
+      var distanceToSegmentLeft = Math.abs(point.x - wsvBBox.left);
+      var distanceToSegmentRight = Math.abs(point.x - (wsvBBox.left + wsvBBox.width));
+
+      var distanceToSegmentLeft_squared = distanceToSegmentLeft * distanceToSegmentLeft;
+      if (distanceToSegmentLeft_squared < squaredDistance) {
+        squaredDistance = distanceToSegmentLeft_squared;
+      }
+
+      var distanceToSegmentRight_squared = distanceToSegmentRight * distanceToSegmentRight;
+      if (distanceToSegmentRight_squared < squaredDistance) {
+        squaredDistance = distanceToSegmentRight_squared;
+      }
+    }
+
+    return squaredDistance;
   }
 
 

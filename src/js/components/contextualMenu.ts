@@ -2,43 +2,43 @@ const constants = require('../constants');
 const menuItems = require('./menuItems');
 
 import Measurements from '../measurements';
-// import Layout from './layout';
+import Layout from './layout';
 import Text from '../components/text';
 import Entity from '../components/entity';
 
 
 class ContextualMenu {
 
-  private _isContextMenuSetUp: Boolean = false;
+  _isContextMenuSetUp: Boolean = false;
 
-  private _tooltipOffset: number = -5;
-  private _theEntityBBox;
-  private _widthTooltip: number;
-  private _heightTooltip: number;
-  private _tooltip_left: number;
-  private _tooltip_top: number;
-  private _tooltip_bottom: number;
+  _tooltipOffset: number = -5;
+  _theEntityBBox;
+  _widthTooltip: number;
+  _heightTooltip: number;
+  _tooltip_left: number;
+  _tooltip_top: number;
+  _tooltip_bottom: number;
 
   // Internal variables for delayed menu hiding
-  private _menuHideTimer = null;
-  private _menuHideDelay: number = 2000;
+  _menuHideTimer = null;
+  _menuHideDelay: number = 2000;
 
-  private _menuItems: Array<menuItemType> = menuItems.menuItems;
+  _menuItems: Array<menuItemType> = menuItems.menuItems;
 
-  private _visibleMenuItems: string[] = [constants.menuElement.gridElement,
-                                        constants.menuElement.closeElement,
-                                        constants.menuElement.orderByLastDataValueElement,
-                                        constants.menuElement.orderByEntityNameElement,
-                                        constants.menuElement.orderByDocPositionElement];
+  _visibleMenuItems: string[] = [constants.menuElement.gridElement,
+                                 constants.menuElement.closeElement,
+                                 constants.menuElement.orderByLastDataValueElement,
+                                 constants.menuElement.orderByEntityNameElement,
+                                 constants.menuElement.orderByDocPositionElement];
 
   // selected menu item
-  private _selectedMenuItem: string;
+  _selectedMenuItem: string;
 
   _refToText: Text;
 
-  // _refToLayout: Layout;
+  _refToLayout: Layout;
 
-  // [key: string]: () => void;
+  _tooltipElements;
 
 // ['#grid', '#close', '#order-by-lastDataValue', '#order-by-entityName', '#order-by-docPosition','#selector', '#selector-ok', '#row', '#column', '#grid-no-overlap'];
 
@@ -47,6 +47,9 @@ class ContextualMenu {
   constructor(referenceToText: Text) {
 
     this._refToText = referenceToText;
+    this._refToLayout = referenceToText._theLayout;
+
+    this._tooltipElements = [];
 
     const menuDiv = document.createElement("div");
     menuDiv.setAttribute('class', 'mouse tooltip');
@@ -80,32 +83,32 @@ class ContextualMenu {
       elementImg.setAttribute('style', styleAttr);
       elementLayoutDiv.appendChild(elementImg);
 
-      elementLayoutDiv.addEventListener('click', () => {
+      elementLayoutDiv.addEventListener('click', event => {
         // unselect current selected menu item
         this.unSelectMenuItem();
 
         // add the class 'selected' if no wsv has been selected (selected wsvs are the gathered ones)
-				if (!($('.entity.selected').length > 1)) {
-					$('.entity').addClass('selected');
-				}
+        if (!($('.entity.selected').length > 1)) {
+          $('.entity').addClass('selected');
+        }
 
         // add class to selected menu item
         this._selectedMenuItem = anElement.element;
-        $(this._selectedMenuItem).addClass('currentSeletedLayout');
+        event.currentTarget.classList.add('currentSeletedLayout');
+        // $(this._selectedMenuItem).addClass('currentSeletedLayout');
 
-        if (anElement.elementType === 'layout') {
-          this._refToText._theLayout.changeLayout(anElement.elementInteraction, '')
+        if (anElement.elementType === 'close') {
+          this._refToText._theLayout.giveUpLayout();
+        } else if (anElement.elementType === 'layout') {
+
+          const entityBBox = this._refToText._currentEntity._entityBbox;
+          const entityBboxCentroid = {x: entityBBox.top + (entityBBox.height/2), y: entityBBox.left + (entityBBox.width/2)};
+
+          this._refToText._theLayout.changeLayout(anElement.elementInteraction, entityBboxCentroid);
         }
-
-
-        // let interactionFN = this[anElement.elementInteraction];
-        //
-        // // is object a function?
-        // if (typeof interactionFN === "function") interactionFN();
-
       });
 
-
+      this._tooltipElements.push(elementLayoutDiv);
 
     }
   }
@@ -124,15 +127,17 @@ class ContextualMenu {
 
   // Perform initial setup on the context menu (attaching listeners, etc.), done once only!
   setupContextMenu(entityMenuCalledOn: Entity) {
-    let classThis = this;
-    $('.tooltip').mouseenter(function() {
+    // let classThis = this;
+    $('.tooltip').mouseenter(() => {
       console.log('adding mouseenter event handler')
-      classThis.stopMenuHideTimer();
+      this.stopMenuHideTimer();
     });
 
-    $('.tooltip').mouseleave(function() {
-      console.log('adding mouseleave event handler')
-      classThis.startMenuHideTimer(entityMenuCalledOn);
+    $('.tooltip').mouseleave(() => {
+      // if (!$('.tooltip').hasClass('hide')) {
+        console.log('adding mouseleave event handler')
+        this.startMenuHideTimer(entityMenuCalledOn);
+      // }
     });
 
     this._isContextMenuSetUp = true;
@@ -150,7 +155,7 @@ class ContextualMenu {
     $('.tooltip').removeClass('hide').addClass('wrapper');
 
     this.computePositionMenu(entityMenuIsCalledOn);
-    this.positionMenu();
+    this.positionMenu(this._refToLayout);
   }
 
 
@@ -160,7 +165,14 @@ class ContextualMenu {
 
     if (this._menuHideTimer) clearTimeout(this._menuHideTimer);
 
-    this._menuHideTimer = setTimeout(() => this.hideContextualMenu(refToEntity), this._menuHideDelay);
+    this._menuHideTimer = setTimeout(() => {
+                                      if (!$('.tooltip').hasClass('hide')) {
+                                        console.log('hide startMenuHideTimer')
+                                        this.hideContextualMenu(refToEntity)
+                                      } else {
+                                        clearTimeout(this._menuHideTimer)
+                                      }
+                                    }, this._menuHideDelay);
   }
 
 
@@ -197,9 +209,9 @@ class ContextualMenu {
   }
 
 
-  positionMenu() {
+  positionMenu(aRefToLayout) {
 
-    if (this._tooltip_left < Measurements.getViewportMeasurements().viewportLeft) {
+    if (this._tooltip_left < Measurements.getViewportMeasurements(aRefToLayout).viewportLeft) {
       this._tooltip_left = this._theEntityBBox.right + this._tooltipOffset;
       $('.tooltip').removeClass('leftPos');
       $('.tooltip').addClass('rightPos');
@@ -288,6 +300,13 @@ class ContextualMenu {
 
   unselect_interaction() {
     console.log('menu item unselect_interaction pushed')
+  }
+
+
+  unSelectIcon() {
+    this._tooltipElements.forEach((aMenuElement: HTMLElement) => {
+      aMenuElement.classList.remove('currentSeletedLayout');
+    });
   }
 
 

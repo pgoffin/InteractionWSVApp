@@ -1,4 +1,4 @@
-import { wsvDataObject, rawWsvData, renderFunc, WsVisualizationType } from "../../../global";
+import { wsvDataObject, rawWsvData, renderFunc, WsVisualizationType, BBox } from "../../../global";
 import Entity from './entity';
 import wsvRendererFactoryClass from './wsvRendererFactoryClass';
 import Text from './text';
@@ -13,12 +13,9 @@ require('../../lib/jquery.sparklificator');
 
 interface WordScaleVisualization {
   _entity: Entity;
-
-  // _wordScaleVis: ;
+  _rawWSVData: Array<rawWsvData>;
   _typeOfWSV: string;
   _renderer: renderFunc;
-
-  _rawWSVData: Array<rawWsvData>;
 }
 
 
@@ -40,24 +37,24 @@ class WordScaleVisualization implements WordScaleVisualization {
   _rendererString: string;
 
   _visualization: HTMLElement = null;
-  _wsvVisualizationBBox;
+  _wsvVisualizationBBox: BBox;
 
   _wsv: HTMLElement = null;
-  _wsvBBox;
+  _wsvBBox: BBox;
 
   _wsvClass: WsVisualizationType;
 
   _refToText: Text;
 
   _aboveOrBelow: string;
-  _docPosition;
+  // _docPosition;
   _middleBoundOffset: number;
   _offset_whiteLayer: number;
   _distanceToCurrEntity: number;
 
-  _backgroundElement;
+  _backgroundElement: HTMLElement;
   // _entityBoxClonedObject;
-  _theClonedWSV;
+  _theClonedWSV: WordScaleVisualization;
   // _wsvBoxClonedObject;
 
 

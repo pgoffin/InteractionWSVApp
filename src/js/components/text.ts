@@ -1,15 +1,12 @@
-import * as d3 from "d3";
-// import { contextualMenu } from './contextualMenu';
-import ContextualMenu from './contextualMenu';
-import Layout from './layout'
 import { wsvDataObject } from '../../../global';
 
-import WordScaleVisualization from "./wordScaleVisualization";
+import ContextualMenu from './contextualMenu';
+import Layout from './layout'
+import WordScaleVisualization from './wordScaleVisualization';
 import Entity from './entity';
 
-// import historianData from "../../data/otherDataset"
-const historianData = require("../../data/otherDataset")
-const stockData = require("../../data/wsvDataFile")
+const historianData = require('../../data/otherDataset')
+const stockData = require('../../data/wsvDataFile')
 const constants = require('../constants');
 
 // to run sparklificator
@@ -23,9 +20,11 @@ interface Text {
   _nameOfTextFile: string;
   _isLayoutVisible: Boolean;
   _currentWSV: WordScaleVisualization;
+  _currentEntity: Entity;
   _listOfWSVs: Array<WordScaleVisualization>;
   _dataForWSV: wsvDataObject;
-  _currentEntity: Entity;
+  _theContextualMenu: ContextualMenu;
+  _theLayout: Layout;
 }
 
 
@@ -40,7 +39,7 @@ class Text implements Text {
 
   // only tagged entities and that have data are stored here
   _listOfWSVs: Array<WordScaleVisualization> = [];
-  _listOfClonedWSVs: Array<WordScaleVisualization>;
+  // _listOfClonedWSVs: Array<WordScaleVisualization>;
 
   _dataForWSV: wsvDataObject = {};
 
@@ -112,24 +111,116 @@ class Text implements Text {
     this._theLayout = new Layout(this);
 
     this._theContextualMenu = new ContextualMenu(this);
+
+    this.addEventsToDocument();
   }
 
 
+  addEventsToDocument() {
 
-  // set currentEntity(anEntity: HTMLElement) {
-  //   if (this.isCurrentEntitySet()) {
-  //     $(this._currentEntity).removeClass('currentEntity');
-  //   }
-  //
-  //   this._currentEntity = anEntity;
-  //   $(this._currentEntity).addClass('currentEntity');
-  //   $(this._currentEntity).next('.sparkline').addClass('currentEntity');
-  //   $(this._currentEntity).css('z-index', 6);
-  //
-  //   if ($(this._currentEntity).hasClass('selected')) {
-  //     $(this._currentEntity).removeClass('selected');
-  //   }
-  // }
+    document.addEventListener('keydown', event => {
+      if (this._isLayoutVisible && (event.keyCode === 27 || event.charCode == 27)) {
+        // ESC
+        event.preventDefault();
+
+        console.log('event: click (give up layout)');
+
+        // if ($('#spacer').length > 0) {
+        //   removeSpacer();
+        // }
+
+        this._theLayout.giveUpLayout();
+        this._theLayout.cleanupAfterLayout();
+      }
+    });
+
+    // var tmpCurrentEntity = $(currentEntity)[0]
+    //
+    // if ($('#spacer').length > 0) {
+    //   removeSpacer();
+    // }
+    //
+    // giveUpLayout();
+    // startMenuHideTimer();
+    // cleanupAfterLayout();
+    // clearSelection();
+    // // resetLayoutIcon();
+    //
+    // if (condition !== study2) {
+    //   hideCloseIcon();
+    // }
+    //
+    // addUsabilityToMenu(tmpCurrentEntity);
+
+    document.addEventListener('dblclick', event => {
+      this.clearSelection();
+
+      if (this._isLayoutVisible) {
+
+        console.log('event: click (give up layout)');
+
+        // if ($('#spacer').length > 0) {
+        //  removeSpacer();
+        // }
+
+        this._theLayout.giveUpLayout();
+        // startMenuHideTimer();
+        // this._theLayout.cleanupAfterLayout();
+        // clearSelection();
+        // // resetLayoutIcon();
+        //
+        // if (condition !== study2) {
+        // hideCloseIcon();
+        // }
+        //
+        // addUsabilityToMenu(tmpCurrentEntity);
+      } else {
+        // summon grid layout when dblclicking somewhere on the canvas
+        console.log("event: dblclick (create layout)");
+
+        const dblClickLocation = {};
+        dblClickLocation.x = event.pageX;
+        dblClickLocation.y = event.pageY;
+
+        this._theLayout.changeLayout('GridLayout', dblClickLocation);
+
+        // unSelectIcon();
+        //
+        // let iconName = grid_layout;
+        // if (condition === study2) {
+        //   iconName = previousLayout;
+        // }
+        //
+        // // dblClickLocation.x = event.clientX;
+        // // dblClickLocation.y = event.clientY;
+        // dblClickLocation.x = event.pageX;
+        // dblClickLocation.y = event.pageY;
+        //
+        // changeLayout(iconName);
+        //
+        // layoutFlag = true;
+        //
+        // if (currentEntity !== null) {
+        //   // currentEntity has to be set here by changeLayout, if not don't go on
+        //   tmpCurrentEntity = $(currentEntity)[0]
+        //
+        //   setLayoutType(iconName, 'newLayout');
+        //
+        //   $('#' + iconName).addClass('currentSeletedLayout');
+        //   console.log('layout set to "' + iconName + '"')
+        //
+        //
+        //   add_SuggestedInteractivity();
+        //
+        //   makeSelectable('sorting');
+        //   makeNotSelectable('selection');
+        //
+        //   showContextMenu(tmpCurrentEntity);
+        //   // to make close icon appear
+        //   hideLayoutIcon();
+      }
+    });
+  }
 
 
   // check if currentEntity is set
@@ -167,127 +258,6 @@ class Text implements Text {
     return aHTMLElement.innerText.trim()
   }
 
-  // /**
-  // * Adds a noData class to the entity tag for text tagged as entities but do not have any available data.
-  // **/
-  // private setEntitiesWithNoDataToClass(setToClass: string): void {
-  //
-  //   // const wsvDataForDocument: wsvDataObject = this.dataForWSV;
-  //
-  //   this.listOfWSVs.forEach((aWSV) => {
-  //     if ((typeof aWSV.wsvData == 'undefined') || (Object.getOwnPropertyNames(aWSV.wsvData).length === 0)) {
-  //       // no data available instead of removing the entity tag add
-  //       // $(value).contents().unwrap();
-  //       aWSV.entity.entityElement.classList.toggle(setToClass);
-  //     }
-  //   });
-  //
-  //   // document.querySelectorAll(constants.entitySpanClass).forEach((value) => {
-  //   // // $(constants.entitySpanClass).forEach((value) => {
-  //   //   // does entity have data available?
-  //   //
-  //   //   const anEntityName: string = this.getEntityFromDOMElement(value);
-  //   //
-  //   //   if ((typeof wsvDataForDocument == 'undefined') || ((typeof wsvDataForDocument[anEntityName] == 'undefined') || (wsvDataForDocument[anEntityName].length == 0))) {
-  //   //     // no data available instead of removing the entity tag add
-  //   //     // $(value).contents().unwrap();
-  //   //     value.classList.toggle('noData');
-  //   //   }
-  //   // });
-  // }
-
-
-  // // add wsvs to the taggedd elements in the text
-  // private addWSV(aTypeOfWSV: string): void {
-  //
-  //   let settings;
-  //   this.listOfWSVs.forEach((aWSV) => {
-  //     if (aWSV.typeOfWSV === 'stockLineChart' && aWSV.hasData) {
-  //
-  //       // sort the stockData array
-  //       let transformedStockData = aWSV.wsvData.map((element) => {
-  //         return {close: element.changeToFirst, date: new Date(element.date)};
-  //       });
-  //
-  //       transformedStockData.sort(function(a: Object, b: Object) {
-  //         return a.date - b.date;
-  //       });
-  //
-  //       // sorted data, ascending
-  //       let dataObject = [{id: 0, values: transformedStockData}];
-  //
-  //       settings = {data: dataObject,
-  //                   renderer: renderers.stockPriceSparkline,
-  //                   position: constants.positionType,
-  //                   paddingWidth: true,
-  //                   paddingHeight: true,
-  //                   width: (constants.stockLineChartSize.markWidth * constants.numberOfMarks),
-  //                   height: constants.stockLineChartSize.heightWordScaleVis };
-  //     } else if (aTypeOfWSV === 'timelineChart') {
-  //
-  //     } else if (aTypeOfWSV === 'eyetrackingChart') {
-  //
-  //     }
-  //   });
-  //
-  //
-  //   $(constants.entitySpanClass).each(function(index, value) {
-  //
-  //     let anEntity = classThis.getEntityFromDOMElement(value);
-  //     let datasetType = classThis.getDataset(this.dataset.wsvType);
-  //     let entityData = datasetType[classThis._nameOfTextFile][anEntity]
-  //
-  //     let settings;
-  //     if (aTypeOfWSV === 'timelineChart') {
-  //
-  //       const startPointDate = Date.parse('1 January 1850');
-  //       // const endPointDate = Date.parse('1 January 1970');
-  //
-  //       let dataObject = entityData;
-  //
-  //       let startDate = Date.parse(dataObject.dates[0]);
-  //       let endDate = Date.parse(dataObject.dates[1]);
-  //
-  //       dataObject.numberOfDays = Math.round((endDate - startDate)/(1000*60*60*24))
-  //       dataObject.startPoint = Math.round((startDate - startPointDate)/(1000*60*60*24))
-  //
-  //       settings = {data: dataObject,
-  //                   renderer: renderers.buildWikiChart,
-  //                   position: constants.positionType,
-  //                   paddingWidth: true,
-  //                   paddingHeight: true,
-  //                   width: constants.timelineSize.width,
-  //                   height: constants.timelineSize.height };
-  //
-  //     }
-  //   });
-  // }
-
-
-  // private addEventToEntities(aContextualMenu: ContextualMenu) {
-  //
-  //   // instead of mouseover use mouseenter and mouseleave, see http://stackoverflow.com/questions/6274495/changing-opacity-with-jquery
-  //   $(constants.entitySpanClass).mouseenter((event) => {
-  //     console.log('mouseenter');
-  //
-  //     if ((this.isLayoutVisible && $(event.currentTarget).hasClass('currentEntity')) || !this.isLayoutVisible) {
-  //
-  //       if (this.currentEntity !== event.currentTarget) {
-  //         aContextualMenu.showContextMenu(event.currentTarget);
-  //         this.currentEntity = event.currentTarget
-  //       }
-  //
-  //       // tmpCurrentEntity = this;
-  //       this.currentEntity = event.currentTarget;
-  //     }
-  //   });
-  //
-  //   $(constants.entitySpanClass).mouseleave(function() {
-  //     console.log('mouseleave');
-  //     aContextualMenu.startMenuHideTimer();
-  //   });
-  // }
-
 
   /**
   * Returns the file name of the text where spaces are substituted with underscores
@@ -296,20 +266,6 @@ class Text implements Text {
   private getTextFileName(): string {
     return $.trim($('h2').text()).split(' ').join('_');
   }
-
-
-  // /**
-  // * Returns the dataset corresponding to the wsv type
-  // * @param {string} aWSVType - the DOM element
-  // * @returns {object}
-  // **/
-  // private getDataset(aWSVType: string): any {
-  //   if (aWSVType == 'historianData') {
-  //     return historianData;
-  //   } else if (aWSVType == 'stockData') {
-  //     return stockData;
-  //   }
-  // }
 
 
   private getDatasetUsingDocumentTag() {
@@ -325,14 +281,25 @@ class Text implements Text {
   }
 
 
-  /**
-  * Get the entity from a DOM element
-  * @param {HTMLElement} aDOMElement - the DOM element
-  * @returns {string}
-  **/
-  private getEntityFromDOMElement(aDOMElement: HTMLElement): string {
-    return $.trim(d3.select(aDOMElement).html());
+  // from here http://stackoverflow.com/questions/880512/prevent-text-selection-after-double-click
+  clearSelection() {
+    if (document.selection && document.selection.empty) {
+      document.selection.empty();
+    } else if (window.getSelection) {
+      let sel = window.getSelection();
+      sel.removeAllRanges();
+    }
   }
+
+
+  // /**
+  // * Get the entity from a DOM element
+  // * @param {HTMLElement} aDOMElement - the DOM element
+  // * @returns {string}
+  // **/
+  // private getEntityFromDOMElement(aDOMElement: HTMLElement): string {
+  //   return $.trim(d3.select(aDOMElement).html());
+  // }
 
 }
 

@@ -1,3 +1,34 @@
+.entity {
+	position: relative;
+	z-index: 2;
+}
+
+.entity.cloned {
+	cursor: pointer;
+}
+
+.entity.currentEntity {
+	z-index: 6;
+}
+
+.sparklificated {
+	position: relative;
+	white-space: nowrap;
+	display: inline-block;
+  opacity: 1;
+}
+
+.sparklificated.hasClone {
+  opacity: 0.2;
+}
+
+.sparklificated.cloned {
+	position: absolute;
+	white-space: nowrap;
+	display: inline-block;
+	z-index: 6;
+}
+
 .whiteLayer {
   position: absolute;
   opacity: 0;

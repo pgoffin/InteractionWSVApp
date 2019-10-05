@@ -124,18 +124,18 @@ class Measurements {
   }
 
 
-  static getViewportMeasurements() {
+  static getViewportMeasurements(aLayoutRef) {
     // get the left, right, top and bottom borders of the text div for optimal visualization of wsvs, same for every layout
     let bodyBbox = this.getBodyBBox();
     let viewportDimensionsLeftRight = {left: bodyBbox.left, right: bodyBbox.right};
     let viewportDimensionsTopBottom = {top: bodyBbox.top, bottom: bodyBbox.bottom};
 
     let layoutInfo = {};
-    if (typeof window['layoutInfo'] !== 'undefined') {
-      layoutInfo.viewportLeft = viewportDimensionsLeftRight.left;
-      layoutInfo.viewportRight = viewportDimensionsLeftRight.right;
-      layoutInfo.viewportTop = viewportDimensionsTopBottom.top;
-      layoutInfo.viewportBottom = viewportDimensionsTopBottom.bottom;
+    if (typeof aLayoutRef !== 'undefined') {
+      aLayoutRef.layoutInfo.viewportLeft = viewportDimensionsLeftRight.left;
+      aLayoutRef.layoutInfo.viewportRight = viewportDimensionsLeftRight.right;
+      aLayoutRef.layoutInfo.viewportTop = viewportDimensionsTopBottom.top;
+      aLayoutRef.layoutInfo.viewportBottom = viewportDimensionsTopBottom.bottom;
     } else {
       console.log('PROBLEM: first create the layoutInfo object.')
     }
@@ -222,6 +222,7 @@ class Measurements {
     let numberColAndRows = {leftNumbColumn: 0,
                             rightNumbColumn: 0,
                             currentEntityColumn: 1,
+                            totalNumberOfColumns: 1,
                             aboveNumbRow: 0,
                             belowNumbRow: 0};
 
@@ -449,6 +450,8 @@ class Measurements {
       }
 
     }
+
+    numberColAndRows.totalNumberOfColumns = numberColAndRows.leftNumbColumn + numberColAndRows.rightNumbColumn + numberColAndRows.currentEntityColumn;
 
     return numberColAndRows;
   }

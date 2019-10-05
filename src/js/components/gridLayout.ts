@@ -1,28 +1,26 @@
-import { LayoutType, BBox } from "../../../global";
+import { BBox, LayoutInfo } from "../../../global";
+
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
 import Entity from './entity';
-// import Measurements from '../measurements';
-import Layout from './layout';
+import LayoutType from './layoutType';
 
-
-const constants = require('../constants');
-const _countby = require('lodash/countby');
+import 'velocity-animate';
+import 'velocity-ui-pack';
 
 
 
-class GridLayout implements LayoutType {
+class GridLayout extends LayoutType {
 
-  _layoutInfo;
+  _layoutInfo: LayoutInfo;
   _refToText: Text;
-  _arrayOfWSVsWithouCurrentWSV;
+  _arrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>;
 
 
-  constructor(anInitialLayoutInfo, aRefToText: Text, anArrayOfWSVsWithouCurrentWSV) {
-    this._layoutInfo = anInitialLayoutInfo;
-
+  constructor(aLayoutInfo: LayoutInfo, aRefToText: Text, anArrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>) {
+    super();
+    this._layoutInfo = aLayoutInfo;
     this._refToText = aRefToText;
-
     this._arrayOfWSVsWithouCurrentWSV = anArrayOfWSVsWithouCurrentWSV;
 
     this.createLayout();
@@ -40,23 +38,25 @@ class GridLayout implements LayoutType {
 
   createLayout() {
 
-    const currentEntity: Entity = this._refToText.currentEntity;
-    const bbox_currEntity: BBox = currentEntity._entityBbox;
-    const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox
-
     const layoutInfo = this.layoutInfo;
-
     layoutInfo.type = 'grid';
 
-    layoutInfo.numberOfColumns = layoutInfo.rowAndColumnNumbers.leftNumbColumn + layoutInfo.rowAndColumnNumbers.currentEntityColumn + layoutInfo.rowAndColumnNumbers.rightNumbColumn;
+    const currentEntity: Entity = this._refToText.currentEntity;
+    const bbox_currEntity: BBox = currentEntity._entityBbox;
+    const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
+
+    // layoutInfo.numberOfColumns = layoutInfo.rowAndColumnNumbers.leftNumbColumn + layoutInfo.rowAndColumnNumbers.currentEntityColumn + layoutInfo.rowAndColumnNumbers.rightNumbColumn;
 
     // update the counts variable
-    const counts = _countby(this._arrayOfWSVsWithouCurrentWSV, function(v: WordScaleVisualization) { return v._aboveOrBelow} );
-    Layout.setUndefinedCountToZero(counts)
-    layoutInfo.counts = counts
+    // const counts = _countby(this._arrayOfWSVsWithouCurrentWSV, function(v: WordScaleVisualization) { return v._aboveOrBelow} );
+    // Layout.setUndefinedCountToZero(counts)
+    // layoutInfo.counts = counts
+
+    // update the counts variable
+    layoutInfo.counts = LayoutType.getAboveBelowCounts(this._arrayOfWSVsWithouCurrentWSV)
 
     // get top left cornerDiffs
-    const numUsedRowsAbove = Math.ceil(counts.above/layoutInfo.numberOfColumns);
+    const numUsedRowsAbove = Math.ceil(layoutInfo.counts.above/layoutInfo.numberOfColumns);
     let topLeftCorner_left = 0;
 
     if (layoutInfo.rowAndColumnNumbers.currentEntityColumn == 0) {
@@ -72,8 +72,8 @@ class GridLayout implements LayoutType {
     layoutInfo.topLeftCorner_top = topLeftCorner_top;
 
 
-    let aboveIndex = Layout.getGridStartIndex(counts.above, layoutInfo.numberOfColumns)
-    this.layoutInfo.startIndex_above = aboveIndex;
+    let aboveIndex = GridLayout.getGridStartIndex(layoutInfo.counts.above, layoutInfo.numberOfColumns)
+    layoutInfo.startIndex_above = aboveIndex;
 
     let mySequence = [];
     let belowIndex = 0;
@@ -90,9 +90,10 @@ class GridLayout implements LayoutType {
         aClonedWSV = aWSV.cloneWSV();
         aWSV._theClonedWSV = aClonedWSV;
 
-        aWSV.entity.entityElement.parentElement.setAttribute('opacity', '0.2');
+        aWSV._wsv.classList.add('hasClone');
+        // aWSV.entity.entityElement.parentElement.setAttribute('opacity', '0.2');
       } else {
-        aClonedWSV = this.theClonedWSV;
+        aClonedWSV = aWSV._theClonedWSV;
         $(aClonedWSV).removeClass('hide');
         $(aClonedWSV).children().removeClass('hide');
         if ($('#spacer').length > 0) {
@@ -123,14 +124,14 @@ class GridLayout implements LayoutType {
 
       let whiteBackgroundElement;
       if (!this._refToText.isLayoutVisible) {
-        whiteBackgroundElement = Layout.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
+        whiteBackgroundElement = LayoutType.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
 
         aWSV._theClonedWSV._backgroundElement = whiteBackgroundElement;
       } else {
         // the layout before might have hidden some of the whiteLayer, therefore unhide
         $('.whiteLayer').removeClass('hide');
 
-        whiteBackgroundElement = this.backgroundElement;
+        whiteBackgroundElement = aWSV._theClonedWSV._backgroundElement;
       }
 
 
@@ -169,6 +170,19 @@ class GridLayout implements LayoutType {
 
     this._refToText.isLayoutVisible = true;
   }
+
+
+  static getGridStartIndex(countsAbove: number, numberOfColumns: number): number {
+
+    let rest = countsAbove % numberOfColumns;
+    if (rest === 0) {
+      rest = numberOfColumns;
+    }
+
+    return numberOfColumns - rest;
+  }
+
+
 }
 
 

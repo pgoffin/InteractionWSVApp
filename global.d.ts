@@ -23,12 +23,35 @@ export interface WsVisualizationType {
 
 
 export interface rawWsvData {
-   [key: string]: string|number|Date;
+ [key: string]: string|number|Date;
 }
 
-export interface LayoutType {
-
+export interface NumberColAndRows {
+  leftNumbColumn: number,
+  rightNumbColumn: number,
+  currentEntityColumn: number,
+  totalNumberOfColumns: number,
+  aboveNumbRow: number,
+  belowNumbRow: number
 }
+
+export interface LayoutInfo {
+  type: string,
+  topLeftCorner_left: number,
+  topLeftCorner_top: number,
+  numberOfColumns: number,
+  cell_dimensions: {width: number, height: number},
+  spaceBetweenGridCells: number,
+  viewportLeft: number,
+  viewportRight: number,
+  viewportTop: number,
+  viewportBottom: number,
+  rowAndColumnNumbers: NumberColAndRows;
+  counts;
+  startIndex_above: number,
+  startIndex_below: number
+}
+
 
 export interface BBox {
   left: number,
