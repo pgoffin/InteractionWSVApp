@@ -4,6 +4,7 @@ import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
 import Entity from './entity';
 import LayoutType from './layoutType';
+// import Layout from './layout';
 
 import 'velocity-animate';
 import 'velocity-ui-pack';
@@ -124,7 +125,7 @@ class GridLayout extends LayoutType {
 
       let whiteBackgroundElement;
       if (!this._refToText.isLayoutVisible) {
-        whiteBackgroundElement = LayoutType.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
+        whiteBackgroundElement = GridLayout.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
 
         aWSV._theClonedWSV._backgroundElement = whiteBackgroundElement;
       } else {

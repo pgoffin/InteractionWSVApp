@@ -1,26 +1,30 @@
 const constants = require('../constants');
 const menuItems = require('./menuItems');
 
-import Measurements from '../measurements';
+// import Measurements from '../measurements';
 import Layout from './layout';
+import LayoutType from './layoutType';
 import Text from '../components/text';
 import Entity from '../components/entity';
 
+
+interface tooltipBBox {
+  offset: number,
+  width: number,
+  height: number,
+  left: number,
+  top: number,
+  bottom: number
+}
 
 class ContextualMenu {
 
   _isContextMenuSetUp: Boolean = false;
 
-  _tooltipOffset: number = -5;
-  _theEntityBBox;
-  _widthTooltip: number;
-  _heightTooltip: number;
-  _tooltip_left: number;
-  _tooltip_top: number;
-  _tooltip_bottom: number;
+  _tooltipBBox: tooltipBBox;
 
   // Internal variables for delayed menu hiding
-  _menuHideTimer = null;
+  _menuHideTimer: number;
   _menuHideDelay: number = 2000;
 
   _menuItems: Array<menuItemType> = menuItems.menuItems;
@@ -38,7 +42,7 @@ class ContextualMenu {
 
   _refToLayout: Layout;
 
-  _tooltipElements;
+  _tooltipElements: Array<HTMLElement>;
 
 // ['#grid', '#close', '#order-by-lastDataValue', '#order-by-entityName', '#order-by-docPosition','#selector', '#selector-ok', '#row', '#column', '#grid-no-overlap'];
 
@@ -49,10 +53,17 @@ class ContextualMenu {
     this._refToText = referenceToText;
     this._refToLayout = referenceToText._theLayout;
 
+    this._tooltipBBox = {offset: -5,
+                         width: 0,
+                         height: 0,
+                         left: 0,
+                         top: 0,
+                         bottom: 0}
+
     this._tooltipElements = [];
 
     const menuDiv = document.createElement("div");
-    menuDiv.setAttribute('class', 'mouse tooltip');
+    menuDiv.setAttribute('id', 'tooltip');
 
     this._menuItems.forEach((anElement: menuItemType) => {
       if (this._visibleMenuItems.includes(anElement.element)) {
@@ -94,8 +105,8 @@ class ContextualMenu {
 
         // add class to selected menu item
         this._selectedMenuItem = anElement.element;
-        event.currentTarget.classList.add('currentSeletedLayout');
-        // $(this._selectedMenuItem).addClass('currentSeletedLayout');
+        const element = event.currentTarget as HTMLElement
+        element.classList.add('currentSeletedLayout');
 
         if (anElement.elementType === 'close') {
           this._refToText._theLayout.giveUpLayout();
@@ -113,31 +124,29 @@ class ContextualMenu {
     }
   }
 
-  /**
-
-  **/
-  set contextMenuSetUpFlag(newState: Boolean) {
-    this._isContextMenuSetUp = newState;
-  }
-
-  get contextMenuSetUpFlag(): Boolean {
-    return this._isContextMenuSetUp;
-  }
+  // /**
+  //
+  // **/
+  // set contextMenuSetUpFlag(newState: Boolean) {
+  //   this._isContextMenuSetUp = newState;
+  // }
+  //
+  // get contextMenuSetUpFlag(): Boolean {
+  //   return this._isContextMenuSetUp;
+  // }
 
 
   // Perform initial setup on the context menu (attaching listeners, etc.), done once only!
   setupContextMenu(entityMenuCalledOn: Entity) {
-    // let classThis = this;
-    $('.tooltip').mouseenter(() => {
+
+    document.getElementById('tooltip').addEventListener('mouseenter', () => {
       console.log('adding mouseenter event handler')
       this.stopMenuHideTimer();
     });
 
-    $('.tooltip').mouseleave(() => {
-      // if (!$('.tooltip').hasClass('hide')) {
-        console.log('adding mouseleave event handler')
-        this.startMenuHideTimer(entityMenuCalledOn);
-      // }
+    document.getElementById('tooltip').addEventListener('mouseleave', () => {
+      console.log('adding mouseleave event handler')
+      this.startMenuHideTimer(entityMenuCalledOn);
     });
 
     this._isContextMenuSetUp = true;
@@ -152,10 +161,11 @@ class ContextualMenu {
 
     this.stopMenuHideTimer()
 
-    $('.tooltip').removeClass('hide').addClass('wrapper');
+    document.getElementById('tooltip').classList.remove('hide')
+    document.getElementById('tooltip').classList.add('wrapper')
 
     this.computePositionMenu(entityMenuIsCalledOn);
-    this.positionMenu(this._refToLayout);
+    this.positionMenu(this._refToLayout, entityMenuIsCalledOn);
   }
 
 
@@ -165,8 +175,8 @@ class ContextualMenu {
 
     if (this._menuHideTimer) clearTimeout(this._menuHideTimer);
 
-    this._menuHideTimer = setTimeout(() => {
-                                      if (!$('.tooltip').hasClass('hide')) {
+    this._menuHideTimer = window.setTimeout(() => {
+                                      if (!document.getElementById('tooltip').classList.contains('hide')) {
                                         console.log('hide startMenuHideTimer')
                                         this.hideContextualMenu(refToEntity)
                                       } else {
@@ -188,46 +198,45 @@ class ContextualMenu {
   hideContextualMenu(refToEntity: Entity) {
     // Don't hide if a layout is being displayed
     if(!this._refToText.isLayoutVisible) {
-      $('.tooltip').removeClass('wrapper')
-      $('.tooltip').addClass('hide');
+
+      document.getElementById('tooltip').classList.remove('wrapper');
+      document.getElementById('tooltip').classList.add('hide')
 
       this.resetLayoutIcon();
 
       console.log('set currentEntity to null')
-      // this._refToText.currentEntity = null;
       refToEntity.unSetAsCurrentEntity();
     }
   }
 
-
+  // compute the tooltip position
   computePositionMenu(entityMenuIsCalledOn: Entity) {
-    // compute the tooltip position
-    this._theEntityBBox = Measurements.get_BBox_entity($(entityMenuIsCalledOn.entityElement).parent());;
-    this._widthTooltip = $('.tooltip')[0].getBoundingClientRect().width;
-    this._heightTooltip = $('.tooltip')[0].getBoundingClientRect().height;
-    this._tooltip_left = this._theEntityBBox.left - this._widthTooltip - this._tooltipOffset;
+
+    this._tooltipBBox.width = document.getElementById('tooltip').getBoundingClientRect().width;
+    this._tooltipBBox.height = document.getElementById('tooltip').getBoundingClientRect().height;
+    this._tooltipBBox.left = entityMenuIsCalledOn._entityBbox.left - this._tooltipBBox.width - this._tooltipBBox.offset;
   }
 
 
-  positionMenu(aRefToLayout) {
+  positionMenu(aRefToLayout: Layout, entityMenuIsCalledOn: Entity) {
 
-    if (this._tooltip_left < Measurements.getViewportMeasurements(aRefToLayout).viewportLeft) {
-      this._tooltip_left = this._theEntityBBox.right + this._tooltipOffset;
-      $('.tooltip').removeClass('leftPos');
-      $('.tooltip').addClass('rightPos');
+    if (this._tooltipBBox.left < LayoutType.getViewportMeasurements(aRefToLayout).viewportLeft) {
+      this._tooltipBBox.left = entityMenuIsCalledOn._entityBbox.right + this._tooltipBBox.offset;
+      document.getElementById('tooltip').classList.remove('leftPos');
+      document.getElementById('tooltip').classList.add('rightPos');
     }
 
-    this._tooltip_top = this._theEntityBBox.top - 18;
-    this._tooltip_bottom = this._theEntityBBox.bottom + this._heightTooltip + 5;
+    this._tooltipBBox.top = entityMenuIsCalledOn._entityBbox.top - 18;
+    this._tooltipBBox.bottom = entityMenuIsCalledOn._entityBbox.bottom + this._tooltipBBox.height + 5;
 
-    if (this._tooltip_bottom > (window.innerHeight  + $(window).scrollTop())) {
-      this._tooltip_top = this._theEntityBBox.top - 5 - this._heightTooltip;
-      $('.tooltip').addClass('topPos');
+    if (this._tooltipBBox.bottom > (window.innerHeight  + $(window).scrollTop())) {
+      this._tooltipBBox.top = entityMenuIsCalledOn._entityBbox.top - 5 - this._tooltipBBox.height;
+      document.getElementById('tooltip').classList.add('topPos')
     }
 
     // set the position of the tooltip
-    $('.tooltip').css('left', this._tooltip_left);
-    $('.tooltip').css('top', this._tooltip_top);
+    document.getElementById('tooltip').style.left = this._tooltipBBox.left + 'px';
+    document.getElementById('tooltip').style.top = this._tooltipBBox.top + 'px';
   }
 
 
@@ -238,68 +247,6 @@ class ContextualMenu {
 
   unSelectMenuItem() {
     $('_selectedMenuItem').removeClass('currentSeletedLayout');
-  }
-
-
-  // function called when pushing a menu item
-  close() {
-    console.log('menu item close pushed')
-
-  }
-
-  grid_layout() {
-    console.log('menu item grid_layout pushed')
-
-    if (this._refToText._theLayout.currentLayout != constants.menuElement.gridElement) {
-      console.log('set layout to "' + constants.menuElement.gridElement + '"')
-
-      this._refToText._theLayout.changeLayout(constants.menuElement.gridElement);
-
-// is this needed
-      this._refToText._theLayout.currentLayout = constants.gridElement;
-    }
-
-
-
-  }
-
-  column_layout() {
-    console.log('menu item column_layout pushed')
-  }
-
-  columnPanAligned_layout() {
-    console.log('menu item columnPanAligned_layout pushed')
-  }
-
-  row_layout() {
-    console.log('menu item row_layout pushed')
-  }
-
-  gridNoOverlap_layout() {
-    console.log('menu item gridNoOverlap_layout pushed')
-  }
-
-  lastDataValue_sort() {
-    console.log('menu item lastDataValue_sort pushed')
-
-    lastValueSort()
-    updateLayout('lastValue');
-  }
-
-  entityName_sort() {
-    console.log('menu item entityName_sort pushed')
-  }
-
-  docPosition_sort() {
-    console.log('menu item docPosition_sort pushed')
-  }
-
-  select_interaction() {
-    console.log('menu item select_interaction pushed')
-  }
-
-  unselect_interaction() {
-    console.log('menu item unselect_interaction pushed')
   }
 
 

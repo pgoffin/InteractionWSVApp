@@ -1,3 +1,5 @@
+import { LayoutInfo } from "../../../global";
+
 import WordScaleVisualization from './wordScaleVisualization'
 
 
@@ -37,6 +39,34 @@ class LayoutType {
 
     return whiteLayerDiv;
   }
+
+
+  // get the left, right, top and bottom borders of text div for optimal visualization of wsvs, same for every layout
+  static getViewportMeasurements(aLayoutRef: Layout): LayoutInfo {
+
+    let bodyBbox = this.getBodyBBox();
+    let viewportDimensionsLeftRight = {left: bodyBbox.left, right: bodyBbox.right};
+    let viewportDimensionsTopBottom = {top: bodyBbox.top, bottom: bodyBbox.bottom};
+
+    let layoutInfo = {};
+    if (typeof aLayoutRef !== 'undefined') {
+      aLayoutRef.layoutInfo.viewportLeft = viewportDimensionsLeftRight.left;
+      aLayoutRef.layoutInfo.viewportRight = viewportDimensionsLeftRight.right;
+      aLayoutRef.layoutInfo.viewportTop = viewportDimensionsTopBottom.top;
+      aLayoutRef.layoutInfo.viewportBottom = viewportDimensionsTopBottom.bottom;
+    } else {
+      console.log('PROBLEM: first create the layoutInfo object.')
+    }
+
+    return layoutInfo;
+  }
+
+
+  static getBodyBBox(): DOMRect | ClientRect {
+
+    return document.body.getBoundingClientRect();
+  }
+
 
 }
 

@@ -1,4 +1,4 @@
-import { NumberColAndRows } from "../../../global";
+import { NumberColAndRows, LayoutInfo } from "../../../global";
 
 const constants = require('../constants');
 
@@ -9,7 +9,7 @@ import Entity from './entity';
 import layoutFactoryClass from './layoutFactoryClass';
 let dl = require('../../lib/datalib.min.js');
 import * as d3 from "d3";
-const _countby = require('lodash/countby');
+// const _countby = require('lodash/countby');
 const _cloneDeep = require('lodash/clonedeep');
 
 import 'velocity-animate';
@@ -20,31 +20,15 @@ const renderers = require('../../lib/renderers');
 
 class Layout {
 
-    _layoutInfo = {type: '',
-                   topLeftCorner_left: 0,
-                   topLeftCorner_top: 0,
-                   numberOfColumns: 0,
-                   cell_dimensions: {width: 0, height: 0},
-                   spaceBetweenGridCells: 0,
-                   viewportLeft: 0,
-                   viewportRight: 0,
-                   viewportTop: 0,
-                   viewportBottom: 0};
-
+    _layoutInfo: LayoutInfo;
     _currentLayout: string = '';
-    // _isLayoutVisible: Boolean = false;
-
-    // _measurementArray = [];
-    // _WSV_cloned = [];
-
     _refToText: Text;
-
     _theLayout: Layout;
-
     _arryOfWSVsThatHaveAClone: Array<WordScaleVisualization>;
 
 
     constructor(theRefToText: Text) {
+      this._layoutInfo = {}
       this._layoutInfo.spaceBetweenGridCells = 4;
 
       this._refToText = theRefToText;
@@ -74,14 +58,17 @@ class Layout {
     }
 
 
-    changeLayout(layoutType: string, eventLocation)  {
+    changeLayout(layoutType: string, eventLocation): Boolean  {
 
       let currentEntity: Entity = this._refToText.currentEntity;
 
       // All possible falsy values in ECMA-/Javascript: null, undefined, NaN, empty string (""), 0, false.
       if (!currentEntity) {
-        this.set_closestEntityAsCurrentEntity(eventLocation);
-        currentEntity = this._refToText.currentEntity
+        if (this.set_closestEntityAsCurrentEntity(eventLocation)) {
+          currentEntity = this._refToText.currentEntity
+        } else {
+          return false;
+        }
       }
 
 
@@ -98,8 +85,8 @@ class Layout {
         let aEntityBBox = aWSV.entity._entityBbox;
         aWSV._aboveOrBelow = (aEntityBBox.top > bbox_currEntity.bottom) ? 'below' : 'above';
 
-        aWSV._docPosition = {'left': aEntityBBox.left + aEntityBBox.width/2.0,
-                            'top': aEntityBBox.top + aEntityBBox.height/2.0};
+        // aWSV._docPosition = {'left': aEntityBBox.left + aEntityBBox.width/2.0,
+        //                     'top': aEntityBBox.top + aEntityBBox.height/2.0};
 
         if (constants.positionType === 'right') {
           aWSV._middleBoundOffset = bbox_currEntity.width - aEntityBBox.width;
@@ -109,10 +96,6 @@ class Layout {
 
         aWSV._distanceToCurrEntity = bbox_currEntity.top - aEntityBBox.top;
       });
-
-      // this._refToText._listOfClonedWSVs = [...wsvsWithoutCurrentWSV];
-      // // order first by above or below, then use distance to to the currentEntity
-      // this._refToText._listOfClonedWSVs.sort(dl.comparator(['+aboveOrBelow', '-distanceToCurrEntity']));
 
       // order first by above or below, then use distance to to the currentEntity
       this._arryOfWSVsThatHaveAClone.sort(dl.comparator(['+aboveOrBelow', '-distanceToCurrEntity']));
@@ -124,6 +107,8 @@ class Layout {
       this.layoutInfo = ['numberOfColumns', rowAndColumnNumbers.totalNumberOfColumns];
 
       this._theLayout = layoutFactoryClass(layoutType, this.layoutInfo, this._refToText, this._arryOfWSVsThatHaveAClone);
+
+      return true;
     }
 
 
@@ -202,7 +187,6 @@ class Layout {
       });
 
       $.Velocity.RunSequence(giveUpAnimationSequence);
-
     }
 
 
@@ -1619,25 +1603,33 @@ class Layout {
 
 
   // get the closest entity to the dbclicked location
-  set_closestEntityAsCurrentEntity(anEventLocation) {
+  set_closestEntityAsCurrentEntity(anEventLocation): Boolean {
 
-    let closestEntity: Entity = null;
+    let closestVisibleEntity: Entity = null;
     let closestDistance: number = 1000000;
 
     this._refToText.listOfWSVs.forEach(aWSV => {
 
-      if (aWSV._wsvBBox.top > 0 && aWSV._wsvBBox.top < window.innerHeight) {
+      // if (aWSV._wsvBBox.top > 0 && aWSV._wsvBBox.top < window.innerHeight) {
+      if (aWSV._wsvBBox.top >= document.body.scrollTop && aWSV._wsvBBox.top < (document.body.scrollTop + window.innerHeight)) {
         // wsv is visible
         let distance = this.getDistancePointClosestWSVCorner(anEventLocation, aWSV._entity);
 
         if (distance < closestDistance) {
-          closestEntity = aWSV._entity;
+          closestVisibleEntity = aWSV._entity;
           closestDistance = distance;
         }
       }
     });
 
-    closestEntity.setAsCurrentEntity();
+    if (!closestVisibleEntity) {
+      // no entities in visible space of the page
+      alert('an entity needs to be visible to gather charts using double clicking!!');
+      return false;
+    }
+
+    closestVisibleEntity.setAsCurrentEntity();
+    return true;
   }
 
 
@@ -1653,9 +1645,9 @@ class Layout {
 
     // does not matter which corner --> array of corner and not object
     const wsvCorners = [{'left': wsvBBox.left, 'top': wsvBBox.top},
-                      {'left': wsvBBox.left + wsvBBox.width, 'top': wsvBBox.top},
-                      {'left': wsvBBox.left, 'top': wsvBBox.top + wsvBBox.height},
-                      {'left': wsvBBox.left + wsvBBox.width, 'top': wsvBBox.top + wsvBBox.height}];
+                        {'left': wsvBBox.left + wsvBBox.width, 'top': wsvBBox.top},
+                        {'left': wsvBBox.left, 'top': wsvBBox.top + wsvBBox.height},
+                        {'left': wsvBBox.left + wsvBBox.width, 'top': wsvBBox.top + wsvBBox.height}];
 
     let squaredDistance = 10000000;
     wsvCorners.forEach(aCorner => {
@@ -1698,6 +1690,21 @@ class Layout {
     return squaredDistance;
   }
 
+
+  // static addWhiteLayer(width: number, height: number, oldTop: number, oldLeft: number) {
+  //
+  //   const whiteLayerDiv = document.createElement('div');
+  //   whiteLayerDiv.classList.add('whiteLayer');
+  //   document.getElementById('text').append(whiteLayerDiv);
+  //
+  //   whiteLayerDiv.style.width = width + 'px';
+  //   whiteLayerDiv.style.height = height + 'px';
+  //
+  //   whiteLayerDiv.style.top = oldTop + 'px';
+  //   whiteLayerDiv.style.left = oldLeft + 'px';
+  //
+  //   return whiteLayerDiv;
+  // }
 
 }
 

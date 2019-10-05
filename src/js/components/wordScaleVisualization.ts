@@ -22,24 +22,22 @@ interface WordScaleVisualization {
 
 class WordScaleVisualization implements WordScaleVisualization {
 
-  _entity: Entity = null;
+  _entity: Entity;
+  _rawWSVData: Array<rawWsvData> ;
 
-  _rawWSVData: Array<rawWsvData> = [];
-  // _hasData: Boolean = false;
-
-  _typeOfWSV: string = '';
+  _typeOfWSV: string;
 
   _renderer: renderFunc;
 
-  _transformedData: wsvDataObject = null;
+  _transformedData: wsvDataObject;
 
-  _rendererAsClass: string = '';
+  _rendererAsClass: string;
   _rendererString: string;
 
-  _visualization: HTMLElement = null;
+  _visualization: HTMLElement;
   _wsvVisualizationBBox: BBox;
 
-  _wsv: HTMLElement = null;
+  _wsv: HTMLElement;
   _wsvBBox: BBox;
 
   _wsvClass: WsVisualizationType;
@@ -47,15 +45,12 @@ class WordScaleVisualization implements WordScaleVisualization {
   _refToText: Text;
 
   _aboveOrBelow: string;
-  // _docPosition;
   _middleBoundOffset: number;
   _offset_whiteLayer: number;
   _distanceToCurrEntity: number;
 
   _backgroundElement: HTMLElement;
-  // _entityBoxClonedObject;
   _theClonedWSV: WordScaleVisualization;
-  // _wsvBoxClonedObject;
 
 
 
@@ -72,7 +67,7 @@ class WordScaleVisualization implements WordScaleVisualization {
     this.wsvClass = wsvRendererFactoryClass(this._rendererAsClass, this.renderer, this.rawWSVData, constants.positionType, true, true)
 
     $(this.entity.entityElement).sparklificator();
-    $(this.entity.entityElement).sparklificator('option', this.wsvClass.settings);
+    $(this.entity.entityElement).sparklificator('option', this.wsvClass._settings);
 
     this._wsv = this.entity.entityElement.parentElement;
 
@@ -195,7 +190,7 @@ class WordScaleVisualization implements WordScaleVisualization {
     let cloneEntityElement = this.entity.entityElement.cloneNode(true)
     let insertedClonedEntityNode = this._wsv.parentNode.insertBefore(cloneEntityElement, this._wsv.nextSibling)
 
-    let clonedWSV = new WordScaleVisualization(insertedClonedEntityNode, this._rawWSVData, this._rendererString, this._refToText);
+    let clonedWSV = new WordScaleVisualization(insertedClonedEntityNode as HTMLElement, this._rawWSVData, this._rendererString, this._refToText);
 
     clonedWSV.entity.entityElement.classList.add('cloned');
     clonedWSV._wsv.classList.add('cloned');

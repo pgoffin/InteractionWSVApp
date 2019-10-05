@@ -130,7 +130,7 @@ path {
 }
 
 
-.tooltip {
+#tooltip {
 	background: #000;
 	border-radius: 5px;
 	padding: 5px 5px;
@@ -156,7 +156,7 @@ path {
 }*/
 
 
-.tooltip.leftPos:not(.topPos):before {
+#tooltip.leftPos:not(.topPos):before {
 	width: 0;
 	height: 0;
 	border-bottom: 6px solid #000000;
@@ -171,7 +171,7 @@ path {
 }
 
 
-.tooltip.rightPos:not(.topPos):before {
+#tooltip.rightPos:not(.topPos):before {
 	width: 0;
 	height: 0;
 	border-bottom: 6px solid #000000;
@@ -186,7 +186,7 @@ path {
 }
 
 
-.tooltip.leftPos.topPos:before {
+#tooltip.leftPos.topPos:before {
 	width: 0;
 	height: 0;
 	border-top: 6px solid #000000;
@@ -201,7 +201,7 @@ path {
 }
 
 
-.tooltip.rightPos.topPos:before {
+#tooltip.rightPos.topPos:before {
 	width: 0;
 	height: 0;
 	border-top: 6px solid #000000;

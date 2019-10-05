@@ -36,20 +36,20 @@ export interface NumberColAndRows {
 }
 
 export interface LayoutInfo {
-  type: string,
-  topLeftCorner_left: number,
-  topLeftCorner_top: number,
-  numberOfColumns: number,
-  cell_dimensions: {width: number, height: number},
-  spaceBetweenGridCells: number,
-  viewportLeft: number,
-  viewportRight: number,
-  viewportTop: number,
-  viewportBottom: number,
-  rowAndColumnNumbers: NumberColAndRows;
-  counts;
-  startIndex_above: number,
-  startIndex_below: number
+  type?: string,
+  topLeftCorner_left?: number,
+  topLeftCorner_top?: number,
+  numberOfColumns?: number,
+  cell_dimensions?: {width: number, height: number},
+  spaceBetweenGridCells?: number,
+  viewportLeft?: number,
+  viewportRight?: number,
+  viewportTop?: number,
+  viewportBottom?: number,
+  rowAndColumnNumbers?: NumberColAndRows;
+  counts?;
+  startIndex_above?: number,
+  startIndex_below?: number
 }
 
 

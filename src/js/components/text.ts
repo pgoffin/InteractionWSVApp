@@ -30,7 +30,7 @@ interface Text {
 
 class Text implements Text {
 
-  _nameOfTextFile: string = "";
+  _nameOfTextFile: string;
 
   // if there is a layout then flag should be true
   _isLayoutVisible: Boolean = false;
@@ -104,10 +104,6 @@ class Text implements Text {
 
     this.createWSVList();
 
-    // check if there is data for each entity if no data is available remove the entity tag
-    // this.setEntitiesWithNoDataToClass('noClass');
-    // this.addWSV(constants.typeOfWSV);
-
     this._theLayout = new Layout(this);
 
     this._theContextualMenu = new ContextualMenu(this);
@@ -130,12 +126,10 @@ class Text implements Text {
         // }
 
         this._theLayout.giveUpLayout();
-        this._theLayout.cleanupAfterLayout();
+        // this._theLayout.cleanupAfterLayout();
       }
     });
 
-    // var tmpCurrentEntity = $(currentEntity)[0]
-    //
     // if ($('#spacer').length > 0) {
     //   removeSpacer();
     // }
@@ -164,8 +158,7 @@ class Text implements Text {
         // }
 
         this._theLayout.giveUpLayout();
-        // startMenuHideTimer();
-        // this._theLayout.cleanupAfterLayout();
+
         // clearSelection();
         // // resetLayoutIcon();
         //
@@ -182,7 +175,10 @@ class Text implements Text {
         dblClickLocation.x = event.pageX;
         dblClickLocation.y = event.pageY;
 
-        this._theLayout.changeLayout('GridLayout', dblClickLocation);
+        let layoutChanged = this._theLayout.changeLayout('GridLayout', dblClickLocation)
+        if (layoutChanged) {
+          this._theContextualMenu.showContextMenu(this._currentEntity);
+        }
 
         // unSelectIcon();
         //
@@ -283,8 +279,8 @@ class Text implements Text {
 
   // from here http://stackoverflow.com/questions/880512/prevent-text-selection-after-double-click
   clearSelection() {
-    if (document.selection && document.selection.empty) {
-      document.selection.empty();
+    if (document.getSelection() && document.getSelection().empty) {
+      document.getSelection().empty();
     } else if (window.getSelection) {
       let sel = window.getSelection();
       sel.removeAllRanges();
@@ -292,14 +288,6 @@ class Text implements Text {
   }
 
 
-  // /**
-  // * Get the entity from a DOM element
-  // * @param {HTMLElement} aDOMElement - the DOM element
-  // * @returns {string}
-  // **/
-  // private getEntityFromDOMElement(aDOMElement: HTMLElement): string {
-  //   return $.trim(d3.select(aDOMElement).html());
-  // }
 
 }
 
