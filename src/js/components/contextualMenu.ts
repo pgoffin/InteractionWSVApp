@@ -115,7 +115,9 @@ class ContextualMenu {
           const entityBBox = this._refToText._currentEntity._entityBbox;
           const entityBboxCentroid = {x: entityBBox.top + (entityBBox.height/2), y: entityBBox.left + (entityBBox.width/2)};
 
-          this._refToText._theLayout.changeLayout(anElement.elementInteraction, entityBboxCentroid);
+          if (this._refToText.chooseCurrentEntity(entityBboxCentroid)) {
+            this._refToText._theLayout.changeLayout(anElement.elementInteraction);
+          }
         }
       });
 

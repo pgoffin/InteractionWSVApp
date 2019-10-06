@@ -58,18 +58,17 @@ class Layout {
     }
 
 
-    changeLayout(layoutType: string, eventLocation): Boolean  {
-
+    changeLayout(layoutType: string) {
       let currentEntity: Entity = this._refToText.currentEntity;
 
-      // All possible falsy values in ECMA-/Javascript: null, undefined, NaN, empty string (""), 0, false.
-      if (!currentEntity) {
-        if (this.set_closestEntityAsCurrentEntity(eventLocation)) {
-          currentEntity = this._refToText.currentEntity
-        } else {
-          return false;
-        }
-      }
+      // // All possible falsy values in ECMA-/Javascript: null, undefined, NaN, empty string (""), 0, false.
+      // if (!currentEntity) {
+      //   if (this.set_closestEntityAsCurrentEntity(eventLocation)) {
+      //     currentEntity = this._refToText.currentEntity
+      //   } else {
+      //     return false;
+      //   }
+      // }
 
 
       const bbox_currEntity = currentEntity._entityBbox;
@@ -107,8 +106,6 @@ class Layout {
       this.layoutInfo = ['numberOfColumns', rowAndColumnNumbers.totalNumberOfColumns];
 
       this._theLayout = layoutFactoryClass(layoutType, this.layoutInfo, this._refToText, this._arryOfWSVsThatHaveAClone);
-
-      return true;
     }
 
 
@@ -1602,93 +1599,10 @@ class Layout {
   }
 
 
-  // get the closest entity to the dbclicked location
-  set_closestEntityAsCurrentEntity(anEventLocation): Boolean {
-
-    let closestVisibleEntity: Entity = null;
-    let closestDistance: number = 1000000;
-
-    this._refToText.listOfWSVs.forEach(aWSV => {
-
-      // if (aWSV._wsvBBox.top > 0 && aWSV._wsvBBox.top < window.innerHeight) {
-      if (aWSV._wsvBBox.top >= document.body.scrollTop && aWSV._wsvBBox.top < (document.body.scrollTop + window.innerHeight)) {
-        // wsv is visible
-        let distance = this.getDistancePointClosestWSVCorner(anEventLocation, aWSV._entity);
-
-        if (distance < closestDistance) {
-          closestVisibleEntity = aWSV._entity;
-          closestDistance = distance;
-        }
-      }
-    });
-
-    if (!closestVisibleEntity) {
-      // no entities in visible space of the page
-      alert('an entity needs to be visible to gather charts using double clicking!!');
-      return false;
-    }
-
-    closestVisibleEntity.setAsCurrentEntity();
-    return true;
-  }
 
 
-  /**
-  * Gets the shortest distance between a point and the closest poinnt on the bbox of the wsv
-  * @param  {[type]} point  [description]
-  * @param  {[type]} entity [description]
-  * @return {number}        shortest ditance between the corner closest to the point and the point
-  */
-  getDistancePointClosestWSVCorner(point, entity: Entity) {
-    // entities are DOM elements
-    const wsvBBox = entity._entityBelongsToWsv._wsvBBox;
 
-    // does not matter which corner --> array of corner and not object
-    const wsvCorners = [{'left': wsvBBox.left, 'top': wsvBBox.top},
-                        {'left': wsvBBox.left + wsvBBox.width, 'top': wsvBBox.top},
-                        {'left': wsvBBox.left, 'top': wsvBBox.top + wsvBBox.height},
-                        {'left': wsvBBox.left + wsvBBox.width, 'top': wsvBBox.top + wsvBBox.height}];
 
-    let squaredDistance = 10000000;
-    wsvCorners.forEach(aCorner => {
-      let newSquaredDistance = ((point.x - aCorner.left) * (point.x - aCorner.left)) + ((point.y - aCorner.top) * (point.y - aCorner.top));
-
-      if (newSquaredDistance < squaredDistance) {
-        squaredDistance = newSquaredDistance
-      }
-    });
-
-    if (point.x > wsvBBox.left && point.x < wsvBBox.left + wsvBBox.width) {
-      var distanceToSegmentTop = Math.abs(point.y - wsvBBox.top);
-      var distanceToSegmentBottom = Math.abs(point.y - (wsvBBox.top + wsvBBox.height));
-
-      var distanceToSegmentTop_squared = distanceToSegmentTop * distanceToSegmentTop;
-      if (distanceToSegmentTop_squared < squaredDistance) {
-        squaredDistance = distanceToSegmentTop_squared;
-      }
-
-      var distanceToSegmentBottom_squared = distanceToSegmentBottom * distanceToSegmentBottom;
-      if (distanceToSegmentBottom_squared < squaredDistance) {
-        squaredDistance = distanceToSegmentBottom_squared;
-      }
-
-    } else if (point.y > wsvBBox.top && point.y < wsvBBox.top + wsvBBox.height) {
-      var distanceToSegmentLeft = Math.abs(point.x - wsvBBox.left);
-      var distanceToSegmentRight = Math.abs(point.x - (wsvBBox.left + wsvBBox.width));
-
-      var distanceToSegmentLeft_squared = distanceToSegmentLeft * distanceToSegmentLeft;
-      if (distanceToSegmentLeft_squared < squaredDistance) {
-        squaredDistance = distanceToSegmentLeft_squared;
-      }
-
-      var distanceToSegmentRight_squared = distanceToSegmentRight * distanceToSegmentRight;
-      if (distanceToSegmentRight_squared < squaredDistance) {
-        squaredDistance = distanceToSegmentRight_squared;
-      }
-    }
-
-    return squaredDistance;
-  }
 
 
   // static addWhiteLayer(width: number, height: number, oldTop: number, oldLeft: number) {
