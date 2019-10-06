@@ -237,14 +237,14 @@ class Text implements Text {
   **/
   private createWSVList(): void {
 
-    document.querySelectorAll(constants.entitySpanClass).forEach((value) => {
+    document.querySelectorAll(constants.entitySpanClass).forEach((entityElement) => {
 
       // get data for the entity
-      let entityName = this.getEntityName(value);
+      let entityName = this.getEntityName(entityElement);
       let dataForEntity = this.dataForWSV[entityName]
 
       if (!((typeof dataForEntity == 'undefined') || (dataForEntity.length == 0))) {
-        let aWSV = new WordScaleVisualization(value, dataForEntity, value.dataset.wsvRenderer, this);
+        let aWSV = new WordScaleVisualization(entityElement, dataForEntity, entityElement.dataset.wsvRenderer, this, false);
 
         this.listOfWSVs.push(aWSV);
       }

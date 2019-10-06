@@ -67,10 +67,11 @@ class ColumnLayout extends LayoutType {
     let belowIndex = 0;
     this._arrayOfWSVsWithouCurrentWSV.forEach(aWSV => {
       // cloning the wsv, and changing the position from relative to absolute
-      let aClonedWSV;
+      let aClonedWSV: WordScaleVisualization;
       if (!this._refToText.isLayoutVisible) {
         aClonedWSV = aWSV.cloneWSV();
         aWSV._theClonedWSV = aClonedWSV;
+        aClonedWSV._theOriginalWSV = aWSV;
 
         aWSV._wsv.classList.add('hasClone');
       } else {
@@ -103,15 +104,14 @@ class ColumnLayout extends LayoutType {
       // the wsv position is controlled over the bottom and left of the entity and not the wsv as a whole or the sparkline
       // clonedWSV is the sparklificated span, due to that have to add position plus substract the size of the sparkline
 
-      let whiteBackgroundElement;
+      let whiteBackgroundElement: HTMLElement;
       if (!this._refToText.isLayoutVisible) {
         whiteBackgroundElement = ColumnLayout.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
+
+        aWSV._theClonedWSV._backgroundElement = whiteBackgroundElement;
       } else {
         // the layout before might have hidden some of the whiteLayer, therefore unhide
-        // $('.whiteLayer').removeClass('hide');
-        document.querySelectorAll('.whiteLayer').forEach(aWhiteLayerElement => {
-          aWhiteLayerElement.classList.remove('hide')
-        });
+        aWSV._theClonedWSV._backgroundElement.classList.remove('hide');
 
         whiteBackgroundElement = aWSV._theClonedWSV._backgroundElement;
       }
@@ -120,17 +120,8 @@ class ColumnLayout extends LayoutType {
         duration: 1000,
         sequenceQueue: false,
 
-        complete: function(clonedWSV) {
-          // WSV_cloned[index].backgroundElement = whiteBackgroundElement;
-          // WSV_cloned[index].entityBoxClonedObject = get_BBox_entity(aClonedWSV);
-          // WSV_cloned[index].theClonedWSV = aClonedWSV;
-          // WSV_cloned[index].wsvBoxClonedObject = get_BBox_wsv_NEW(aClonedWSV, positionType);
-          //
-          // d3.select(aClonedWSV[0]).datum().x = WSV_cloned[index].wsvBoxClonedObject.left;
-          // d3.select(aClonedWSV[0]).datum().y = WSV_cloned[index].wsvBoxClonedObject.top;
-          // d3.select(aClonedWSV[0]).datum().middleBoundOffset = WSV_cloned[index].middleBoundOffset;
-          // d3.select(aClonedWSV[0]).datum().originalIndex = index;
-          // d3.select(aClonedWSV[0]).datum().backgroundElement = whiteBackgroundElement;
+        complete: () => {
+          aClonedWSV._entity.getBBoxOfEntity();
         }
       }});
 

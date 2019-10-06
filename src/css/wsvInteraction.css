@@ -35,3 +35,15 @@
   z-index: 4;
   pointer-events: none;
 }
+
+.hoveringTrail {
+	position: absolute;
+	pointer-events: none;
+	z-index: 410;
+}
+
+.hoveringTrail path {
+	fill: none;
+	stroke: blue;
+	stroke-width: 1.5px;
+}

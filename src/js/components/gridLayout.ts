@@ -84,12 +84,13 @@ class GridLayout extends LayoutType {
     this._arrayOfWSVsWithouCurrentWSV.forEach(aWSV => {
 
       // cloning the wsv, and changing the position from relative to absolute
-      let aClonedWSV;
+      let aClonedWSV: WordScaleVisualization;
       // if (this._layout.currentLayout == '') {
       if (!this._refToText.isLayoutVisible) {
         // aClonedWSV = Layout.cloneEntityWithWSV(aWSV.entity, aWSV._middleBoundOffset, aWSV._offset_whiteLayer, index);
         aClonedWSV = aWSV.cloneWSV();
         aWSV._theClonedWSV = aClonedWSV;
+        aClonedWSV._theOriginalWSV = aWSV;
 
         aWSV._wsv.classList.add('hasClone');
         // aWSV.entity.entityElement.parentElement.setAttribute('opacity', '0.2');
@@ -123,17 +124,14 @@ class GridLayout extends LayoutType {
       }
 
 
-      let whiteBackgroundElement;
+      let whiteBackgroundElement: HTMLElement;
       if (!this._refToText.isLayoutVisible) {
         whiteBackgroundElement = GridLayout.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
 
         aWSV._theClonedWSV._backgroundElement = whiteBackgroundElement;
       } else {
         // the layout before might have hidden some of the whiteLayer, therefore unhide
-        // $('.whiteLayer').removeClass('hide');
-        document.querySelectorAll('.whiteLayer').forEach(aWhiteLayerElement => {
-          aWhiteLayerElement.classList.remove('hide')
-        });
+        aWSV._theClonedWSV._backgroundElement.classList.remove('hide');
 
         whiteBackgroundElement = aWSV._theClonedWSV._backgroundElement;
       }
@@ -143,20 +141,8 @@ class GridLayout extends LayoutType {
         duration: 1000,
         sequenceQueue: false,
 
-        complete: function(clonedWSV) {
-
-          // aWSV._refToText._listOfClonedWSVs[index]._backgroundElement = whiteBackgroundElement;
-          // aWSV._refToText._listOfClonedWSVs[index]._entityBoxClonedObject = Measurements.get_BBox_entity(aClonedWSV);
-          // aWSV._refToText._listOfClonedWSVs[index]._theClonedWSV = aClonedWSV;
-          // aWSV._refToText._listOfClonedWSVs[index]._wsvBoxClonedObject = Measurements.get_BBox_wsv(aClonedWSV, constants.positionType);
-
-          // d3.select(clonedWSV[0]).datum().x = aWSV._theClonedWSV._wsvBBox.left;
-          // d3.select(clonedWSV[0]).datum().y = aWSV._theClonedWSV._wsvBBox.top;
-
-          // d3.select(aClonedWSV[0]).datum().y = aWSV._refToText._listOfClonedWSVs[index]._wsvBoxClonedObject.top;
-          // d3.select(aClonedWSV[0]).datum()._middleBoundOffset = aWSV._refToText._listOfClonedWSVs[index]._middleBoundOffset;
-          // d3.select(aClonedWSV[0]).datum()._originalIndex = index;
-          // d3.select(aClonedWSV[0]).datum()._backgroundElement = whiteBackgroundElement;
+        complete: () => {
+          aClonedWSV._entity.getBBoxOfEntity();
         }
       }});
 

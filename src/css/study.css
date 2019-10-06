@@ -103,11 +103,7 @@ path {
 }
 
 
-.hoveringTrail path {
-	fill: none;
-	stroke: blue;
-	stroke-width: 1.5px;
-}
+
 
 
 .wsvMovement {
@@ -174,11 +170,11 @@ path {
 	pointer-events: none;
 }
 
-.box.currentSeletedLayout {
+/* .box.currentSeletedLayout {
 	border-color: #1af0ff;
 	opacity: 0.2;
 	pointer-events: none;
-}
+} */
 
 
 img.icon {

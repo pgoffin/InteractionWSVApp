@@ -51,12 +51,13 @@ class WordScaleVisualization implements WordScaleVisualization {
 
   _backgroundElement: HTMLElement;
   _theClonedWSV: WordScaleVisualization;
+  _theOriginalWSV: WordScaleVisualization;
 
 
 
-  constructor(anElement: HTMLElement, data: Array<rawWsvData>, theRenderer: string, referenceToText: Text) {
+  constructor(anElement: HTMLElement, data: Array<rawWsvData>, theRenderer: string, referenceToText: Text, aIsAClone: Boolean) {
     this._refToText = referenceToText;
-    this.entity = new Entity(anElement, this._refToText, this);
+    this.entity = new Entity(anElement, this._refToText, this, aIsAClone);
 
     this.rawWSVData = data;
 
@@ -190,8 +191,9 @@ class WordScaleVisualization implements WordScaleVisualization {
     let cloneEntityElement = this.entity.entityElement.cloneNode(true)
     let insertedClonedEntityNode = this._wsv.parentNode.insertBefore(cloneEntityElement, this._wsv.nextSibling)
 
-    let clonedWSV = new WordScaleVisualization(insertedClonedEntityNode as HTMLElement, this._rawWSVData, this._rendererString, this._refToText);
+    let clonedWSV = new WordScaleVisualization(insertedClonedEntityNode as HTMLElement, this._rawWSVData, this._rendererString, this._refToText, true);
 
+    // clonedWSV.entity._isAClone = true;
     clonedWSV.entity.entityElement.classList.add('cloned');
     clonedWSV._wsv.classList.add('cloned');
     clonedWSV._visualization.classList.add('cloned');
