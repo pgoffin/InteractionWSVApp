@@ -159,10 +159,15 @@ path {
 	padding: 3px;
 }
 
-.box:not(.notSelectable):hover {
+.box.selectable:hover {
 	background-color: #fff;
 	cursor: pointer;
 }
+
+/* .box:not(.notSelectable):hover {
+	background-color: #fff;
+	cursor: pointer;
+} */
 
 .box.notSelectable {
 	opacity: 0.2;

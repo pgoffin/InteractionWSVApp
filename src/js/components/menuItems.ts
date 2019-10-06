@@ -1,5 +1,5 @@
 
-interface menuItemType {
+interface MenuItemType {
   element: string;
   elementType: string;
   elementInteraction: string;

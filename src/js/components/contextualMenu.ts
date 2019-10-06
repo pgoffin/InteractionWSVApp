@@ -20,28 +20,20 @@ interface tooltipBBox {
 class ContextualMenu {
 
   _isContextMenuSetUp: Boolean = false;
-
   _tooltipBBox: tooltipBBox;
-
   // Internal variables for delayed menu hiding
   _menuHideTimer: number;
   _menuHideDelay: number = 2000;
-
-  _menuItems: Array<menuItemType> = menuItems.menuItems;
-
+  _menuItems: Array<MenuItemType> = menuItems.menuItems;
   _visibleMenuItems: string[] = [constants.menuElement.gridElement,
                                  constants.menuElement.closeElement,
+                                 constants.menuElement.columnElement,
                                  constants.menuElement.orderByLastDataValueElement,
                                  constants.menuElement.orderByEntityNameElement,
                                  constants.menuElement.orderByDocPositionElement];
-
-  // selected menu item
-  _selectedMenuItem: string;
-
+  _selectedLayoutMenuItem: HTMLElement;
   _refToText: Text;
-
   _refToLayout: Layout;
-
   _tooltipElements: Array<HTMLElement>;
 
 // ['#grid', '#close', '#order-by-lastDataValue', '#order-by-entityName', '#order-by-docPosition','#selector', '#selector-ok', '#row', '#column', '#grid-no-overlap'];
@@ -65,7 +57,7 @@ class ContextualMenu {
     const menuDiv = document.createElement("div");
     menuDiv.setAttribute('id', 'tooltip');
 
-    this._menuItems.forEach((anElement: menuItemType) => {
+    this._menuItems.forEach((anElement: MenuItemType) => {
       if (this._visibleMenuItems.includes(anElement.element)) {
         this.createMenuElement(menuDiv, anElement);
       }
@@ -76,7 +68,7 @@ class ContextualMenu {
   }
 
 
-  createMenuElement(aMenuDiv: HTMLElement, anElement: menuItemType) {
+  createMenuElement(aMenuDiv: HTMLElement, anElement: MenuItemType) {
 
     const styleAttr = 'width:width;height:height;'
 
@@ -85,6 +77,8 @@ class ContextualMenu {
       elementLayoutDiv.setAttribute('class', 'box ' + anElement.elementType);
       elementLayoutDiv.setAttribute('id', anElement.elementInteraction);
       aMenuDiv.appendChild(elementLayoutDiv);
+
+      elementLayoutDiv.classList.add('selectable');
 
       var elementImg = document.createElement("img");
       elementImg.setAttribute('class', 'icon');
@@ -95,29 +89,55 @@ class ContextualMenu {
       elementLayoutDiv.appendChild(elementImg);
 
       elementLayoutDiv.addEventListener('click', event => {
-        // unselect current selected menu item
-        this.unSelectMenuItem();
+
+        const element = event.currentTarget as HTMLElement
+
+        const previousSelectedLayoutMenuItem = this._selectedLayoutMenuItem;
+        if (previousSelectedLayoutMenuItem && anElement.elementType === 'layout') {
+          previousSelectedLayoutMenuItem.classList.remove('notSelectable');
+          previousSelectedLayoutMenuItem.classList.add('selectable')
+
+          element.classList.remove('selectable');
+          element.classList.add('notSelectable');
+
+          this._selectedLayoutMenuItem = element;
+
+        } else if (!previousSelectedLayoutMenuItem) {
+          // add class to selected menu item
+          element.classList.remove('selectable');
+          element.classList.add('notSelectable');
+
+          this._selectedLayoutMenuItem = element;
+        }
+
 
         // add the class 'selected' if no wsv has been selected (selected wsvs are the gathered ones)
+        // if (document.querySelectorAll('.entity.selected').length <= 1) {
+        //   document.querySelectorAll('.entity').forEach(entityElem => {})
+        // }
         if (!($('.entity.selected').length > 1)) {
           $('.entity').addClass('selected');
         }
 
-        // add class to selected menu item
-        this._selectedMenuItem = anElement.element;
-        const element = event.currentTarget as HTMLElement
-        element.classList.add('currentSeletedLayout');
+        // // add class to selected menu item
+        // element.classList.remove('selectable');
+        // element.classList.add('notSelectable');
+
+
 
         if (anElement.elementType === 'close') {
           this._refToText._theLayout.giveUpLayout();
+          this.cleanupAfterLayout();
         } else if (anElement.elementType === 'layout') {
 
-          const entityBBox = this._refToText._currentEntity._entityBbox;
-          const entityBboxCentroid = {x: entityBBox.top + (entityBBox.height/2), y: entityBBox.left + (entityBBox.width/2)};
+          // const entityBBox = this._refToText._currentEntity._entityBbox;
+          // const entityBboxCentroid = {x: entityBBox.top + (entityBBox.height/2), y: entityBBox.left + (entityBBox.width/2)};
 
-          if (this._refToText.chooseCurrentEntity(entityBboxCentroid)) {
+          if (this._refToText.chooseCurrentEntity(null)) {
             this._refToText._theLayout.changeLayout(anElement.elementInteraction);
           }
+        } else if (anElement.elementType === 'sorting') {
+          console.log('not yet implemented')
         }
       });
 
@@ -125,17 +145,6 @@ class ContextualMenu {
 
     }
   }
-
-  // /**
-  //
-  // **/
-  // set contextMenuSetUpFlag(newState: Boolean) {
-  //   this._isContextMenuSetUp = newState;
-  // }
-  //
-  // get contextMenuSetUpFlag(): Boolean {
-  //   return this._isContextMenuSetUp;
-  // }
 
 
   // Perform initial setup on the context menu (attaching listeners, etc.), done once only!
@@ -204,7 +213,7 @@ class ContextualMenu {
       document.getElementById('tooltip').classList.remove('wrapper');
       document.getElementById('tooltip').classList.add('hide')
 
-      this.resetLayoutIcon();
+      // this.resetLayoutIcon();
 
       console.log('set currentEntity to null')
       refToEntity.unSetAsCurrentEntity();
@@ -242,22 +251,71 @@ class ContextualMenu {
   }
 
 
-  resetLayoutIcon() {
-    $('.layout').removeClass('hide');
-  }
+  // resetLayoutIcon() {
+  //   $('.layout').removeClass('hide');
+  // }
 
 
-  unSelectMenuItem() {
-    $('_selectedMenuItem').removeClass('currentSeletedLayout');
-  }
+  // unSelectMenuItem() {
+  //   $('_selectedMenuItem').removeClass('currentSeletedLayout');
+  // }
 
 
   unSelectIcon() {
     this._tooltipElements.forEach((aMenuElement: HTMLElement) => {
-      aMenuElement.classList.remove('currentSeletedLayout');
+      aMenuElement.classList.remove('notSelectable');
+      aMenuElement.classList.add('selectable');
     });
   }
 
+
+  // /**
+  // * Goes through the icons of the menu and makes the appropriate icons selectable
+  // * @param {[string]} hideOfs array of groups of icons that should be made unselectable
+  // */
+  // setNotSelectableIcons(hideOfs) {
+  //
+  //
+  //   this._tooltipElements.forEach(aTooltipItem => {
+  //
+  //
+  //   });
+  //
+  //
+  //   $.each(contextualMenuIcons, function(index, icon) {
+  //
+  //     var classNames = $(icon).attr('class').split(/\s+/);
+  //
+  //     $.each(hideOfs, function(i, aHideOf) {
+  //
+  //       if (classNames.indexOf(aHideOf) !== -1) {
+  //         $(icon).addClass('notSelectable');
+  //       }
+  //     });
+  //   });
+  // }
+
+
+  /**
+  * makes all icons selectable
+  */
+  setAllMenuItemsAsSelectable() {
+
+    this._tooltipElements.forEach(aTooltipItem => {
+      aTooltipItem.classList.remove('notSelectable');
+      aTooltipItem.classList.add('selectable');
+    });
+  }
+
+  cleanupAfterLayout() {
+    // go through all menu items and reset their class to selectable
+    this._tooltipElements.forEach((aMenuElement: HTMLElement) => {
+      aMenuElement.classList.remove('notSelectable');
+      aMenuElement.classList.add('selectable');
+    });
+
+    this._selectedLayoutMenuItem = null;
+  }
 
 
 }

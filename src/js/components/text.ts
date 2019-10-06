@@ -126,7 +126,7 @@ class Text implements Text {
         // }
 
         this._theLayout.giveUpLayout();
-        // this._theLayout.cleanupAfterLayout();
+        this._theContextualMenu.cleanupAfterLayout();
       }
     });
 
@@ -158,6 +158,7 @@ class Text implements Text {
         // }
 
         this._theLayout.giveUpLayout();
+        this._theContextualMenu.cleanupAfterLayout();
 
         // clearSelection();
         // // resetLayoutIcon();

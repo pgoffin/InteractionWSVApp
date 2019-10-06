@@ -16,6 +16,7 @@ module.exports = {
 
 
   menuElement: { gridElement: '#grid',
+                 columnElement: '#column',
                  closeElement: '#close',
                  orderByLastDataValueElement: '#order-by-lastDataValue',
                  orderByEntityNameElement: '#order-by-entityName',

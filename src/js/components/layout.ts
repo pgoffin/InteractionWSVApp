@@ -193,10 +193,10 @@ class Layout {
 
       // hide tooltip
       // this._refToText._theContextualMenu.stopMenuHideTimer()
-      console.log('hide cleanupAfterLayout')
+      // console.log('hide cleanupAfterLayout')
       this._refToText._theContextualMenu.hideContextualMenu(this._refToText._currentEntity);
 
-      this._refToText._theContextualMenu.unSelectIcon();
+      // this._refToText._theContextualMenu.unSelectIcon();
 
       // $('.currentSeletedLayout').removeClass('currentSeletedLayout')
 

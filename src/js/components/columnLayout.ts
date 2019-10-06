@@ -11,7 +11,7 @@ import 'velocity-ui-pack';
 
 
 
-class GridLayout extends LayoutType {
+class ColumnLayout extends LayoutType {
 
   _layoutInfo: LayoutInfo;
   _refToText: Text;
@@ -40,59 +40,39 @@ class GridLayout extends LayoutType {
   createLayout() {
 
     const layoutInfo = this.layoutInfo;
-    layoutInfo.type = 'grid';
+    layoutInfo.type = 'column';
 
     const currentEntity: Entity = this._refToText.currentEntity;
     const bbox_currEntity: BBox = currentEntity._entityBbox;
     const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
 
-    // layoutInfo.numberOfColumns = layoutInfo.rowAndColumnNumbers.leftNumbColumn + layoutInfo.rowAndColumnNumbers.currentEntityColumn + layoutInfo.rowAndColumnNumbers.rightNumbColumn;
-
-    // update the counts variable
-    // const counts = _countby(this._arrayOfWSVsWithouCurrentWSV, function(v: WordScaleVisualization) { return v._aboveOrBelow} );
-    // Layout.setUndefinedCountToZero(counts)
-    // layoutInfo.counts = counts
+    // update the row and columns number
+    layoutInfo.numberOfColumns = 1;
 
     // update the counts variable
     layoutInfo.counts = LayoutType.getAboveBelowCounts(this._arrayOfWSVsWithouCurrentWSV)
 
+
     // get top left cornerDiffs
     const numUsedRowsAbove = Math.ceil(layoutInfo.counts.above/layoutInfo.numberOfColumns);
-    let topLeftCorner_left = 0;
 
-    if (layoutInfo.rowAndColumnNumbers.currentEntityColumn == 0) {
-      topLeftCorner_left = bbox_currEntity.left + (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells));
-
-    } else {
-      topLeftCorner_left = bbox_currEntity.left - (layoutInfo.rowAndColumnNumbers.leftNumbColumn * (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)));
-    }
-
-    let topLeftCorner_top = bbox_currWSV.top - (numUsedRowsAbove * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)));
+    const topLeftCorner_left = bbox_currEntity.left - (layoutInfo.rowAndColumnNumbers.leftNumbColumn * (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)));
+    const topLeftCorner_top = bbox_currWSV.top - (numUsedRowsAbove * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)));
 
     layoutInfo.topLeftCorner_left = topLeftCorner_left;
     layoutInfo.topLeftCorner_top = topLeftCorner_top;
 
-
-    let aboveIndex = GridLayout.getGridStartIndex(layoutInfo.counts.above, layoutInfo.numberOfColumns)
-    layoutInfo.startIndex_above = aboveIndex;
-
-    let mySequence = [];
+    const mySequence = [];
+    let aboveIndex = 0;
     let belowIndex = 0;
-    layoutInfo.startIndex_below = 0;
-    // let classThis = this;
-    // $.each(this._refToText._listOfClonedWSVs, function(index, value) {
     this._arrayOfWSVsWithouCurrentWSV.forEach(aWSV => {
-
       // cloning the wsv, and changing the position from relative to absolute
       let aClonedWSV;
-      // if (this._layout.currentLayout == '') {
       if (!this._refToText.isLayoutVisible) {
-        // aClonedWSV = Layout.cloneEntityWithWSV(aWSV.entity, aWSV._middleBoundOffset, aWSV._offset_whiteLayer, index);
         aClonedWSV = aWSV.cloneWSV();
         aWSV._theClonedWSV = aClonedWSV;
 
         aWSV._wsv.classList.add('hasClone');
-        // aWSV.entity.entityElement.parentElement.setAttribute('opacity', '0.2');
       } else {
         aClonedWSV = aWSV._theClonedWSV;
         $(aClonedWSV).removeClass('hide');
@@ -102,32 +82,30 @@ class GridLayout extends LayoutType {
         }
       }
 
-
       let newTop = 0;
-      let newLeft = 0;
+      let newLeft = topLeftCorner_left + aWSV._middleBoundOffset;
       if (aWSV._aboveOrBelow === 'above') {
 
         newTop = topLeftCorner_top + (Math.floor(aboveIndex/layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)));
-        newLeft = topLeftCorner_left + ((aboveIndex % layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells))) + aWSV._middleBoundOffset;
 
         aboveIndex += 1;
 
       } else if (aWSV._aboveOrBelow === 'below') {
 
         newTop = (bbox_currWSV.bottom + (2*layoutInfo.spaceBetweenGridCells)) + (Math.floor(belowIndex/layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)));
-        newLeft = topLeftCorner_left + ((belowIndex % layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells))) + aWSV._middleBoundOffset;
+
         belowIndex += 1;
 
       } else {
         console.log('error with above or below; aboveOrBelow is not defined')
       }
 
+      // the wsv position is controlled over the bottom and left of the entity and not the wsv as a whole or the sparkline
+      // clonedWSV is the sparklificated span, due to that have to add position plus substract the size of the sparkline
 
       let whiteBackgroundElement;
       if (!this._refToText.isLayoutVisible) {
-        whiteBackgroundElement = GridLayout.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
-
-        aWSV._theClonedWSV._backgroundElement = whiteBackgroundElement;
+        whiteBackgroundElement = ColumnLayout.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
       } else {
         // the layout before might have hidden some of the whiteLayer, therefore unhide
         // $('.whiteLayer').removeClass('hide');
@@ -138,25 +116,21 @@ class GridLayout extends LayoutType {
         whiteBackgroundElement = aWSV._theClonedWSV._backgroundElement;
       }
 
-
       mySequence.push({e: aClonedWSV._wsv, p: {left: (newLeft), top: (newTop)}, o: {
         duration: 1000,
         sequenceQueue: false,
 
         complete: function(clonedWSV) {
-
-          // aWSV._refToText._listOfClonedWSVs[index]._backgroundElement = whiteBackgroundElement;
-          // aWSV._refToText._listOfClonedWSVs[index]._entityBoxClonedObject = Measurements.get_BBox_entity(aClonedWSV);
-          // aWSV._refToText._listOfClonedWSVs[index]._theClonedWSV = aClonedWSV;
-          // aWSV._refToText._listOfClonedWSVs[index]._wsvBoxClonedObject = Measurements.get_BBox_wsv(aClonedWSV, constants.positionType);
-
-          // d3.select(clonedWSV[0]).datum().x = aWSV._theClonedWSV._wsvBBox.left;
-          // d3.select(clonedWSV[0]).datum().y = aWSV._theClonedWSV._wsvBBox.top;
-
-          // d3.select(aClonedWSV[0]).datum().y = aWSV._refToText._listOfClonedWSVs[index]._wsvBoxClonedObject.top;
-          // d3.select(aClonedWSV[0]).datum()._middleBoundOffset = aWSV._refToText._listOfClonedWSVs[index]._middleBoundOffset;
-          // d3.select(aClonedWSV[0]).datum()._originalIndex = index;
-          // d3.select(aClonedWSV[0]).datum()._backgroundElement = whiteBackgroundElement;
+          // WSV_cloned[index].backgroundElement = whiteBackgroundElement;
+          // WSV_cloned[index].entityBoxClonedObject = get_BBox_entity(aClonedWSV);
+          // WSV_cloned[index].theClonedWSV = aClonedWSV;
+          // WSV_cloned[index].wsvBoxClonedObject = get_BBox_wsv_NEW(aClonedWSV, positionType);
+          //
+          // d3.select(aClonedWSV[0]).datum().x = WSV_cloned[index].wsvBoxClonedObject.left;
+          // d3.select(aClonedWSV[0]).datum().y = WSV_cloned[index].wsvBoxClonedObject.top;
+          // d3.select(aClonedWSV[0]).datum().middleBoundOffset = WSV_cloned[index].middleBoundOffset;
+          // d3.select(aClonedWSV[0]).datum().originalIndex = index;
+          // d3.select(aClonedWSV[0]).datum().backgroundElement = whiteBackgroundElement;
         }
       }});
 
@@ -176,18 +150,9 @@ class GridLayout extends LayoutType {
   }
 
 
-  static getGridStartIndex(countsAbove: number, numberOfColumns: number): number {
-
-    let rest = countsAbove % numberOfColumns;
-    if (rest === 0) {
-      rest = numberOfColumns;
-    }
-
-    return numberOfColumns - rest;
-  }
 
 
 }
 
 
-export default GridLayout
+export default ColumnLayout
