@@ -13,7 +13,7 @@ import 'velocity-ui-pack';
 
 
 
-class GridLayout extends LayoutType {
+class ColumnPanAlignedLayout extends LayoutType {
 
   _layoutInfo: LayoutInfo;
   _refToText: Text;
@@ -42,7 +42,7 @@ class GridLayout extends LayoutType {
   createLayout() {
 
     const layoutInfo = this.layoutInfo;
-    layoutInfo.type = 'grid';
+    layoutInfo.type = 'column-pan-aligned';
 
     const currentEntity: Entity = this._refToText.currentEntity;
     const bbox_currEntity: BBox = currentEntity._entityBbox;
@@ -180,4 +180,4 @@ class GridLayout extends LayoutType {
 }
 
 
-export default GridLayout
+export default ColumnPanAlignedLayout

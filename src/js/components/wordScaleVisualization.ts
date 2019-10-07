@@ -26,6 +26,7 @@ class WordScaleVisualization implements WordScaleVisualization {
   _rawWSVData: Array<rawWsvData> ;
 
   _typeOfWSV: string;
+  _positionOfWSV: string;
 
   _renderer: renderFunc;
 
@@ -57,6 +58,7 @@ class WordScaleVisualization implements WordScaleVisualization {
 
   constructor(anElement: HTMLElement, data: Array<rawWsvData>, theRenderer: string, referenceToText: Text, aIsAClone: Boolean) {
     this._refToText = referenceToText;
+    this._positionOfWSV = constants.positionType;
     this.entity = new Entity(anElement, this._refToText, this, aIsAClone);
 
     this.rawWSVData = data;
@@ -65,7 +67,7 @@ class WordScaleVisualization implements WordScaleVisualization {
     this._rendererString = theRenderer;
     this._rendererAsClass = theRenderer.charAt(0).toUpperCase() + theRenderer.slice(1);
 
-    this.wsvClass = wsvRendererFactoryClass(this._rendererAsClass, this.renderer, this.rawWSVData, constants.positionType, true, true)
+    this.wsvClass = wsvRendererFactoryClass(this._rendererAsClass, this.renderer, this.rawWSVData, this._positionOfWSV, true, true)
 
     $(this.entity.entityElement).sparklificator();
     $(this.entity.entityElement).sparklificator('option', this.wsvClass._settings);
@@ -77,8 +79,8 @@ class WordScaleVisualization implements WordScaleVisualization {
     this.typeOfWSV = constants.typeOfWSV;
 
     // bboxes
-    this._wsvVisualizationBBox = this.getBBoxOfSparkline();
-    this._wsvBBox = this.getBBoxOfWSV(constants.positionType);
+    this.getBBoxOfSparkline();
+    this.getBBoxOfWSV(this._positionOfWSV);
 
   }
 
@@ -144,7 +146,9 @@ class WordScaleVisualization implements WordScaleVisualization {
     // let bboxEntity = this.get_BBox_entity(theWSV);
     // let bboxSparkline = this.get_BBox_sparkline(theWSV);
     let bboxEntity = this.entity._entityBbox;
-    let bboxSparkline = this.getBBoxOfSparkline();
+
+    this.getBBoxOfSparkline();
+    let bboxSparkline = this._wsvVisualizationBBox
 
     if (thePositionType === 'right') {
       theBbox.left = bboxEntity.left;
@@ -158,7 +162,8 @@ class WordScaleVisualization implements WordScaleVisualization {
       console.log('position type not implemented');
     }
 
-    return theBbox;
+    this._wsvBBox = theBbox
+    // return theBbox;
   }
 
 
@@ -182,7 +187,9 @@ class WordScaleVisualization implements WordScaleVisualization {
     theBbox.width = bbox.width;
     theBbox.height = bbox.height;
 
-    return theBbox;
+    this._wsvVisualizationBBox = theBbox;
+
+    // return theBbox;
   }
 
 

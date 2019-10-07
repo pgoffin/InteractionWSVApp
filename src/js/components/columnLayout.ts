@@ -122,6 +122,8 @@ class ColumnLayout extends LayoutType {
 
         complete: () => {
           aClonedWSV._entity.getBBoxOfEntity();
+          aClonedWSV.getBBoxOfSparkline();
+          aClonedWSV.getBBoxOfWSV(aClonedWSV._positionOfWSV);
         }
       }});
 

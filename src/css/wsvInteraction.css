@@ -1,6 +1,34 @@
+body {
+	font: 18px Helvetica;
+	margin: 20px;
+	background-color: #fff;
+}
+
+#document a {
+	display:none; /* Hide links at the top of the articles. */
+}
+
+#document{
+	max-width: 700px;
+	margin:auto;
+}
+
+.smaller {
+  font: 10px Helvetica;
+}
+
+#text {
+	line-height: 1.5;
+}
+
 .entity {
 	position: relative;
 	z-index: 2;
+	background-color: #ffdf80;
+}
+
+.entity.noWSV {
+	background-color: transparent;
 }
 
 .entity.cloned {
@@ -9,6 +37,24 @@
 
 .entity.currentEntity {
 	z-index: 6;
+}
+
+.currentEntity:not(.sparkline) {
+	background-color: #ffcf40;
+}
+
+.entity:hover {
+	background: #ffecb3;
+}
+
+.entity.selected {
+	border-style: solid;
+	border-width: 1px;
+	border-color: #ffca2b;
+}
+
+.entity.showInLayout {
+	background-color: #e6ac00;
 }
 
 .sparklificated {
@@ -46,4 +92,83 @@
 	fill: none;
 	stroke: blue;
 	stroke-width: 1.5px;
+}
+
+.hide {
+	display: none;
+}
+
+#tooltip {
+	background: #eee;
+	padding: 2px;
+	position: absolute;
+	text-align: center;
+	color: #FFF;
+	font-size: .75em;
+	z-index: 999;
+	box-shadow: 2px 2px 6px 0px rgba(0, 0, 0, 0.3);
+	transition: opacity 0.3s;
+	opacity: 0.75;
+}
+
+.wrapper {
+	display: flex;
+}
+
+.box {
+	padding: 3px;
+}
+
+.box.selectable:hover {
+	background-color: #fff;
+	cursor: pointer;
+}
+
+.box.notSelectable {
+	opacity: 0.2;
+	pointer-events: none;
+}
+
+img.icon {
+	width: 20px;
+	height: auto;
+}
+
+/* suggested interactivity */
+/* https://css-tricks.com/examples/ShapesOfCSS/ */
+#triangle_left {
+	position: absolute;
+	top: calc(100% - 50%);
+
+	width: 0;
+	height: 0;
+	border-top: 15px solid transparent;
+	border-right: 30px solid #00becc;
+	border-bottom: 15px solid transparent;
+
+	z-index: 999;
+}
+
+
+#triangle_right {
+	position: absolute;
+	top: calc(100% - 50%);
+
+	width: 0;
+	height: 0;
+	border-top: 15px solid transparent;
+	border-left: 30px solid #00becc;
+	border-bottom: 15px solid transparent;
+
+	z-index: 999;
+}
+
+#triangle_left:active, #triangle_right:active {
+	box-shadow: 0 0 5px -1px rgba(0,0,0,0.6);
+}
+
+.whiteLayer {
+	box-shadow: 4px 4px 2px 0px rgba(0,0,0,0.3);
+	border: 0.5px solid #eee;
+	background-color: #fdfdfd;
 }

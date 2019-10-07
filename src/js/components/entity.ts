@@ -225,23 +225,20 @@ class Entity implements Entity {
                    .y(function(d) { return d.y; });
     }
 
-    svgContainer.append('path')
-                .attr('d', line(lineEndpoints))
-                .attr('class', 'hoveringTrail');
+    // svgContainer.append('path')
+    //             .attr('d', line(lineEndpoints))
+    //             .attr('class', 'hoveringTrail');
 
-    // let theLine = svgContainer.selectAll('.' + type)
-    //                           .data(lineEndpoints);
-    //
-    // theLine.attr('d', line(lineEndpoints));
-    //
-    // theLine.enter().append('path')
-    //                .attr('class', type)
-    //                .attr('d', line(lineEndpoints))
-    //                .style("fill", "none")
-    //                .style("stroke", "darkslateblue")
-    //                .style("stroke-width", "4px");
-    //
-    // theLine.exit().remove();
+    let theLine = svgContainer.selectAll('.' + type)
+                              .data([lineEndpoints]);
+
+    theLine.attr('d', line(lineEndpoints));
+
+    theLine.enter().append('path')
+                   .attr('class', type)
+                   .attr('d', function(d) {return line(d)})
+
+    theLine.exit().remove();
   }
 
 
