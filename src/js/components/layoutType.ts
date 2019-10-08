@@ -44,7 +44,7 @@ class LayoutType {
   // get the left, right, top and bottom borders of text div for optimal visualization of wsvs, same for every layout
   static getViewportMeasurements(aLayoutRef: Layout): LayoutInfo {
 
-    let bodyBbox = this.getBodyBBox();
+    let bodyBbox = LayoutType.getBodyBBox();
     let viewportDimensionsLeftRight = {left: bodyBbox.left, right: bodyBbox.right};
     let viewportDimensionsTopBottom = {top: bodyBbox.top, bottom: bodyBbox.bottom};
 

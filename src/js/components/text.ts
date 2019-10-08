@@ -109,6 +109,7 @@ class Text implements Text {
     this._theContextualMenu = new ContextualMenu(this);
 
     this.addEventsToDocument();
+    this.addSuggestedInteractivityTags();
   }
 
 
@@ -220,6 +221,33 @@ class Text implements Text {
       }
     });
   }
+
+
+  addSuggestedInteractivityTags() {
+
+    var hideClass = 'hide';
+
+    const orientaionCircleDiv = document.createElement("div");
+    orientaionCircleDiv.setAttribute('id', 'orientation_circles');
+    orientaionCircleDiv.setAttribute('class', hideClass);
+    document.body.appendChild(orientaionCircleDiv);
+
+    const restrictedDragBandDiv = document.createElement("div");
+    restrictedDragBandDiv.setAttribute('id', 'restrictedDragBand');
+    restrictedDragBandDiv.setAttribute('class', hideClass);
+    document.body.appendChild(restrictedDragBandDiv);
+
+    const leftTriangleDiv = document.createElement("div");
+    leftTriangleDiv.setAttribute('id', 'triangle_left');
+    leftTriangleDiv.setAttribute('class', hideClass);
+    document.body.appendChild(leftTriangleDiv);
+
+    const rightTriangleDiv = document.createElement("div");
+    rightTriangleDiv.setAttribute('id', 'triangle_right');
+    rightTriangleDiv.setAttribute('class', hideClass);
+    document.body.appendChild(rightTriangleDiv);
+  }
+
 
 
   // check if currentEntity is set

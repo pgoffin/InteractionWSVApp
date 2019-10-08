@@ -1,7 +1,6 @@
 const constants = require('../constants');
 const menuItems = require('./menuItems');
 
-// import Measurements from '../measurements';
 import Layout from './layout';
 import LayoutType from './layoutType';
 import Text from '../components/text';
@@ -28,6 +27,9 @@ class ContextualMenu {
   _visibleMenuItems: string[] = [constants.menuElement.gridElement,
                                  constants.menuElement.closeElement,
                                  constants.menuElement.columnElement,
+                                 constants.menuElement.columnPanAlignedElement,
+                                 constants.menuElement.gridNoOverlapElement,
+                                 constants.menuElement.rowElement,
                                  constants.menuElement.orderByLastDataValueElement,
                                  constants.menuElement.orderByEntityNameElement,
                                  constants.menuElement.orderByDocPositionElement];
@@ -112,26 +114,17 @@ class ContextualMenu {
 
 
         // add the class 'selected' if no wsv has been selected (selected wsvs are the gathered ones)
-        // if (document.querySelectorAll('.entity.selected').length <= 1) {
-        //   document.querySelectorAll('.entity').forEach(entityElem => {})
-        // }
         if (!($('.entity.selected').length > 1)) {
           $('.entity').addClass('selected');
         }
 
-        // // add class to selected menu item
-        // element.classList.remove('selectable');
-        // element.classList.add('notSelectable');
-
-
 
         if (anElement.elementType === 'close') {
+
           this._refToText._theLayout.giveUpLayout();
           this.cleanupAfterLayout();
-        } else if (anElement.elementType === 'layout') {
 
-          // const entityBBox = this._refToText._currentEntity._entityBbox;
-          // const entityBboxCentroid = {x: entityBBox.top + (entityBBox.height/2), y: entityBBox.left + (entityBBox.width/2)};
+        } else if (anElement.elementType === 'layout') {
 
           if (this._refToText.chooseCurrentEntity(null)) {
             this._refToText._theLayout.changeLayout(anElement.elementInteraction);
@@ -251,49 +244,12 @@ class ContextualMenu {
   }
 
 
-  // resetLayoutIcon() {
-  //   $('.layout').removeClass('hide');
-  // }
-
-
-  // unSelectMenuItem() {
-  //   $('_selectedMenuItem').removeClass('currentSeletedLayout');
-  // }
-
-
   unSelectIcon() {
     this._tooltipElements.forEach((aMenuElement: HTMLElement) => {
       aMenuElement.classList.remove('notSelectable');
       aMenuElement.classList.add('selectable');
     });
   }
-
-
-  // /**
-  // * Goes through the icons of the menu and makes the appropriate icons selectable
-  // * @param {[string]} hideOfs array of groups of icons that should be made unselectable
-  // */
-  // setNotSelectableIcons(hideOfs) {
-  //
-  //
-  //   this._tooltipElements.forEach(aTooltipItem => {
-  //
-  //
-  //   });
-  //
-  //
-  //   $.each(contextualMenuIcons, function(index, icon) {
-  //
-  //     var classNames = $(icon).attr('class').split(/\s+/);
-  //
-  //     $.each(hideOfs, function(i, aHideOf) {
-  //
-  //       if (classNames.indexOf(aHideOf) !== -1) {
-  //         $(icon).addClass('notSelectable');
-  //       }
-  //     });
-  //   });
-  // }
 
 
   /**

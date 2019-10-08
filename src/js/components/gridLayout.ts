@@ -1,7 +1,5 @@
 import { BBox, LayoutInfo } from "../../../global";
 
-const constants = require('../constants');
-
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
 import Entity from './entity';
@@ -48,13 +46,6 @@ class GridLayout extends LayoutType {
     const bbox_currEntity: BBox = currentEntity._entityBbox;
     const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
 
-    // layoutInfo.numberOfColumns = layoutInfo.rowAndColumnNumbers.leftNumbColumn + layoutInfo.rowAndColumnNumbers.currentEntityColumn + layoutInfo.rowAndColumnNumbers.rightNumbColumn;
-
-    // update the counts variable
-    // const counts = _countby(this._arrayOfWSVsWithouCurrentWSV, function(v: WordScaleVisualization) { return v._aboveOrBelow} );
-    // Layout.setUndefinedCountToZero(counts)
-    // layoutInfo.counts = counts
-
     // update the counts variable
     layoutInfo.counts = LayoutType.getAboveBelowCounts(this._arrayOfWSVsWithouCurrentWSV)
 
@@ -81,8 +72,7 @@ class GridLayout extends LayoutType {
     let mySequence = [];
     let belowIndex = 0;
     layoutInfo.startIndex_below = 0;
-    // let classThis = this;
-    // $.each(this._refToText._listOfClonedWSVs, function(index, value) {
+
     this._arrayOfWSVsWithouCurrentWSV.forEach(aWSV => {
 
       // cloning the wsv, and changing the position from relative to absolute
@@ -128,7 +118,7 @@ class GridLayout extends LayoutType {
 
       let whiteBackgroundElement: HTMLElement;
       if (!this._refToText.isLayoutVisible) {
-        whiteBackgroundElement = GridLayout.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
+        whiteBackgroundElement = LayoutType.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
 
         aWSV._theClonedWSV._backgroundElement = whiteBackgroundElement;
       } else {

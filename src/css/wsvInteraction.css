@@ -134,7 +134,11 @@ img.icon {
 	height: auto;
 }
 
-/* suggested interactivity */
+#restrictedDragBand {
+	position: absolute;
+	background-color: white;
+}
+
 /* https://css-tricks.com/examples/ShapesOfCSS/ */
 #triangle_left {
 	position: absolute;
