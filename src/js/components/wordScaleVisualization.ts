@@ -3,7 +3,7 @@ import Entity from './entity';
 import wsvRendererFactoryClass from './wsvRendererFactoryClass';
 import Text from './text';
 
-const constants = require('../constants');
+import { wsvInteractionConstants } from '../constants';
 
 // to run sparklificator
 require('webpack-jquery-ui/widgets');
@@ -58,7 +58,7 @@ class WordScaleVisualization implements WordScaleVisualization {
 
   constructor(anElement: HTMLElement, data: Array<rawWsvData>, theRenderer: string, referenceToText: Text, aIsAClone: Boolean) {
     this._refToText = referenceToText;
-    this._positionOfWSV = constants.positionType;
+    this._positionOfWSV = wsvInteractionConstants.positionType;
     this.entity = new Entity(anElement, this._refToText, this, aIsAClone);
 
     this.rawWSVData = data;
@@ -76,7 +76,7 @@ class WordScaleVisualization implements WordScaleVisualization {
 
     this._visualization = this._wsv.querySelector('span.sparkline');
 
-    this.typeOfWSV = constants.typeOfWSV;
+    this.typeOfWSV = wsvInteractionConstants.typeOfWSV;
 
     // bboxes
     this.getBBoxOfSparkline();
@@ -151,10 +151,13 @@ class WordScaleVisualization implements WordScaleVisualization {
     let bboxSparkline = this._wsvVisualizationBBox
 
     if (this._positionOfWSV === 'right') {
-      theBbox.left = bboxEntity.left;
+      // theBbox.left = bboxEntity.left;
+      theBbox.left = bboxWSV.left;
       theBbox.top = bboxWSV.top + scrollingOffset;
-      theBbox.right = bboxSparkline.right;
+      // theBbox.right = bboxSparkline.right;
+      theBbox.right =  bboxSparkline.right;
       theBbox.bottom = bboxWSV.bottom + scrollingOffset;
+      // theBbox.width = bboxSparkline.right - bboxEntity.left;
       theBbox.width = bboxSparkline.right - bboxEntity.left;
       theBbox.height = bboxWSV.height;
 
@@ -200,7 +203,6 @@ class WordScaleVisualization implements WordScaleVisualization {
 
     let clonedWSV = new WordScaleVisualization(insertedClonedEntityNode as HTMLElement, this._rawWSVData, this._rendererString, this._refToText, true);
 
-    // clonedWSV.entity._isAClone = true;
     clonedWSV.entity.entityElement.classList.add('cloned');
     clonedWSV._wsv.classList.add('cloned');
     clonedWSV._visualization.classList.add('cloned');

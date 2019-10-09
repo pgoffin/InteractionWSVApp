@@ -7,7 +7,9 @@ import Entity from './entity';
 
 const historianData = require('../../data/otherDataset')
 const stockData = require('../../data/wsvDataFile')
-const constants = require('../constants');
+
+import { wsvInteractionConstants } from '../constants';
+
 
 // to run sparklificator
 // require('webpack-jquery-ui/widgets');
@@ -265,7 +267,7 @@ class Text implements Text {
   **/
   private createWSVList(): void {
 
-    document.querySelectorAll(constants.entitySpanClass).forEach((entityElement) => {
+    document.querySelectorAll(wsvInteractionConstants.entitySpanClass).forEach((entityElement) => {
 
       // get data for the entity
       let entityName = this.getEntityName(entityElement);

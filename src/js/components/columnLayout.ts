@@ -4,7 +4,6 @@ import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
 import Entity from './entity';
 import LayoutType from './layoutType';
-// import Layout from './layout';
 
 import 'velocity-animate';
 import 'velocity-ui-pack';

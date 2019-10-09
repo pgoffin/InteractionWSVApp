@@ -50,9 +50,9 @@ export interface LayoutInfo {
   counts?,
   startIndex_above?: number,
   startIndex_below?: number,
-  bandLength: number,
-  startOffsetRowlayout: number,
-  snapPositions
+  bandLength?: number,
+  startOffsetRowlayout?: number,
+  snapPositions?
 }
 
 

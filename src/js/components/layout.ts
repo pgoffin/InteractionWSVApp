@@ -1,6 +1,6 @@
 import { NumberColAndRows, LayoutInfo } from "../../../global";
 
-const constants = require('../constants');
+import { wsvInteractionConstants } from '../constants';
 
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
@@ -25,7 +25,6 @@ class Layout {
   constructor(theRefToText: Text) {
     this._layoutInfo = {}
     this._layoutInfo.spaceBetweenGridCells = 4;
-
     this._refToText = theRefToText;
   }
 
@@ -59,17 +58,17 @@ class Layout {
     const bbox_currEntity = currentEntity._entityBbox;
     const bbox_currWSV = currentEntity._entityBelongsToWsv._wsvBBox
 
-    this._arryOfWSVsThatHaveAClone = this._refToText.listOfWSVs.filter(aWSV => aWSV != this._refToText._currentWSV);
-
-    const cellDimensions = this.getCellDimensions(this._arryOfWSVsThatHaveAClone);
+    const cellDimensions = this.getCellDimensions(this._refToText.listOfWSVs);
     this.layoutInfo = ['cell_dimensions', cellDimensions];
     this.layoutInfo = ['bbox_currentWSV', bbox_currWSV];
+
+    this._arryOfWSVsThatHaveAClone = this._refToText.listOfWSVs.filter(aWSV => aWSV != this._refToText._currentWSV);
 
     this._arryOfWSVsThatHaveAClone.forEach(aWSV => {
       let aEntityBBox = aWSV.entity._entityBbox;
       aWSV._aboveOrBelow = (aEntityBBox.top > bbox_currEntity.bottom) ? 'below' : 'above';
 
-      if (constants.positionType === 'right') {
+      if (wsvInteractionConstants.positionType === 'right') {
         aWSV._middleBoundOffset = bbox_currEntity.width - aEntityBBox.width;
 
         aWSV._offset_whiteLayer = this.layoutInfo.cell_dimensions.width - aWSV._wsvVisualizationBBox.width - aEntityBBox.width;
@@ -82,7 +81,7 @@ class Layout {
     this._arryOfWSVsThatHaveAClone.sort(dl.comparator(['+aboveOrBelow', '-distanceToCurrEntity']));
 
 
-    let rowAndColumnNumbers: NumberColAndRows = Layout.spaceAvailability_numberColAndRows(currentEntity, constants.positionType, layoutType, 'middleBound', this._refToText.listOfWSVs, this.layoutInfo.cell_dimensions.width, this.layoutInfo.cell_dimensions.height, this.layoutInfo.spaceBetweenGridCells);
+    let rowAndColumnNumbers: NumberColAndRows = Layout.spaceAvailability_numberColAndRows(currentEntity, wsvInteractionConstants.positionType, layoutType, 'middleBound', this._refToText.listOfWSVs, this.layoutInfo.cell_dimensions.width, this.layoutInfo.cell_dimensions.height, this.layoutInfo.spaceBetweenGridCells);
 
     this.layoutInfo = ['rowAndColumnNumbers', rowAndColumnNumbers];
     this.layoutInfo = ['numberOfColumns', rowAndColumnNumbers.totalNumberOfColumns];

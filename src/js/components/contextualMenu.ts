@@ -1,4 +1,5 @@
-const constants = require('../constants');
+import { wsvInteractionConstants } from '../constants';
+
 const menuItems = require('./menuItems');
 
 import Layout from './layout';
@@ -24,15 +25,15 @@ class ContextualMenu {
   _menuHideTimer: number;
   _menuHideDelay: number = 2000;
   _menuItems: Array<MenuItemType> = menuItems.menuItems;
-  _visibleMenuItems: string[] = [constants.menuElement.gridElement,
-                                 constants.menuElement.closeElement,
-                                 constants.menuElement.columnElement,
-                                 constants.menuElement.columnPanAlignedElement,
-                                 constants.menuElement.gridNoOverlapElement,
-                                 constants.menuElement.rowElement,
-                                 constants.menuElement.orderByLastDataValueElement,
-                                 constants.menuElement.orderByEntityNameElement,
-                                 constants.menuElement.orderByDocPositionElement];
+  _visibleMenuItems: string[] = [wsvInteractionConstants.menuElement.gridElement,
+                                 wsvInteractionConstants.menuElement.closeElement,
+                                 wsvInteractionConstants.menuElement.columnElement,
+                                 wsvInteractionConstants.menuElement.columnPanAlignedElement,
+                                 wsvInteractionConstants.menuElement.gridNoOverlapElement,
+                                 wsvInteractionConstants.menuElement.rowElement,
+                                 wsvInteractionConstants.menuElement.orderByLastDataValueElement,
+                                 wsvInteractionConstants.menuElement.orderByEntityNameElement,
+                                 wsvInteractionConstants.menuElement.orderByDocPositionElement];
   _selectedLayoutMenuItem: HTMLElement;
   _refToText: Text;
   _refToLayout: Layout;

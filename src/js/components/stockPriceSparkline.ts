@@ -1,7 +1,6 @@
 import { renderFunc, WsVisualizationType, rawWsvData } from "../../../global";
 
-const constants = require('../constants');
-
+import { wsvInteractionConstants } from '../constants';
 
 
 
@@ -26,11 +25,11 @@ class StockPriceSparkline implements WsVisualizationType {
 
     this.transformedWsvData = this.transformRawData(this.rawWsvData)
 
-    this._numberOfMarks = constants.numberOfMarks;
-    this._markWidth = constants.stockLineChartSize.markWidth;
+    this._numberOfMarks = wsvInteractionConstants.numberOfMarks;
+    this._markWidth = wsvInteractionConstants.stockLineChartSize.markWidth;
 
     this._width = (this._markWidth * this._numberOfMarks);
-    this._height = constants.stockLineChartSize.heightWordScaleVis;
+    this._height = wsvInteractionConstants.stockLineChartSize.heightWordScaleVis;
 
     let aSettings = {data: this.transformedWsvData,
                      renderer: this.renderer,

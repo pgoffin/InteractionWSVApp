@@ -1,4 +1,4 @@
-module.exports = {
+export const wsvInteractionConstants = {
   entitySpanClass: '.entity',
 
   // typeOfWSV: 'timelineChart',
