@@ -80,7 +80,7 @@ class WordScaleVisualization implements WordScaleVisualization {
 
     // bboxes
     this.getBBoxOfSparkline();
-    this.getBBoxOfWSV(this._positionOfWSV);
+    this.getBBoxOfWSV();
 
   }
 
@@ -129,7 +129,7 @@ class WordScaleVisualization implements WordScaleVisualization {
   }
 
 
-  getBBoxOfWSV(thePositionType: string) {
+  getBBoxOfWSV() {
     let theBbox = {left: 0,
                    top: 0,
                    right: 0,
@@ -150,7 +150,7 @@ class WordScaleVisualization implements WordScaleVisualization {
     this.getBBoxOfSparkline();
     let bboxSparkline = this._wsvVisualizationBBox
 
-    if (thePositionType === 'right') {
+    if (this._positionOfWSV === 'right') {
       theBbox.left = bboxEntity.left;
       theBbox.top = bboxWSV.top + scrollingOffset;
       theBbox.right = bboxSparkline.right;
