@@ -5,7 +5,7 @@ import * as d3 from "d3";
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
 import Entity from './entity';
-import LayoutType from './layoutType';
+import Layout from './layout';
 // import Layout from './layout';
 
 import 'velocity-animate';
@@ -13,7 +13,7 @@ import 'velocity-ui-pack';
 
 
 
-class RowLayout extends LayoutType {
+class RowLayout implements Layout {
 
   _layoutInfo: LayoutInfo;
   _refToText: Text;
@@ -21,12 +21,12 @@ class RowLayout extends LayoutType {
 
 
   constructor(aLayoutInfo: LayoutInfo, aRefToText: Text, anArrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>) {
-    super();
+    // super();
     this._layoutInfo = aLayoutInfo;
     this._refToText = aRefToText;
     this._arrayOfWSVsWithouCurrentWSV = anArrayOfWSVsWithouCurrentWSV;
 
-    this.createLayout();
+    this.applyLayout();
   }
 
 
@@ -39,7 +39,7 @@ class RowLayout extends LayoutType {
   }
 
 
-  createLayout() {
+  applyLayout() {
 
     const layoutInfo = this.layoutInfo;
     layoutInfo.type = 'row';

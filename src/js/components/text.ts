@@ -1,7 +1,7 @@
 import { wsvDataObject } from '../../../global';
 
 import ContextualMenu from './contextualMenu';
-import Layout from './layout'
+// import LayoutCreator from './layoutCreator'
 import WordScaleVisualization from './wordScaleVisualization';
 import Entity from './entity';
 
@@ -26,7 +26,8 @@ interface Text {
   _listOfWSVs: Array<WordScaleVisualization>;
   _dataForWSV: wsvDataObject;
   _theContextualMenu: ContextualMenu;
-  _theLayout: Layout;
+  // _theLayout: Layout;
+  // _theConcreteLayoutCreator: LayoutCreator;
 }
 
 
@@ -49,7 +50,7 @@ class Text implements Text {
 
   _theContextualMenu: ContextualMenu;
 
-  _theLayout: Layout;
+  // _theConcreteLayoutCreator: LayoutCreator;
 
 
   // getter/setter
@@ -106,7 +107,7 @@ class Text implements Text {
 
     this.createWSVList();
 
-    this._theLayout = new Layout(this);
+    // this._theConcreteLayoutCreator = new LayoutCreator(this);
 
     this._theContextualMenu = new ContextualMenu(this);
 

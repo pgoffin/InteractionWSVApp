@@ -3,7 +3,8 @@ import { BBox, LayoutInfo } from "../../../global";
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
 import Entity from './entity';
-import LayoutType from './layoutType';
+import Layout from './layout';
+import LayoutCreator from './layoutCreator'
 // import Layout from './layout';
 
 import 'velocity-animate';
@@ -11,7 +12,7 @@ import 'velocity-ui-pack';
 
 
 
-class GridLayout extends LayoutType {
+class GridLayout implements Layout {
 
   _layoutInfo: LayoutInfo;
   _refToText: Text;
@@ -19,12 +20,12 @@ class GridLayout extends LayoutType {
 
 
   constructor(aLayoutInfo: LayoutInfo, aRefToText: Text, anArrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>) {
-    super();
+    // super();
     this._layoutInfo = aLayoutInfo;
     this._refToText = aRefToText;
     this._arrayOfWSVsWithouCurrentWSV = anArrayOfWSVsWithouCurrentWSV;
 
-    this.createLayout();
+    this.applyLayout();
   }
 
 
@@ -37,7 +38,7 @@ class GridLayout extends LayoutType {
   }
 
 
-  createLayout() {
+  applyLayout() {
 
     const layoutInfo = this.layoutInfo;
     layoutInfo.type = 'grid';
@@ -47,7 +48,7 @@ class GridLayout extends LayoutType {
     const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
 
     // update the counts variable
-    layoutInfo.counts = LayoutType.getAboveBelowCounts(this._arrayOfWSVsWithouCurrentWSV)
+    layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._arrayOfWSVsWithouCurrentWSV)
 
     // get top left cornerDiffs
     const numUsedRowsAbove = Math.ceil(layoutInfo.counts.above/layoutInfo.numberOfColumns);
@@ -118,7 +119,7 @@ class GridLayout extends LayoutType {
 
       let whiteBackgroundElement: HTMLElement;
       if (!this._refToText.isLayoutVisible) {
-        whiteBackgroundElement = LayoutType.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
+        whiteBackgroundElement = LayoutCreator.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
 
         aWSV._theClonedWSV._backgroundElement = whiteBackgroundElement;
       } else {

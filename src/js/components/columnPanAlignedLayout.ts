@@ -3,14 +3,14 @@ import { BBox, LayoutInfo } from "../../../global";
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
 import Entity from './entity';
-import LayoutType from './layoutType';
+import Layout from './layout';
 
 import 'velocity-animate';
 import 'velocity-ui-pack';
 
 
 
-class ColumnPanAlignedLayout extends LayoutType {
+class ColumnPanAlignedLayout implements Layout {
 
   _layoutInfo: LayoutInfo;
   _refToText: Text;
@@ -18,12 +18,12 @@ class ColumnPanAlignedLayout extends LayoutType {
 
 
   constructor(aLayoutInfo: LayoutInfo, aRefToText: Text, anArrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>) {
-    super();
+    // super();
     this._layoutInfo = aLayoutInfo;
     this._refToText = aRefToText;
     this._arrayOfWSVsWithouCurrentWSV = anArrayOfWSVsWithouCurrentWSV;
 
-    this.createLayout();
+    this.applyLayout();
   }
 
 
@@ -36,7 +36,7 @@ class ColumnPanAlignedLayout extends LayoutType {
   }
 
 
-  createLayout() {
+  applyLayout() {
 
     const layoutInfo = this.layoutInfo;
     layoutInfo.type = 'column-pan-aligned';

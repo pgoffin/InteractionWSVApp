@@ -2,8 +2,9 @@ import { wsvInteractionConstants } from '../constants';
 
 const menuItems = require('./menuItems');
 
-import Layout from './layout';
-import LayoutType from './layoutType';
+import LayoutCreator from './layoutCreator';
+import ConcreteLayoutCreator from './concreteLayoutCreator';
+// import LayoutType from './layoutType';
 import Text from '../components/text';
 import Entity from '../components/entity';
 
@@ -36,7 +37,7 @@ class ContextualMenu {
                                  wsvInteractionConstants.menuElement.orderByDocPositionElement];
   _selectedLayoutMenuItem: HTMLElement;
   _refToText: Text;
-  _refToLayout: Layout;
+  _refToLayout: LayoutCreator;
   _tooltipElements: Array<HTMLElement>;
 
 // ['#grid', '#close', '#order-by-lastDataValue', '#order-by-entityName', '#order-by-docPosition','#selector', '#selector-ok', '#row', '#column', '#grid-no-overlap'];
@@ -128,7 +129,8 @@ class ContextualMenu {
         } else if (anElement.elementType === 'layout') {
 
           if (this._refToText.chooseCurrentEntity(null)) {
-            this._refToText._theLayout.changeLayout(anElement.elementInteraction);
+            // this._refToText._theLayout.changeLayout(anElement.elementInteraction);
+            new ConcreteLayoutCreator(this._refToText).changeLayout(anElement.elementInteraction)
           }
         } else if (anElement.elementType === 'sorting') {
           console.log('not yet implemented')
@@ -225,7 +227,7 @@ class ContextualMenu {
 
   positionMenu(aRefToLayout: Layout, entityMenuIsCalledOn: Entity) {
 
-    if (this._tooltipBBox.left < LayoutType.getViewportMeasurements(aRefToLayout).viewportLeft) {
+    if (this._tooltipBBox.left < LayoutCreator.getViewportMeasurements(aRefToLayout).viewportLeft) {
       this._tooltipBBox.left = entityMenuIsCalledOn._entityBbox.right + this._tooltipBBox.offset;
       document.getElementById('tooltip').classList.remove('leftPos');
       document.getElementById('tooltip').classList.add('rightPos');
