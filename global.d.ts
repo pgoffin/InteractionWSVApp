@@ -1,13 +1,15 @@
-export interface wsvDataObject {
-  [key: string]: Array<rawWsvData>;
+export interface WsvDataObject {
+  [key: string]: Array<RawWsvData>;
 }
 
-export interface renderFunc {
+
+export interface RenderFunc {
   (sparkSpan: string, width: number, height: number, interaction: Boolean, environment: string, data:Array<object>): void
 }
 
+
 export interface WsVisualizationType {
-  _renderer: renderFunc;
+  _renderer: RenderFunc;
 
   _settings: object;
 
@@ -22,7 +24,7 @@ export interface WsVisualizationType {
 }
 
 
-export interface rawWsvData {
+export interface RawWsvData {
  [key: string]: string|number|Date;
 }
 
@@ -63,4 +65,9 @@ export interface BBox {
   bottom: number,
   width: number,
   height: number
+}
+
+export interface EventLocation {
+  x: number,
+  y: number
 }

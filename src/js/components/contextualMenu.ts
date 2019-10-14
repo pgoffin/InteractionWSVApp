@@ -4,7 +4,6 @@ const menuItems = require('./menuItems');
 
 import LayoutCreator from './layoutCreator';
 import ConcreteLayoutCreator from './concreteLayoutCreator';
-// import LayoutType from './layoutType';
 import Text from '../components/text';
 import Entity from '../components/entity';
 
@@ -17,6 +16,8 @@ interface tooltipBBox {
   top: number,
   bottom: number
 }
+
+
 
 class ContextualMenu {
 
@@ -39,15 +40,24 @@ class ContextualMenu {
   _refToText: Text;
   _refToLayout: LayoutCreator;
   _tooltipElements: Array<HTMLElement>;
+  _theTooltipElement: HTMLElement;
 
 // ['#grid', '#close', '#order-by-lastDataValue', '#order-by-entityName', '#order-by-docPosition','#selector', '#selector-ok', '#row', '#column', '#grid-no-overlap'];
 
+
+  // getter/setter
+  set theTooltipElement(value: HTMLElement) {
+      this._theTooltipElement = value;
+  }
+  get theTooltipElement(): HTMLElement {
+      return this._theTooltipElement;
+  }
 
 
   constructor(referenceToText: Text) {
 
     this._refToText = referenceToText;
-    this._refToLayout = referenceToText._theLayout;
+    // this._refToLayout = referenceToText._theLayout;
 
     this._tooltipBBox = {offset: -5,
                          width: 0,
@@ -60,6 +70,7 @@ class ContextualMenu {
 
     const menuDiv = document.createElement("div");
     menuDiv.setAttribute('id', 'tooltip');
+    this.theTooltipElement = menuDiv;
 
     this._menuItems.forEach((anElement: MenuItemType) => {
       if (this._visibleMenuItems.includes(anElement.element)) {
@@ -123,14 +134,15 @@ class ContextualMenu {
 
         if (anElement.elementType === 'close') {
 
-          this._refToText._theLayout.giveUpLayout();
+          this._refToText._layoutCreator.giveUpLayout();
           this.cleanupAfterLayout();
 
         } else if (anElement.elementType === 'layout') {
 
           if (this._refToText.chooseCurrentEntity(null)) {
             // this._refToText._theLayout.changeLayout(anElement.elementInteraction);
-            new ConcreteLayoutCreator(this._refToText).changeLayout(anElement.elementInteraction)
+            this._refToText.layoutCreator.changeLayout(anElement.elementInteraction)
+            // new ConcreteLayoutCreator(this._refToText)
           }
         } else if (anElement.elementType === 'sorting') {
           console.log('not yet implemented')
@@ -146,12 +158,12 @@ class ContextualMenu {
   // Perform initial setup on the context menu (attaching listeners, etc.), done once only!
   setupContextMenu(entityMenuCalledOn: Entity) {
 
-    document.getElementById('tooltip').addEventListener('mouseenter', () => {
+    this.theTooltipElement.addEventListener('mouseenter', () => {
       console.log('adding mouseenter event handler')
       this.stopMenuHideTimer();
     });
 
-    document.getElementById('tooltip').addEventListener('mouseleave', () => {
+    this.theTooltipElement.addEventListener('mouseleave', () => {
       console.log('adding mouseleave event handler')
       this.startMenuHideTimer(entityMenuCalledOn);
     });
@@ -168,8 +180,8 @@ class ContextualMenu {
 
     this.stopMenuHideTimer()
 
-    document.getElementById('tooltip').classList.remove('hide')
-    document.getElementById('tooltip').classList.add('wrapper')
+    this.theTooltipElement.classList.remove('hide')
+    this.theTooltipElement.classList.add('wrapper')
 
     this.computePositionMenu(entityMenuIsCalledOn);
     this.positionMenu(this._refToLayout, entityMenuIsCalledOn);
@@ -183,7 +195,7 @@ class ContextualMenu {
     if (this._menuHideTimer) clearTimeout(this._menuHideTimer);
 
     this._menuHideTimer = window.setTimeout(() => {
-                                      if (!document.getElementById('tooltip').classList.contains('hide')) {
+                                      if (!this.theTooltipElement.classList.contains('hide')) {
                                         console.log('hide startMenuHideTimer')
                                         this.hideContextualMenu(refToEntity)
                                       } else {
@@ -206,8 +218,8 @@ class ContextualMenu {
     // Don't hide if a layout is being displayed
     if(!this._refToText.isLayoutVisible) {
 
-      document.getElementById('tooltip').classList.remove('wrapper');
-      document.getElementById('tooltip').classList.add('hide')
+      this.theTooltipElement.classList.remove('wrapper');
+      this.theTooltipElement.classList.add('hide')
 
       // this.resetLayoutIcon();
 
@@ -219,8 +231,8 @@ class ContextualMenu {
   // compute the tooltip position
   computePositionMenu(entityMenuIsCalledOn: Entity) {
 
-    this._tooltipBBox.width = document.getElementById('tooltip').getBoundingClientRect().width;
-    this._tooltipBBox.height = document.getElementById('tooltip').getBoundingClientRect().height;
+    this._tooltipBBox.width = this.theTooltipElement.getBoundingClientRect().width;
+    this._tooltipBBox.height = this.theTooltipElement.getBoundingClientRect().height;
     this._tooltipBBox.left = entityMenuIsCalledOn._entityBbox.left - this._tooltipBBox.width - this._tooltipBBox.offset;
   }
 
@@ -229,8 +241,8 @@ class ContextualMenu {
 
     if (this._tooltipBBox.left < LayoutCreator.getViewportMeasurements(aRefToLayout).viewportLeft) {
       this._tooltipBBox.left = entityMenuIsCalledOn._entityBbox.right + this._tooltipBBox.offset;
-      document.getElementById('tooltip').classList.remove('leftPos');
-      document.getElementById('tooltip').classList.add('rightPos');
+      this.theTooltipElement.classList.remove('leftPos');
+      this.theTooltipElement.classList.add('rightPos');
     }
 
     this._tooltipBBox.top = entityMenuIsCalledOn._entityBbox.top - 18;
@@ -238,12 +250,12 @@ class ContextualMenu {
 
     if (this._tooltipBBox.bottom > (window.innerHeight  + $(window).scrollTop())) {
       this._tooltipBBox.top = entityMenuIsCalledOn._entityBbox.top - 5 - this._tooltipBBox.height;
-      document.getElementById('tooltip').classList.add('topPos')
+      this.theTooltipElement.classList.add('topPos')
     }
 
     // set the position of the tooltip
-    document.getElementById('tooltip').style.left = this._tooltipBBox.left + 'px';
-    document.getElementById('tooltip').style.top = this._tooltipBBox.top + 'px';
+    this.theTooltipElement.style.left = this._tooltipBBox.left + 'px';
+    this.theTooltipElement.style.top = this._tooltipBBox.top + 'px';
   }
 
 

@@ -67,7 +67,7 @@ class Entity implements Entity {
 
         if (!this._refToText.isLayoutVisible) {
 
-          this._refToText._theContextualMenu.showContextMenu(this);
+          this._refToText._contextualMenu.showContextMenu(this);
 
           this.setAsCurrentEntity()
         }
@@ -76,7 +76,7 @@ class Entity implements Entity {
       this.entityElement.addEventListener('mouseleave', () => {
         console.log('mouseleave');
 
-        this._refToText._theContextualMenu.startMenuHideTimer(this);
+        this._refToText._contextualMenu.startMenuHideTimer(this);
       });
 
     } else {

@@ -1,20 +1,15 @@
-import { wsvDataObject } from '../../../global';
+import { WsvDataObject, EventLocation } from '../../../global';
 
 import ContextualMenu from './contextualMenu';
-// import LayoutCreator from './layoutCreator'
 import WordScaleVisualization from './wordScaleVisualization';
 import Entity from './entity';
+import LayoutCreator from './layoutCreator';
+import ConcreteLayoutCreator from './concreteLayoutCreator';
 
 const historianData = require('../../data/otherDataset')
 const stockData = require('../../data/wsvDataFile')
 
 import { wsvInteractionConstants } from '../constants';
-
-
-// to run sparklificator
-// require('webpack-jquery-ui/widgets');
-// const renderers = require('../../lib/renderers');
-// require('../../lib/jquery.sparklificator');
 
 
 
@@ -24,33 +19,33 @@ interface Text {
   _currentWSV: WordScaleVisualization;
   _currentEntity: Entity;
   _listOfWSVs: Array<WordScaleVisualization>;
-  _dataForWSV: wsvDataObject;
-  _theContextualMenu: ContextualMenu;
-  // _theLayout: Layout;
-  // _theConcreteLayoutCreator: LayoutCreator;
+  _dataForWSV: WsvDataObject;
+  _contextualMenu: ContextualMenu;
+  _layoutCreator: LayoutCreator;
 }
+
 
 
 class Text implements Text {
 
-  _nameOfTextFile: string;
+  // _nameOfTextFile: string;
 
   // if there is a layout then flag should be true
-  _isLayoutVisible: Boolean = false;
+  // _isLayoutVisible: Boolean = false;
 
-  _currentWSV: WordScaleVisualization = null;
+  // _currentWSV: WordScaleVisualization = null;
 
   // only tagged entities and that have data are stored here
-  _listOfWSVs: Array<WordScaleVisualization> = [];
-  // _listOfClonedWSVs: Array<WordScaleVisualization>;
-
-  _dataForWSV: wsvDataObject = {};
-
-  _currentEntity: Entity;
-
-  _theContextualMenu: ContextualMenu;
-
-  // _theConcreteLayoutCreator: LayoutCreator;
+  // _listOfWSVs: Array<WordScaleVisualization> = [];
+  // // _listOfClonedWSVs: Array<WordScaleVisualization>;
+  //
+  // _dataForWSV: wsvDataObject = {};
+  //
+  // _currentEntity: Entity;
+  //
+  // _theContextualMenu: ContextualMenu;
+  //
+  // // _theConcreteLayoutCreator: LayoutCreator;
 
 
   // getter/setter
@@ -75,10 +70,10 @@ class Text implements Text {
       return this._currentWSV;
   }
 
-  set dataForWSV(value: wsvDataObject) {
+  set dataForWSV(value: WsvDataObject) {
       this._dataForWSV = value;
   }
-  get dataForWSV(): wsvDataObject {
+  get dataForWSV(): WsvDataObject {
       return this._dataForWSV;
   }
 
@@ -96,23 +91,39 @@ class Text implements Text {
       return this._currentEntity;
   }
 
+  set layoutCreator(value: LayoutCreator)  {
+      this._layoutCreator = value;
+  }
+  get layoutCreator(): LayoutCreator {
+      return this._layoutCreator;
+  }
 
-  initializeText() {
+
+
+  constructor() {
     console.log('initializing some text')
 
     this.nameOfTextFile = this.getTextFileName();
+    this.isLayoutVisible = false;
 
     // TODO Can this be done better?
-    this.dataForWSV = this.getDatasetUsingDocumentTag();
+    const theData = this.getDatasetUsingDocumentTag()
+    if (theData !== null) {
+      this.dataForWSV = theData;
 
-    this.createWSVList();
+      this.createWSVList();
 
-    // this._theConcreteLayoutCreator = new LayoutCreator(this);
+      this.layoutCreator = new ConcreteLayoutCreator(this)
 
-    this._theContextualMenu = new ContextualMenu(this);
+      this._contextualMenu = new ContextualMenu(this);
 
-    this.addEventsToDocument();
-    this.addSuggestedInteractivityTags();
+      this.addEventsToDocument();
+      this.addSuggestedInteractivityTags();
+    } else {
+      console.log('ERROR: check why there is no dataset for this text');
+      // return null
+    }
+
   }
 
 
@@ -129,8 +140,8 @@ class Text implements Text {
         //   removeSpacer();
         // }
 
-        this._theLayout.giveUpLayout();
-        this._theContextualMenu.cleanupAfterLayout();
+        this._layoutCreator.giveUpLayout();
+        this._contextualMenu.cleanupAfterLayout();
       }
     });
 
@@ -161,8 +172,8 @@ class Text implements Text {
         //  removeSpacer();
         // }
 
-        this._theLayout.giveUpLayout();
-        this._theContextualMenu.cleanupAfterLayout();
+        this.layoutCreator.giveUpLayout();
+        this._contextualMenu.cleanupAfterLayout();
 
         // clearSelection();
         // // resetLayoutIcon();
@@ -176,7 +187,7 @@ class Text implements Text {
         // summon grid layout when dblclicking somewhere on the canvas
         console.log("event: dblclick (create layout)");
 
-        const dblClickLocation = {};
+        const dblClickLocation: EventLocation = {x: 0, y: 0};
         dblClickLocation.x = event.pageX;
         dblClickLocation.y = event.pageY;
 
@@ -268,6 +279,8 @@ class Text implements Text {
   **/
   private createWSVList(): void {
 
+    const tmpWSVList: Array<WordScaleVisualization> = [];
+
     document.querySelectorAll(wsvInteractionConstants.entitySpanClass).forEach((entityElement) => {
 
       // get data for the entity
@@ -277,9 +290,11 @@ class Text implements Text {
       if (!((typeof dataForEntity == 'undefined') || (dataForEntity.length == 0))) {
         let aWSV = new WordScaleVisualization(entityElement, dataForEntity, entityElement.dataset.wsvRenderer, this, false);
 
-        this.listOfWSVs.push(aWSV);
+        tmpWSVList.push(aWSV);
       }
     });
+
+    this.listOfWSVs = tmpWSVList;
 
   }
 
@@ -299,15 +314,22 @@ class Text implements Text {
 
 
   private getDatasetUsingDocumentTag() {
-    let docDiv = document.getElementById('document');
-    let whatData = docDiv.dataset.wsvType
-    let aTextTitle = this.nameOfTextFile;
+    const docDiv = document.getElementById('document');
 
-    if (whatData == 'historianData') {
-      return historianData[aTextTitle];
-    } else if (whatData == 'stockData') {
-      return stockData[aTextTitle];
+    if (docDiv !== null) {
+      const whatData = docDiv.dataset.wsvType
+      const aTextTitle = this.nameOfTextFile;
+
+      if (whatData == 'historianData') {
+        return historianData[aTextTitle];
+      } else if (whatData == 'stockData') {
+        return stockData[aTextTitle];
+      }
+    } else {
+      alert('There is no div element with id "document"');
+      return null;
     }
+
   }
 
 
@@ -322,7 +344,7 @@ class Text implements Text {
   }
 
 
-  chooseCurrentEntity(anEventLocation): Boolean {
+  chooseCurrentEntity(anEventLocation: EventLocation): Boolean {
     let aCurrentEntity = this.currentEntity;
 
     // All possible falsy values in ECMA-/Javascript: null, undefined, NaN, empty string (""), 0, false.

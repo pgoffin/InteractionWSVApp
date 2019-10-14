@@ -6,7 +6,6 @@ import Layout from './layout';
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
 import Entity from './entity';
-import layoutFactoryClass from './layoutFactoryClass';
 const dl = require('../../lib/datalib.min.js');
 
 import 'velocity-animate';
@@ -17,16 +16,20 @@ import 'velocity-ui-pack';
 abstract class LayoutCreator {
 
   _layoutInfo: LayoutInfo;
-  _currentLayout: string = '';
+  _currentLayout: string;
   _refToText: Text;
   _theLayout: Layout;
   _arryOfWSVsThatHaveAClone: Array<WordScaleVisualization>;
 
 
-  constructor(theRefToText: Text) {
-    this._layoutInfo = {}
+
+  constructor(aRefToText: Text) {
+    this._layoutInfo = {};
     this._layoutInfo.spaceBetweenGridCells = 4;
-    this._refToText = theRefToText;
+
+    this._currentLayout = '';
+
+    this._refToText = aRefToText;
   }
 
 
@@ -54,7 +57,7 @@ abstract class LayoutCreator {
 
 
 
-  abstract layoutFactoryClass(aLayoutName: string, initialLayoutInfo: LayoutInfo, refToText: Text, arrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>): Layout
+  abstract layoutFactory(aLayoutName: string, initialLayoutInfo: LayoutInfo, refToText: Text, arrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>): Layout
 
 
   changeLayout(layoutType: string) {
@@ -91,7 +94,7 @@ abstract class LayoutCreator {
     this.layoutInfo = ['rowAndColumnNumbers', rowAndColumnNumbers];
     this.layoutInfo = ['numberOfColumns', rowAndColumnNumbers.totalNumberOfColumns];
 
-    this._theLayout = this.layoutFactoryClass(layoutType, this.layoutInfo, this._refToText, this._arryOfWSVsThatHaveAClone);
+    this._theLayout = this.layoutFactory(layoutType, this.layoutInfo, this._refToText, this._arryOfWSVsThatHaveAClone);
 
     this._theLayout.applyLayout();
   }
@@ -184,7 +187,7 @@ abstract class LayoutCreator {
     this._refToText._isLayoutVisible = false;
 
     // hide tooltip
-    this._refToText._theContextualMenu.hideContextualMenu(this._refToText._currentEntity);
+    this._refToText._contextualMenu.hideContextualMenu(this._refToText._currentEntity);
 
     document.getElementById('triangle_left').classList.add('hide');
     document.getElementById('triangle_right').classList.add('hide');
@@ -208,16 +211,10 @@ abstract class LayoutCreator {
 
   updateEntityBBox() {
 
-    this._arrayOfWSVsWithouCurrentWSV.forEach(aWSV => {
+    this._arryOfWSVsThatHaveAClone.forEach(aWSV => {
       aWSV._theClonedWSV._entity.getBBoxOfEntity();
 
     });
-    //
-    // $.each(WSV_cloned, function(index, d) {
-    //
-    //   d.entityBbox = get_BBox_entity(d.anEntity.parent())
-    //
-    // });
   }
 
 

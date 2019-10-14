@@ -7,7 +7,7 @@
 interface Layout {
 
 
-  applyLayout();
+  applyLayout(): void;
 
 
 

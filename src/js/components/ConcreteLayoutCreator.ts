@@ -1,26 +1,34 @@
 import { LayoutInfo } from "../../../global";
 
-import LayoutCreator from './layoutCreator'
-import Layout from './layout'
+import LayoutCreator from './layoutCreator';
+import Layout from './layout';
+import Text from './text';
+import WordScaleVisualization from './wordScaleVisualization';
 
-import GridLayout from './gridLayout';
 import ColumnLayout from './columnLayout';
 import ColumnPanAlignedLayout from './columnPanAlignedLayout';
-import RowLayout from './rowLayout';
+import GridLayout from './gridLayout';
 import GridNoOverlapLayout from './gridNoOverlapLayout';
-import Text from './text'
-import WordScaleVisualization from './wordScaleVisualization';
+import RowLayout from './rowLayout';
 
 
 class ConcreteLayoutCreator extends LayoutCreator {
 
-  layouts: any = {GridLayout, ColumnLayout, ColumnPanAlignedLayout, RowLayout, GridNoOverlapLayout};
+  readonly _layouts = {GridLayout, ColumnLayout, ColumnPanAlignedLayout, RowLayout, GridNoOverlapLayout};
 
-  contructor() {
-    
+
+  constructor(aRefToText: Text) {
+    super(aRefToText);
+    console.log('the concreteLayoutCreator constructor');
   }
 
-  layoutFactoryClass(aLayoutName: string, initialLayoutInfo: LayoutInfo, refToText: Text, arrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>): Layout {
+
+  get layouts() {
+    return this._layouts;
+  }
+
+
+  layoutFactory(aLayoutName: string, initialLayoutInfo: LayoutInfo, refToText: Text, arrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>): Layout {
 
     return new this.layouts[aLayoutName](initialLayoutInfo, refToText, arrayOfWSVsWithouCurrentWSV)
 
