@@ -9,7 +9,7 @@ interface Layout {
 
   applyLayout(): void;
 
-
+  cleanUpAfterLayout():void;
 
 }
 

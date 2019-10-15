@@ -15,16 +15,13 @@ class GridLayout implements Layout {
 
   _layoutInfo: LayoutInfo;
   _refToText: Text;
-  _arrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>;
+  _wsvsWithouCurrentWSV: Array<WordScaleVisualization>;
 
 
   constructor(aLayoutInfo: LayoutInfo, aRefToText: Text, anArrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>) {
-    // super();
     this._layoutInfo = aLayoutInfo;
     this._refToText = aRefToText;
-    this._arrayOfWSVsWithouCurrentWSV = anArrayOfWSVsWithouCurrentWSV;
-
-    this.applyLayout();
+    this._wsvsWithouCurrentWSV = anArrayOfWSVsWithouCurrentWSV;
   }
 
 
@@ -47,7 +44,7 @@ class GridLayout implements Layout {
     const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
 
     // update the counts variable
-    layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._arrayOfWSVsWithouCurrentWSV)
+    layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._wsvsWithouCurrentWSV)
 
     // get top left cornerDiffs
     const numUsedRowsAbove = Math.ceil(layoutInfo.counts.above/layoutInfo.numberOfColumns);
@@ -73,7 +70,7 @@ class GridLayout implements Layout {
     let belowIndex = 0;
     layoutInfo.startIndex_below = 0;
 
-    this._arrayOfWSVsWithouCurrentWSV.forEach(aWSV => {
+    this._wsvsWithouCurrentWSV.forEach(aWSV => {
 
       // cloning the wsv, and changing the position from relative to absolute
       let aClonedWSV: WordScaleVisualization;
@@ -134,9 +131,9 @@ class GridLayout implements Layout {
         sequenceQueue: false,
 
         complete: () => {
-          aClonedWSV._entity.getBBoxOfEntity();
-          aClonedWSV.getBBoxOfSparkline();
-          aClonedWSV.getBBoxOfWSV();
+          aClonedWSV._entity.setBBoxOfEntity();
+          aClonedWSV.setBBoxOfSparkline();
+          aClonedWSV.setBBoxOfWSV();
         }
       }});
 
@@ -151,8 +148,6 @@ class GridLayout implements Layout {
     $.Velocity.RunSequence(mySequence);
 
     $('.sparklificated.clonedWSV.first .entity').css('background-color', 'rgb(255, 223, 128)');
-
-    this._refToText.isLayoutVisible = true;
   }
 
 
@@ -164,6 +159,12 @@ class GridLayout implements Layout {
     }
 
     return numberOfColumns - rest;
+  }
+
+
+  cleanUpAfterLayout() {
+    console.log('grid layout cleanup');
+
   }
 
 

@@ -1,4 +1,4 @@
-import { WsvDataObject, EventLocation } from '../../../global';
+import { WsvDataObject, EventLocation, BBox } from '../../../global';
 
 import ContextualMenu from './contextualMenu';
 import WordScaleVisualization from './wordScaleVisualization';
@@ -16,8 +16,8 @@ import { wsvInteractionConstants } from '../constants';
 interface Text {
   _nameOfTextFile: string;
   _isLayoutVisible: Boolean;
-  _currentWSV: WordScaleVisualization;
-  _currentEntity: Entity;
+  _currentWSV: WordScaleVisualization | null;
+  _currentEntity: Entity | null;
   _listOfWSVs: Array<WordScaleVisualization>;
   _dataForWSV: WsvDataObject;
   _contextualMenu: ContextualMenu;
@@ -43,10 +43,10 @@ class Text implements Text {
       return this._isLayoutVisible;
   }
 
-  set currentWSV(value: WordScaleVisualization) {
+  set currentWSV(value: WordScaleVisualization | null) {
       this._currentWSV = value;
   }
-  get currentWSV(): WordScaleVisualization {
+  get currentWSV(): WordScaleVisualization | null {
       return this._currentWSV;
   }
 
@@ -64,10 +64,10 @@ class Text implements Text {
       return this._listOfWSVs;
   }
 
-  set currentEntity(value: Entity)  {
+  set currentEntity(value: Entity | null)  {
       this._currentEntity = value;
   }
-  get currentEntity(): Entity {
+  get currentEntity(): Entity | null {
       return this._currentEntity;
   }
 
@@ -76,6 +76,13 @@ class Text implements Text {
   }
   get layoutCreator(): LayoutCreator {
       return this._layoutCreator;
+  }
+
+  set contextualMenu(value: ContextualMenu)  {
+      this._contextualMenu = value;
+  }
+  get contextualMenu(): ContextualMenu {
+      return this._contextualMenu;
   }
 
 
@@ -115,8 +122,8 @@ class Text implements Text {
 
         console.log('event: click (give up layout)');
 
-        this._layoutCreator.giveUpLayout();
-        this._contextualMenu.cleanupTooltip();
+        this.layoutCreator.giveUpLayout();
+        this.contextualMenu.cleanupTooltip();
       }
     });
 
@@ -141,7 +148,7 @@ class Text implements Text {
         console.log('event: click (give up layout)');
 
         this.layoutCreator.giveUpLayout();
-        this._contextualMenu.cleanupTooltip();
+        this.contextualMenu.cleanupTooltip();
 
         // clearSelection();
         // // resetLayoutIcon();
@@ -155,16 +162,23 @@ class Text implements Text {
         // summon grid layout when dblclicking somewhere on the canvas
         console.log("event: dblclick (create layout)");
 
-        const dblClickLocation: EventLocation = {x: 0, y: 0};
-        dblClickLocation.x = event.pageX;
-        dblClickLocation.y = event.pageY;
+        const dblClickLocation: EventLocation = {x: event.pageX,
+                                                 y: event.pageY};
 
-        if (this.chooseCurrentEntity(dblClickLocation)) {
-          this._layoutCreator.changeLayout('GridLayout')
-          this._contextualMenu.showContextMenu(this._currentEntity);
+        this.chooseCurrentEntity(dblClickLocation)
+        if (this.isCurrentEntitySet()) {
+          this.contextualMenu.showContextMenu(this._currentEntity!);
+          this.layoutCreator.changeLayout('GridLayout')
         } else {
           console.log('no current entity was found')
         }
+
+        // if (this.chooseCurrentEntity(dblClickLocation)) {
+        //   this.contextualMenu.showContextMenu(this._currentEntity);
+        //   this.layoutCreator.changeLayout('GridLayout')
+        // } else {
+        //   console.log('no current entity was found')
+        // }
 
         // unSelectIcon();
         //
@@ -172,16 +186,7 @@ class Text implements Text {
         // if (condition === study2) {
         //   iconName = previousLayout;
         // }
-        //
-        // // dblClickLocation.x = event.clientX;
-        // // dblClickLocation.y = event.clientY;
-        // dblClickLocation.x = event.pageX;
-        // dblClickLocation.y = event.pageY;
-        //
-        // changeLayout(iconName);
-        //
-        // layoutFlag = true;
-        //
+
         // if (currentEntity !== null) {
         //   // currentEntity has to be set here by changeLayout, if not don't go on
         //   tmpCurrentEntity = $(currentEntity)[0]
@@ -209,10 +214,10 @@ class Text implements Text {
 
     var hideClass = 'hide';
 
-    const orientaionCircleDiv = document.createElement("div");
-    orientaionCircleDiv.setAttribute('id', 'orientation_circles');
-    orientaionCircleDiv.setAttribute('class', hideClass);
-    document.body.appendChild(orientaionCircleDiv);
+    // const orientaionCircleDiv = document.createElement("div");
+    // orientaionCircleDiv.setAttribute('id', 'orientation_circles');
+    // orientaionCircleDiv.setAttribute('class', hideClass);
+    // document.body.appendChild(orientaionCircleDiv);
 
     const restrictedDragBandDiv = document.createElement("div");
     restrictedDragBandDiv.setAttribute('id', 'restrictedDragBand');
@@ -231,10 +236,9 @@ class Text implements Text {
   }
 
 
-
   // check if currentEntity is set
   isCurrentEntitySet(): Boolean {
-    if (this.currentEntity != null) {
+    if (this.currentEntity) {
       return true;
     } else {
       return false;
@@ -249,21 +253,26 @@ class Text implements Text {
 
     const tmpWSVList: Array<WordScaleVisualization> = [];
 
-    document.querySelectorAll(wsvInteractionConstants.entitySpanClass).forEach((entityElement) => {
+    document.querySelectorAll(wsvInteractionConstants.entitySpanClass).forEach(anElement => {
 
       // get data for the entity
-      let entityName = this.getEntityName(entityElement);
+      let anHTMLElement = anElement as HTMLElement;
+
+      let entityName = this.getEntityName(anHTMLElement);
       let dataForEntity = this.dataForWSV[entityName]
 
       if (!((typeof dataForEntity == 'undefined') || (dataForEntity.length == 0))) {
-        let aWSV = new WordScaleVisualization(entityElement, dataForEntity, entityElement.dataset.wsvRenderer, this, false);
+        if (anHTMLElement.dataset.wsvRenderer) {
+          let aWSV = new WordScaleVisualization(anHTMLElement, dataForEntity, anHTMLElement.dataset.wsvRenderer, this, false);
 
-        tmpWSVList.push(aWSV);
+          tmpWSVList.push(aWSV);
+        } else {
+          console.log('ERROR: wsv has no renderer assigned through data attribute data-wsv-renderer')
+        }
       }
     });
 
     this.listOfWSVs = tmpWSVList;
-
   }
 
 
@@ -297,7 +306,6 @@ class Text implements Text {
       alert('There is no div element with id "document"');
       return null;
     }
-
   }
 
 
@@ -307,33 +315,35 @@ class Text implements Text {
       document.getSelection().empty();
     } else if (window.getSelection) {
       let sel = window.getSelection();
-      sel.removeAllRanges();
+
+      if (sel) {
+        sel.removeAllRanges();
+      }
     }
   }
 
 
-  chooseCurrentEntity(anEventLocation: EventLocation): Boolean {
+  chooseCurrentEntity(anEventLocation: EventLocation) {
     let aCurrentEntity = this.currentEntity;
 
     // All possible falsy values in ECMA-/Javascript: null, undefined, NaN, empty string (""), 0, false.
     if (!aCurrentEntity) {
-      const choosenEntity: Entity = this.set_closestEntityAsCurrentEntity(anEventLocation)
+      const choosenEntity: Entity | null = this.getClosestEntityAsCurrentEntity(anEventLocation)
       if (choosenEntity) {
         choosenEntity.setAsCurrentEntity();
       } else {
         alert('an entity needs to be visible to gather charts using double clicking!!');
-        return false;
       }
+    } else {
+      console.log('ERROR: a currentEntity has already been choose');
     }
-
-    return true;
   }
 
 
   // get the closest entity to the dbclicked location
-  set_closestEntityAsCurrentEntity(anEventLocation: EventLocation): Entity {
+  getClosestEntityAsCurrentEntity(anEventLocation: EventLocation): Entity | null {
 
-    let closestVisibleEntity: Entity = null;
+    let closestVisibleEntity: Entity | null = null;
     let closestDistance: number = 1000000;
 
     this.listOfWSVs.forEach(aWSV => {
@@ -355,7 +365,6 @@ class Text implements Text {
       return null;
     }
 
-    // closestVisibleEntity.setAsCurrentEntity();
     return closestVisibleEntity;
   }
 
@@ -366,7 +375,7 @@ class Text implements Text {
   * @param  {[type]} entity [description]
   * @return {number}        shortest ditance between the corner closest to the point and the point
   */
-  getDistancePointClosestWSVCorner(point: EventLocation, entity: Entity) {
+  getDistancePointClosestWSVCorner(point: EventLocation, entity: Entity): number {
     // entities are DOM elements
     const wsvBBox = entity._entityBelongsToWsv._wsvBBox;
 
@@ -417,6 +426,13 @@ class Text implements Text {
     return squaredDistance;
   }
 
+
+  getViewportInfo(): BBox {
+
+    const viewPortDimension = document.body.getBoundingClientRect();
+
+    return viewPortDimension;
+  }
 
 
 }

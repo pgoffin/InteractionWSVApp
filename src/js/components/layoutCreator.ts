@@ -1,4 +1,4 @@
-import { NumberColAndRows, LayoutInfo } from "../../../global";
+  import { NumberColAndRows, LayoutInfo } from "../../../global";
 
 import { wsvInteractionConstants } from '../constants';
 
@@ -16,10 +16,10 @@ import 'velocity-ui-pack';
 abstract class LayoutCreator {
 
   _layoutInfo: LayoutInfo;
-  _currentLayout: string;
+  // _currentLayout: string;
   _refToText: Text;
   _theLayout: Layout;
-  _arryOfWSVsThatHaveAClone: Array<WordScaleVisualization>;
+  _wsvsThatHaveAClone: Array<WordScaleVisualization>;
 
 
 
@@ -27,25 +27,19 @@ abstract class LayoutCreator {
     this._layoutInfo = {};
     this._layoutInfo.spaceBetweenGridCells = 4;
 
-    this._currentLayout = '';
+    // this._currentLayout = '';
 
     this._refToText = aRefToText;
+    this._wsvsThatHaveAClone = []
   }
 
 
-  // getter/setter
-  get currentLayout(): string {
-    return this._currentLayout;
-  }
-  set currentLayout(aLayout: string) {
-    this._currentLayout = aLayout;
-  }
-
-  // get measurementArray() {
-  //   return this._measurementArray;
+  // // getter/setter
+  // get currentLayout(): string {
+  //   return this._currentLayout;
   // }
-  // set measurementArray(anArray) {
-  //   this._measurementArray = anArray;
+  // set currentLayout(aLayout: string) {
+  //   this._currentLayout = aLayout;
   // }
 
   set layoutInfo(keyValuePair) {
@@ -70,9 +64,9 @@ abstract class LayoutCreator {
     this.layoutInfo = ['cell_dimensions', cellDimensions];
     this.layoutInfo = ['bbox_currentWSV', bbox_currWSV];
 
-    this._arryOfWSVsThatHaveAClone = this._refToText.listOfWSVs.filter(aWSV => aWSV != this._refToText._currentWSV);
+    this._wsvsThatHaveAClone = this._refToText.listOfWSVs.filter(aWSV => aWSV != this._refToText._currentWSV);
 
-    this._arryOfWSVsThatHaveAClone.forEach(aWSV => {
+    this._wsvsThatHaveAClone.forEach(aWSV => {
       let aEntityBBox = aWSV.entity._entityBbox;
       aWSV._aboveOrBelow = (aEntityBBox.top > bbox_currEntity.bottom) ? 'below' : 'above';
 
@@ -86,7 +80,7 @@ abstract class LayoutCreator {
     });
 
     // order first by above or below, then use distance to to the currentEntity
-    this._arryOfWSVsThatHaveAClone.sort(dl.comparator(['+aboveOrBelow', '-distanceToCurrEntity']));
+    this._wsvsThatHaveAClone.sort(dl.comparator(['+aboveOrBelow', '-distanceToCurrEntity']));
 
 
     let rowAndColumnNumbers: NumberColAndRows = this.spaceAvailability_numberColAndRows(currentEntity, wsvInteractionConstants.positionType, layoutType, 'middleBound', this._refToText.listOfWSVs, this.layoutInfo.cell_dimensions.width, this.layoutInfo.cell_dimensions.height, this.layoutInfo.spaceBetweenGridCells);
@@ -94,9 +88,10 @@ abstract class LayoutCreator {
     this.layoutInfo = ['rowAndColumnNumbers', rowAndColumnNumbers];
     this.layoutInfo = ['numberOfColumns', rowAndColumnNumbers.totalNumberOfColumns];
 
-    this._theLayout = this.layoutFactory(layoutType, this.layoutInfo, this._refToText, this._arryOfWSVsThatHaveAClone);
-
+    this._theLayout = this.layoutFactory(layoutType, this.layoutInfo, this._refToText, this._wsvsThatHaveAClone);
     this._theLayout.applyLayout();
+
+    this._refToText.isLayoutVisible = true;
   }
 
 
@@ -104,7 +99,7 @@ abstract class LayoutCreator {
 
     const giveUpAnimationSequence = [];
 
-    this._arryOfWSVsThatHaveAClone.forEach((aWSV, index) => {
+    this._wsvsThatHaveAClone.forEach((aWSV, index) => {
 
       let originalWSVBBox = aWSV._wsvBBox;
       let whiteBackgroundElement = aWSV._theClonedWSV._backgroundElement;
@@ -120,7 +115,7 @@ abstract class LayoutCreator {
                                       }
                                   });
 
-      if (Object.is(this._arryOfWSVsThatHaveAClone.length - 1, index)) {
+      if (Object.is(this._wsvsThatHaveAClone.length - 1, index)) {
 
         giveUpAnimationSequence.push({e: whiteBackgroundElement,
                                       p: {left: originalWSVBBox.left, top: originalWSVBBox.top, opacity: 0},
@@ -135,6 +130,7 @@ abstract class LayoutCreator {
                                             document.querySelectorAll('.entity').forEach(anElement => {anElement.classList.remove('selected')});
 
                                             this.cleanupAfterLayout();
+                                            this._theLayout.cleanUpAfterLayout();
 
                                             // this._refToText._currentEntity.unSetAsCurrentEntity();
                                             // this._refToText._isLayoutVisible = false;
@@ -175,10 +171,6 @@ abstract class LayoutCreator {
     });
 
     $.Velocity.RunSequence(giveUpAnimationSequence);
-
-    if ($('#spacer').length > 0) {
-      this.removeSpacer();
-    }
   }
 
 
@@ -189,66 +181,26 @@ abstract class LayoutCreator {
     // hide tooltip
     this._refToText._contextualMenu.hideContextualMenu(this._refToText._currentEntity);
 
-    document.getElementById('triangle_left').classList.add('hide');
-    document.getElementById('triangle_right').classList.add('hide');
-
     this.layoutInfo.bandLength = 0;
     this.layoutInfo.startOffsetRowlayout = 0;
     this.layoutInfo.snapPositions = [];
 
+    this._wsvsThatHaveAClone = [];
+
     // remove any trails
     // removeTrail();
 
-    this.removeSpacer();
-  }
 
-
-  removeSpacer() {
-
-    const spacerElement = document.getElementById('spacer');
-
-    if (spacerElement) spacerElement.remove();
-
-    // change the entityBbox as the spacer was removed
-    // this.updateEntityBBox();
   }
 
 
   updateEntityBBox() {
 
-    this._arryOfWSVsThatHaveAClone.forEach(aWSV => {
-      aWSV._theClonedWSV._entity.getBBoxOfEntity();
+    this._wsvsThatHaveAClone.forEach(aWSV => {
+      aWSV._theClonedWSV._entity.setBBoxOfEntity();
 
     });
   }
-
-
-  // static addWhiteLayer(width: number, height: number, oldTop: number, oldLeft: number) {
-  //
-  //   // var whiteLayerBox = $("<div class='whiteLayer'></div>");
-  //   //
-  //   // $('#text').append(whiteLayerBox);
-  //
-  //   const whiteLayerDiv = document.createElement('div');
-  //   whiteLayerDiv.classList.add('whiteLayer');
-  //   document.getElementById('text').append(whiteLayerDiv);
-  //
-  //   whiteLayerDiv.style.width = width + 'px';
-  //   whiteLayerDiv.style.height = height + 'px';
-  //
-  //   whiteLayerDiv.style.top = oldTop + 'px';
-  //   whiteLayerDiv.style.left = oldLeft + 'px';
-  //
-  //   // $(whiteLayerBox).css('position', 'absolute');
-  //   // $(whiteLayerBox).css('opacity', 0);
-  //   // $(whiteLayerBox).width(width);
-  //   // $(whiteLayerBox).height(height);
-  //   // $(whiteLayerBox).offset({top: oldTop, left: oldLeft});
-  //   // $(whiteLayerBox).css('z-index', 4);
-  //   // $(whiteLayerBox).css('pointer-events', 'none');
-  //
-  //   return whiteLayerDiv;
-  // }
 
 
   static comparing2DCoordinates(oldCoordinates, newCoordinates) {
@@ -293,7 +245,7 @@ abstract class LayoutCreator {
   * @param  {[type]} spaceBetweenGridCells        [description]
   * @return {object}      - custom object including the number of columns to the left and right, and above and below
   */
-  spaceAvailability_numberColAndRows(aCurrentEntity, aPositionType, layoutType, boundToWhat, arrayOfWSVs, aCellWidth, aCellHeight, spaceBetweenGridCells) {
+  spaceAvailability_numberColAndRows(aCurrentEntity, aPositionType, layoutType, boundToWhat, arrayOfWSVs, aCellWidth, aCellHeight, spaceBetweenGridCells): LayoutInfo {
 
     //TODO layoutTpe variable not yet used, do I need to use it
 
@@ -367,14 +319,14 @@ abstract class LayoutCreator {
 
         // how many rows available above current entity
         // top position relative to viewport
-        availableSpace_above = Math.max(0, (currentWSV_topPosition - $(window).scrollTop() - spaceBetweenGridCells));
+        availableSpace_above = Math.max(0, (currentWSV_topPosition - document.body.scrollTop - spaceBetweenGridCells));
 
         numRowsPossible_above = Math.floor(availableSpace_above / (aCellHeight + (2 * spaceBetweenGridCells)));
         numberColAndRows.aboveNumbRow = numRowsPossible_above;
 
         // how many rows available below current entity
         // bottom position relative to viewport
-        availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - $(window).scrollTop()) - spaceBetweenGridCells));
+        availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - document.body.scrollTop) - spaceBetweenGridCells));
 
         numRowsPossible_below = Math.floor(availableSpace_below / (aCellHeight + (2 * spaceBetweenGridCells)));
         numberColAndRows.belowNumbRow = numRowsPossible_below;
@@ -403,13 +355,13 @@ abstract class LayoutCreator {
         numberColAndRows.rightNumbColumn = 0;
 
         // how many rows available above current entity
-        availableSpace_above = Math.max(0, (currentWSV_topPosition - $(window).scrollTop() - spaceBetweenGridCells));
+        availableSpace_above = Math.max(0, (currentWSV_topPosition - document.body.scrollTop - spaceBetweenGridCells));
 
         numRowsPossible_above = Math.floor(availableSpace_above / (aCellHeight + (2 * spaceBetweenGridCells)));
         numberColAndRows.aboveNumbRow = numRowsPossible_above;
 
         // how many rows available below current entity
-        availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - $(window).scrollTop()) - spaceBetweenGridCells));
+        availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - document.body.scrollTop) - spaceBetweenGridCells));
 
         numRowsPossible_below = Math.floor(availableSpace_below / (aCellHeight + (2 * spaceBetweenGridCells)));
         numberColAndRows.belowNumbRow = numRowsPossible_below;
@@ -438,13 +390,13 @@ abstract class LayoutCreator {
         numberColAndRows.rightNumbColumn = 1;
 
         // how many rows available above current entity
-        availableSpace_above = Math.max(0, (currentWSV_topPosition - $(window).scrollTop() - spaceBetweenGridCells));
+        availableSpace_above = Math.max(0, (currentWSV_topPosition - document.body.scrollTop - spaceBetweenGridCells));
 
         numRowsPossible_above = Math.floor(availableSpace_above / (aCellHeight + (2 * spaceBetweenGridCells)));
         numberColAndRows.aboveNumbRow = numRowsPossible_above;
 
         // how many rows available below current entity
-        availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - $(window).scrollTop()) - spaceBetweenGridCells));
+        availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - document.body.scrollTop) - spaceBetweenGridCells));
 
         numRowsPossible_below = Math.floor(availableSpace_below / (aCellHeight + (2 * spaceBetweenGridCells)));
         numberColAndRows.belowNumbRow = numRowsPossible_below;
@@ -471,10 +423,10 @@ abstract class LayoutCreator {
         numberColAndRows.rightNumbColumn = numbColumnsPossible_right;
 
         // how many rows available above current entity
-        availableSpace_above = Math.max(0, (currentWSV_topPosition - $(window).scrollTop() - spaceBetweenGridCells));
+        availableSpace_above = Math.max(0, (currentWSV_topPosition - document.body.scrollTop - spaceBetweenGridCells));
         numRowsPossible_above = Math.floor(availableSpace_above / (aCellHeight + (2 * spaceBetweenGridCells)));
 
-        availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - $(window).scrollTop()) - spaceBetweenGridCells));
+        availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - document.body.scrollTop) - spaceBetweenGridCells));
         numRowsPossible_below = Math.floor(availableSpace_below / (aCellHeight + (2 * spaceBetweenGridCells)));
 
         if (numRowsPossible_above > 0) {
@@ -512,13 +464,13 @@ abstract class LayoutCreator {
         numberColAndRows.rightNumbColumn = numbColumnsPossible_right;
 
         // how many rows available above current entity
-        availableSpace_above = Math.max(0, (currentWSV_topPosition - $(window).scrollTop() - spaceBetweenGridCells));
+        availableSpace_above = Math.max(0, (currentWSV_topPosition - document.body.scrollTop - spaceBetweenGridCells));
 
         numRowsPossible_above = Math.floor(availableSpace_above / (aCellHeight + (2 * spaceBetweenGridCells)));
         numberColAndRows.aboveNumbRow = numRowsPossible_above;
 
         // how many rows available below current entity
-        availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - $(window).scrollTop()) - spaceBetweenGridCells));
+        availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - document.body.scrollTop) - spaceBetweenGridCells));
 
         numRowsPossible_below = Math.floor(availableSpace_below / (aCellHeight + (2 * spaceBetweenGridCells)));
         numberColAndRows.belowNumbRow = numRowsPossible_below;

@@ -2,8 +2,6 @@ import { wsvInteractionConstants } from '../constants';
 
 const menuItems = require('./menuItems');
 
-import LayoutCreator from './layoutCreator';
-import ConcreteLayoutCreator from './concreteLayoutCreator';
 import Text from '../components/text';
 import Entity from '../components/entity';
 
@@ -36,28 +34,26 @@ class ContextualMenu {
                                  wsvInteractionConstants.menuElement.orderByLastDataValueElement,
                                  wsvInteractionConstants.menuElement.orderByEntityNameElement,
                                  wsvInteractionConstants.menuElement.orderByDocPositionElement];
-  _selectedLayoutMenuItem: HTMLElement;
+  _selectedLayoutMenuItem: HTMLElement | null;
   _refToText: Text;
-  _refToLayout: LayoutCreator;
   _tooltipElements: Array<HTMLElement>;
-  _theTooltipElement: HTMLElement;
+  _tooltip: HTMLElement;
 
 // ['#grid', '#close', '#order-by-lastDataValue', '#order-by-entityName', '#order-by-docPosition','#selector', '#selector-ok', '#row', '#column', '#grid-no-overlap'];
 
 
   // getter/setter
-  set theTooltipElement(value: HTMLElement) {
-      this._theTooltipElement = value;
+  set tooltip(value: HTMLElement) {
+      this._tooltip = value;
   }
-  get theTooltipElement(): HTMLElement {
-      return this._theTooltipElement;
+  get tooltip(): HTMLElement {
+      return this._tooltip;
   }
 
 
   constructor(referenceToText: Text) {
 
     this._refToText = referenceToText;
-    // this._refToLayout = referenceToText._theLayout;
 
     this._tooltipBBox = {offset: -5,
                          width: 0,
@@ -70,7 +66,7 @@ class ContextualMenu {
 
     const menuDiv = document.createElement("div");
     menuDiv.setAttribute('id', 'tooltip');
-    this.theTooltipElement = menuDiv;
+    this.tooltip = menuDiv;
 
     this._menuItems.forEach((anElement: MenuItemType) => {
       if (this._visibleMenuItems.includes(anElement.element)) {
@@ -139,11 +135,19 @@ class ContextualMenu {
 
         } else if (anElement.elementType === 'layout') {
 
-          if (this._refToText.chooseCurrentEntity(null)) {
-            // this._refToText._theLayout.changeLayout(anElement.elementInteraction);
-            this._refToText.layoutCreator.changeLayout(anElement.elementInteraction)
-            // new ConcreteLayoutCreator(this._refToText)
+          if (this._refToText.isCurrentEntitySet) {
+
+            if (this._refToText._isLayoutVisible) {
+              this._refToText.layoutCreator._theLayout.cleanUpAfterLayout();
+              this._refToText.layoutCreator.changeLayout(anElement.elementInteraction)
+            } else {
+              this._refToText.layoutCreator.changeLayout(anElement.elementInteraction)
+            }
+
+          } else {
+            console.log('ERROR: no currentEntity, there should be one as tooltip is called on the currentEntity')
           }
+
         } else if (anElement.elementType === 'sorting') {
           console.log('not yet implemented')
         }
@@ -158,12 +162,12 @@ class ContextualMenu {
   // Perform initial setup on the context menu (attaching listeners, etc.), done once only!
   setupContextMenu(entityMenuCalledOn: Entity) {
 
-    this.theTooltipElement.addEventListener('mouseenter', () => {
+    this.tooltip.addEventListener('mouseenter', () => {
       console.log('adding mouseenter event handler')
       this.stopMenuHideTimer();
     });
 
-    this.theTooltipElement.addEventListener('mouseleave', () => {
+    this.tooltip.addEventListener('mouseleave', () => {
       console.log('adding mouseleave event handler')
       this.startMenuHideTimer(entityMenuCalledOn);
     });
@@ -180,11 +184,11 @@ class ContextualMenu {
 
     this.stopMenuHideTimer()
 
-    this.theTooltipElement.classList.remove('hide')
-    this.theTooltipElement.classList.add('wrapper')
+    this.tooltip.classList.remove('hide')
+    this.tooltip.classList.add('wrapper')
 
-    this.computePositionMenu(entityMenuIsCalledOn);
-    this.positionMenu(this._refToLayout, entityMenuIsCalledOn);
+    this.getTooltipBBox(entityMenuIsCalledOn);
+    this.positionMenu(entityMenuIsCalledOn);
   }
 
 
@@ -195,7 +199,7 @@ class ContextualMenu {
     if (this._menuHideTimer) clearTimeout(this._menuHideTimer);
 
     this._menuHideTimer = window.setTimeout(() => {
-                                      if (!this.theTooltipElement.classList.contains('hide')) {
+                                      if (!this.tooltip.classList.contains('hide')) {
                                         console.log('hide startMenuHideTimer')
                                         this.hideContextualMenu(refToEntity)
                                       } else {
@@ -218,8 +222,8 @@ class ContextualMenu {
     // Don't hide if a layout is being displayed
     if(!this._refToText.isLayoutVisible) {
 
-      this.theTooltipElement.classList.remove('wrapper');
-      this.theTooltipElement.classList.add('hide')
+      this.tooltip.classList.remove('wrapper');
+      this.tooltip.classList.add('hide')
 
       // this.resetLayoutIcon();
 
@@ -229,33 +233,33 @@ class ContextualMenu {
   }
 
   // compute the tooltip position
-  computePositionMenu(entityMenuIsCalledOn: Entity) {
+  getTooltipBBox(entityMenuIsCalledOn: Entity) {
 
-    this._tooltipBBox.width = this.theTooltipElement.getBoundingClientRect().width;
-    this._tooltipBBox.height = this.theTooltipElement.getBoundingClientRect().height;
+    this._tooltipBBox.width = this.tooltip.getBoundingClientRect().width;
+    this._tooltipBBox.height = this.tooltip.getBoundingClientRect().height;
     this._tooltipBBox.left = entityMenuIsCalledOn._entityBbox.left - this._tooltipBBox.width - this._tooltipBBox.offset;
   }
 
 
-  positionMenu(aRefToLayout: Layout, entityMenuIsCalledOn: Entity) {
+  positionMenu(entityMenuIsCalledOn: Entity) {
 
-    if (this._tooltipBBox.left < LayoutCreator.getViewportMeasurements(aRefToLayout).viewportLeft) {
+    if (this._tooltipBBox.left < this._refToText.getViewportInfo().left) {
       this._tooltipBBox.left = entityMenuIsCalledOn._entityBbox.right + this._tooltipBBox.offset;
-      this.theTooltipElement.classList.remove('leftPos');
-      this.theTooltipElement.classList.add('rightPos');
+      this.tooltip.classList.remove('leftPos');
+      this.tooltip.classList.add('rightPos');
     }
 
     this._tooltipBBox.top = entityMenuIsCalledOn._entityBbox.top - 18;
     this._tooltipBBox.bottom = entityMenuIsCalledOn._entityBbox.bottom + this._tooltipBBox.height + 5;
 
-    if (this._tooltipBBox.bottom > (window.innerHeight  + $(window).scrollTop())) {
+    if (this._tooltipBBox.bottom > (window.innerHeight + document.body.scrollTop)) {
       this._tooltipBBox.top = entityMenuIsCalledOn._entityBbox.top - 5 - this._tooltipBBox.height;
-      this.theTooltipElement.classList.add('topPos')
+      this.tooltip.classList.add('topPos')
     }
 
     // set the position of the tooltip
-    this.theTooltipElement.style.left = this._tooltipBBox.left + 'px';
-    this.theTooltipElement.style.top = this._tooltipBBox.top + 'px';
+    this.tooltip.style.left = this._tooltipBBox.left + 'px';
+    this.tooltip.style.top = this._tooltipBBox.top + 'px';
   }
 
 
@@ -277,6 +281,7 @@ class ContextualMenu {
       aTooltipItem.classList.add('selectable');
     });
   }
+
 
   cleanupTooltip() {
     // go through all menu items and reset their class to selectable

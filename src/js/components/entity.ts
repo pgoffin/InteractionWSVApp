@@ -52,7 +52,7 @@ class Entity implements Entity {
 
     this._entityBelongsToWsv = theWSV;
 
-    this.getBBoxOfEntity();
+    this.setBBoxOfEntity();
 
     this.addEventsToEntity()
   }
@@ -84,7 +84,7 @@ class Entity implements Entity {
       this.entityElement.addEventListener('mouseenter', () => {
         console.log('mouseenter on cloned entity');
 
-        this.draw_connection_line('hoveringTrail', this, null)
+        this.drawConnectionLine('hoveringTrail', this, null)
       });
 
       this.entityElement.addEventListener('mouseleave', () => {
@@ -120,14 +120,15 @@ class Entity implements Entity {
     this._isCurrentEntity = false;
   }
 
+
   setAsSelected() {
     this.entityElement.classList.add('selected');
 
     this._isSelected = true
   }
 
-  // measurements
-  getBBoxOfEntity() {
+
+  setBBoxOfEntity() {
 
     const theBbox = { left: 0,
                     top: 0,
@@ -151,11 +152,10 @@ class Entity implements Entity {
     theBbox.height = bbox.height;
 
     this._entityBbox = theBbox;
-    // return theBbox;
   }
 
 
-  draw_connection_line(type: string, source: Entity, target: Entity) {
+  drawConnectionLine(type: string, source: Entity, target: Entity | null) {
 
     let svgContainer;
 
@@ -183,7 +183,11 @@ class Entity implements Entity {
       sourceElement = source._entityElement;
 
       // dragged element
-      targetElement = target._entityElement;
+      if (target) {
+        targetElement = target._entityElement;
+      } else {
+        console.log('ERROR: target is null')
+      }
 
     } else {
 

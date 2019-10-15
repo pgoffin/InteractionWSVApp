@@ -23,8 +23,6 @@ class ColumnPanAlignedLayout implements Layout {
     this._layoutInfo = aLayoutInfo;
     this._refToText = aRefToText;
     this._arrayOfWSVsWithouCurrentWSV = anArrayOfWSVsWithouCurrentWSV;
-
-    this.applyLayout();
   }
 
 
@@ -156,9 +154,9 @@ class ColumnPanAlignedLayout implements Layout {
         sequenceQueue: false,
 
         complete: () => {
-          aClonedWSV._entity.getBBoxOfEntity();
-          aClonedWSV.getBBoxOfSparkline();
-          aClonedWSV.getBBoxOfWSV();
+          aClonedWSV._entity.setBBoxOfEntity();
+          aClonedWSV.setBBoxOfSparkline();
+          aClonedWSV.setBBoxOfWSV();
         }
       }});
 
@@ -172,11 +170,13 @@ class ColumnPanAlignedLayout implements Layout {
     $.Velocity.RunSequence(mySequence);
 
     $('.sparklificated.clonedWSV.first .entity').css('background-color', 'rgb(255, 223, 128)');
-
-    this._refToText.isLayoutVisible = true;
   }
 
 
+  cleanUpAfterLayout() {
+    console.log('columnPanAligned layout cleanup');
+
+  }
 }
 
 

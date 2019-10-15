@@ -35,10 +35,10 @@ class WordScaleVisualization implements WordScaleVisualization {
   _rendererAsClass: string;
   _rendererString: string;
 
-  _visualization: HTMLElement;
+  _visualization: HTMLElement | null;
   _wsvVisualizationBBox: BBox;
 
-  _wsv: HTMLElement;
+  _wsv: HTMLElement | null;
   _wsvBBox: BBox;
 
   _wsvClass: WsVisualizationType;
@@ -74,14 +74,15 @@ class WordScaleVisualization implements WordScaleVisualization {
 
     this._wsv = this.entity.entityElement.parentElement;
 
-    this._visualization = this._wsv.querySelector('span.sparkline');
+    if (this._wsv) {
+      this._visualization = this._wsv.querySelector('span.sparkline');
+    }
 
     this.typeOfWSV = wsvInteractionConstants.typeOfWSV;
 
     // bboxes
-    this.getBBoxOfSparkline();
-    this.getBBoxOfWSV();
-
+    this.setBBoxOfSparkline();
+    this.setBBoxOfWSV();
   }
 
 
@@ -99,13 +100,6 @@ class WordScaleVisualization implements WordScaleVisualization {
   get rawWSVData(): Array<RawWsvData> {
       return this._rawWSVData;
   }
-
-  // set hasData(value: Boolean) {
-  //     this._hasData = value;
-  // }
-  // get hasData(): Boolean {
-  //     return this._hasData;
-  // }
 
   set typeOfWSV(value: string) {
       this._typeOfWSV = value;
@@ -129,7 +123,7 @@ class WordScaleVisualization implements WordScaleVisualization {
   }
 
 
-  getBBoxOfWSV() {
+  setBBoxOfWSV() {
     let theBbox = {left: 0,
                    top: 0,
                    right: 0,
@@ -138,27 +132,26 @@ class WordScaleVisualization implements WordScaleVisualization {
                    height: 0};
 
     // adapt top and bottom to give values according to the document
-    let bboxWSV = this._wsv.getBoundingClientRect();
+    let bboxWSV
+    if (this._wsv) {
+      bboxWSV = this._wsv.getBoundingClientRect();
+    }
 
     let scrollingOffset = document.body.scrollTop;
-    // let scrollingOffset = $(window).scrollTop();
 
-    // let bboxEntity = this.get_BBox_entity(theWSV);
-    // let bboxSparkline = this.get_BBox_sparkline(theWSV);
     let bboxEntity = this.entity._entityBbox;
 
-    this.getBBoxOfSparkline();
-    let bboxSparkline = this._wsvVisualizationBBox
+    this.setBBoxOfSparkline();
 
     if (this._positionOfWSV === 'right') {
       // theBbox.left = bboxEntity.left;
       theBbox.left = bboxWSV.left;
       theBbox.top = bboxWSV.top + scrollingOffset;
       // theBbox.right = bboxSparkline.right;
-      theBbox.right =  bboxSparkline.right;
+      theBbox.right =  this._wsvVisualizationBBox.right;
       theBbox.bottom = bboxWSV.bottom + scrollingOffset;
       // theBbox.width = bboxSparkline.right - bboxEntity.left;
-      theBbox.width = bboxSparkline.right - bboxEntity.left;
+      theBbox.width = this._wsvVisualizationBBox.right - bboxEntity.left;
       theBbox.height = bboxWSV.height;
 
     } else {
@@ -166,11 +159,10 @@ class WordScaleVisualization implements WordScaleVisualization {
     }
 
     this._wsvBBox = theBbox
-    // return theBbox;
   }
 
 
-  getBBoxOfSparkline() {
+  setBBoxOfSparkline() {
     let theBbox = { left: 0,
                     top: 0,
                     right: 0,
@@ -191,8 +183,6 @@ class WordScaleVisualization implements WordScaleVisualization {
     theBbox.height = bbox.height;
 
     this._wsvVisualizationBBox = theBbox;
-
-    // return theBbox;
   }
 
 
@@ -206,9 +196,6 @@ class WordScaleVisualization implements WordScaleVisualization {
     clonedWSV.entity.entityElement.classList.add('cloned');
     clonedWSV._wsv.classList.add('cloned');
     clonedWSV._visualization.classList.add('cloned');
-
-    // clonedWSV._wsv.setStyle('z-index', '6');
-    // clonedWSV._wsv.style.zIndex = '6';
 
     return clonedWSV;
   }
