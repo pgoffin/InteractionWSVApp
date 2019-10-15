@@ -1,4 +1,4 @@
-import { BBox, LayoutInfo } from "../../../global";
+import { BBox, LayoutInfo, VelocitySequence } from "../../../global";
 
 import * as d3 from "d3";
 
@@ -21,7 +21,6 @@ class RowLayout implements Layout {
 
 
   constructor(aLayoutInfo: LayoutInfo, aRefToText: Text, anArrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>) {
-    // super();
     this._layoutInfo = aLayoutInfo;
     this._refToText = aRefToText;
     this._arrayOfWSVsWithouCurrentWSV = anArrayOfWSVsWithouCurrentWSV;
@@ -42,7 +41,7 @@ class RowLayout implements Layout {
     const layoutInfo = this.layoutInfo;
     layoutInfo.type = 'row';
 
-    const currentEntity: Entity = this._refToText.currentEntity;
+    const currentEntity: Entity = this._refToText.currentEntity!;
     const bbox_currEntity: BBox = currentEntity._entityBbox;
     const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
 
@@ -63,14 +62,16 @@ class RowLayout implements Layout {
     }
 
     const theRestrictedDragBand = document.getElementById('restrictedDragBand');
-    theRestrictedDragBand.classList.remove('hide')
-    theRestrictedDragBand.style.top = layoutInfo.topLeftCorner_top - layoutInfo.spaceBetweenGridCells + 'px';
-    theRestrictedDragBand.style.left = layoutInfo.viewportLeft + 'px';
-    theRestrictedDragBand.style.width = LayoutCreator.getBodyBBox().width + 'px';
-    theRestrictedDragBand.style.height = layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells) + 'px';
+    if (theRestrictedDragBand) {
+      theRestrictedDragBand.classList.remove('hide')
+      theRestrictedDragBand.style.top = layoutInfo.topLeftCorner_top - layoutInfo.spaceBetweenGridCells + 'px';
+      theRestrictedDragBand.style.left = layoutInfo.viewportLeft + 'px';
+      theRestrictedDragBand.style.width = LayoutCreator.getBodyBBox().width + 'px';
+      theRestrictedDragBand.style.height = layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells) + 'px';
+    }
 
 
-    let mySequence = [];
+    let mySequence: Array<VelocitySequence> = [];
     this._arrayOfWSVsWithouCurrentWSV.forEach((aWSV, index) => {
 
       // cloning the wsv, and changing the position from relative to absolute

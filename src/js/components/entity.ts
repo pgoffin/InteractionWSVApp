@@ -6,8 +6,13 @@ import WordScaleVisualization from './wordScaleVisualization';
 
 interface Entity {
   _entityName: string;
-
   _entityElement: HTMLElement;
+  _isSelected: Boolean;
+  _isCurrentEntity: Boolean;
+  _entityBbox: BBox;
+  _entityBelongsToWsv: WordScaleVisualization;
+  _isAClone: Boolean;
+  _refToText: Text;
 }
 
 
@@ -175,35 +180,42 @@ class Entity implements Entity {
     const bboxText = $('#text').offset();
     const bboxBody = $('body').offset();
 
-    let sourceElement;
-    let targetElement;
+    // let sourceElement;
+    // let targetElement;
 
-    if (type === 'diffLine') {
-      // source element
-      sourceElement = source._entityElement;
-
-      // dragged element
-      if (target) {
-        targetElement = target._entityElement;
-      } else {
-        console.log('ERROR: target is null')
-      }
-
-    } else {
-
-      // origin element
-      sourceElement = this._entityBbox;
-      // cloned element
-      targetElement = this._entityBelongsToWsv._theOriginalWSV._entity._entityBbox;
-    }
+    // origin element
+    let sourceElementBBox: BBox = this._entityBbox;
+    // cloned element
+    let targetElementBBox: BBox = this._entityBelongsToWsv._theOriginalWSV._entity._entityBbox;
 
 
-    const xSource = sourceElement.left + (sourceElement.width/2.0) - bboxBody.left;
-    const ySource = sourceElement.top + (sourceElement.height/2.0) - bboxText.top;
+    // if (type === 'diffLine') {
+    //   // source element
+    //   sourceElement = source._entityElement;
+    //
+    //   // dragged element
+    //   if (target) {
+    //     targetElement = target._entityElement;
+    //   } else {
+    //     console.log('ERROR: target is null')
+    //   }
+    // }
+
+    // } else {
+    //
+    //   // origin element
+    //   sourceElementBBox = this._entityBbox;
+    //   // cloned element
+    //   targetElementBBox = this._entityBelongsToWsv._theOriginalWSV._entity._entityBbox;
+    // }
+
+
+    const xSource = sourceElementBBox.left + (sourceElementBBox.width/2.0) - sourceElementBBox.left;
+    const ySource = sourceElementBBox.top + (sourceElementBBox.height/2.0) - sourceElementBBox.top;
 
     // dragged element
-    const xTarget = targetElement.left + (targetElement.width/2.0) - bboxBody.left;
-    const yTarget = targetElement.top + (targetElement.height/2.0) - bboxText.top;
+    const xTarget = targetElementBBox.left + (targetElementBBox.width/2.0) - bboxBody.left;
+    const yTarget = targetElementBBox.top + (targetElementBBox.height/2.0) - bboxText.top;
 
     // based on this http://stackoverflow.com/questions/15007877/how-to-use-the-d3-diagonal-function-to-draw-curved-lines
     const s = {x: xSource, y: ySource};

@@ -71,3 +71,9 @@ export interface EventLocation {
   x: number,
   y: number
 }
+
+export interface VelocitySequence {
+  e: HTMLElement,
+  p: {left: number, top: number, opacity?: number},
+  o: {duration: number, sequenceQueue: Boolean, complete?: (() => void) | ((arg0: [HTMLElement]) => void)}
+}

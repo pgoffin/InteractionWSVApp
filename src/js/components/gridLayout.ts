@@ -1,4 +1,4 @@
-import { BBox, LayoutInfo } from "../../../global";
+import { BBox, LayoutInfo, VelocitySequence } from "../../../global";
 
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
@@ -39,7 +39,7 @@ class GridLayout implements Layout {
     const layoutInfo = this.layoutInfo;
     layoutInfo.type = 'grid';
 
-    const currentEntity: Entity = this._refToText.currentEntity;
+    const currentEntity: Entity = this._refToText.currentEntity!;
     const bbox_currEntity: BBox = currentEntity._entityBbox;
     const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
 
@@ -66,7 +66,7 @@ class GridLayout implements Layout {
     let aboveIndex = GridLayout.getGridStartIndex(layoutInfo.counts.above, layoutInfo.numberOfColumns)
     layoutInfo.startIndex_above = aboveIndex;
 
-    let mySequence = [];
+    let mySequence: Array<VelocitySequence> = [];
     let belowIndex = 0;
     layoutInfo.startIndex_below = 0;
 

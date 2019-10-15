@@ -1,4 +1,4 @@
-import { BBox, LayoutInfo } from "../../../global";
+import { BBox, LayoutInfo, VelocitySequence } from "../../../global";
 
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
@@ -19,7 +19,6 @@ class ColumnLayout implements Layout {
 
 
   constructor(aLayoutInfo: LayoutInfo, aRefToText: Text, anArrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>) {
-    // super();
     this._layoutInfo = aLayoutInfo;
     this._refToText = aRefToText;
     this._arrayOfWSVsWithouCurrentWSV = anArrayOfWSVsWithouCurrentWSV;
@@ -40,7 +39,7 @@ class ColumnLayout implements Layout {
     const layoutInfo = this.layoutInfo;
     layoutInfo.type = 'column';
 
-    const currentEntity: Entity = this._refToText.currentEntity;
+    const currentEntity: Entity = this._refToText.currentEntity!;
     const bbox_currEntity: BBox = currentEntity._entityBbox;
     const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
 
@@ -60,7 +59,7 @@ class ColumnLayout implements Layout {
     layoutInfo.topLeftCorner_left = topLeftCorner_left;
     layoutInfo.topLeftCorner_top = topLeftCorner_top;
 
-    const mySequence = [];
+    const mySequence: Array<VelocitySequence> = [];
     let aboveIndex = 0;
     let belowIndex = 0;
     this._arrayOfWSVsWithouCurrentWSV.forEach(aWSV => {

@@ -38,7 +38,7 @@ class WordScaleVisualization implements WordScaleVisualization {
   _visualization: HTMLElement | null;
   _wsvVisualizationBBox: BBox;
 
-  _wsv: HTMLElement | null;
+  _wsv: HTMLElement;
   _wsvBBox: BBox;
 
   _wsvClass: WsVisualizationType;
@@ -51,8 +51,8 @@ class WordScaleVisualization implements WordScaleVisualization {
   _distanceToCurrEntity: number;
 
   _backgroundElement: HTMLElement;
-  _theClonedWSV: WordScaleVisualization;
-  _theOriginalWSV: WordScaleVisualization;
+  _theClonedWSV: WordScaleVisualization | null;
+  _theOriginalWSV: WordScaleVisualization | null;
 
 
 

@@ -1,4 +1,4 @@
-import { BBox, LayoutInfo } from "../../../global";
+import { BBox, LayoutInfo, VelocitySequence } from "../../../global";
 
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
@@ -19,7 +19,6 @@ class GridNoOverlapLayout implements Layout {
 
 
   constructor(aLayoutInfo: LayoutInfo, aRefToText: Text, anArrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>) {
-    // super();
     this._layoutInfo = aLayoutInfo;
     this._refToText = aRefToText;
     this._arrayOfWSVsWithouCurrentWSV = anArrayOfWSVsWithouCurrentWSV;
@@ -40,7 +39,7 @@ class GridNoOverlapLayout implements Layout {
     const layoutInfo = this.layoutInfo;
     layoutInfo.type = 'grid-no-overlap';
 
-    const currentEntity: Entity = this._refToText.currentEntity;
+    const currentEntity: Entity = this._refToText.currentEntity!;
     const bbox_currEntity: BBox = currentEntity._entityBbox;
     const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
 
@@ -69,7 +68,7 @@ class GridNoOverlapLayout implements Layout {
 
     const topLeftCorner_left = bbox_currEntity.left - (layoutInfo.rowAndColumnNumbers.leftNumbColumn * (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)));
 
-    let mySequence = [];
+    let mySequence: Array<VelocitySequence> = [];
     this._arrayOfWSVsWithouCurrentWSV.forEach((aWSV, index) => {
 
       // cloning the wsv, and changing the position from relative to absolute

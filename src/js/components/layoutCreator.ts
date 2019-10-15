@@ -1,4 +1,4 @@
-  import { NumberColAndRows, LayoutInfo } from "../../../global";
+  import { NumberColAndRows, LayoutInfo, VelocitySequence } from "../../../global";
 
 import { wsvInteractionConstants } from '../constants';
 
@@ -97,7 +97,7 @@ abstract class LayoutCreator {
 
   giveUpLayout() {
 
-    const giveUpAnimationSequence = [];
+    const giveUpAnimationSequence: Array<VelocitySequence> = [];
 
     this._wsvsThatHaveAClone.forEach((aWSV, index) => {
 
@@ -170,7 +170,11 @@ abstract class LayoutCreator {
       }
     });
 
-    $.Velocity.RunSequence(giveUpAnimationSequence);
+    if (giveUpAnimationSequence.length > 0) {
+      $.Velocity.RunSequence(giveUpAnimationSequence);
+    } else {
+      this.cleanupAfterLayout();
+    }
   }
 
 
