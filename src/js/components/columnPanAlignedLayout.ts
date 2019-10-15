@@ -4,6 +4,7 @@ import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
 import Entity from './entity';
 import Layout from './layout';
+import LayoutCreator from './layoutCreator';
 
 import 'velocity-animate';
 import 'velocity-ui-pack';
@@ -49,7 +50,7 @@ class ColumnPanAlignedLayout implements Layout {
     layoutInfo.numberOfColumns = 1;
 
     // update the counts variable
-    layoutInfo.counts = LayoutType.getAboveBelowCounts(this._arrayOfWSVsWithouCurrentWSV)
+    layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._arrayOfWSVsWithouCurrentWSV)
 
     // reference for the alignement
     let referenceClonedWSV
@@ -139,7 +140,7 @@ class ColumnPanAlignedLayout implements Layout {
 
       let whiteBackgroundElement;
       if (!this._refToText.isLayoutVisible) {
-        whiteBackgroundElement = LayoutType.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
+        whiteBackgroundElement = LayoutCreator.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
 
         aWSV._theClonedWSV._backgroundElement = whiteBackgroundElement;
       } else {

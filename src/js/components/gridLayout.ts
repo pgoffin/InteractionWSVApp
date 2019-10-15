@@ -5,7 +5,6 @@ import WordScaleVisualization from './wordScaleVisualization';
 import Entity from './entity';
 import Layout from './layout';
 import LayoutCreator from './layoutCreator'
-// import Layout from './layout';
 
 import 'velocity-animate';
 import 'velocity-ui-pack';

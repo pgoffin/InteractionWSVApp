@@ -1,4 +1,4 @@
-import { wsvDataObject, rawWsvData, renderFunc, WsVisualizationType, BBox } from "../../../global";
+import { WsvDataObject, RawWsvData, RenderFunc, WsVisualizationType, BBox } from "../../../global";
 import Entity from './entity';
 import wsvRendererFactoryClass from './wsvRendererFactoryClass';
 import Text from './text';
@@ -13,9 +13,9 @@ require('../../lib/jquery.sparklificator');
 
 interface WordScaleVisualization {
   _entity: Entity;
-  _rawWSVData: Array<rawWsvData>;
+  _rawWSVData: Array<RawWsvData>;
   _typeOfWSV: string;
-  _renderer: renderFunc;
+  _renderer: RenderFunc;
 }
 
 
@@ -23,14 +23,14 @@ interface WordScaleVisualization {
 class WordScaleVisualization implements WordScaleVisualization {
 
   _entity: Entity;
-  _rawWSVData: Array<rawWsvData> ;
+  _rawWSVData: Array<RawWsvData> ;
 
   _typeOfWSV: string;
   _positionOfWSV: string;
 
-  _renderer: renderFunc;
+  _renderer: RenderFunc;
 
-  _transformedData: wsvDataObject;
+  _transformedData: WsvDataObject;
 
   _rendererAsClass: string;
   _rendererString: string;
@@ -56,7 +56,7 @@ class WordScaleVisualization implements WordScaleVisualization {
 
 
 
-  constructor(anElement: HTMLElement, data: Array<rawWsvData>, theRenderer: string, referenceToText: Text, aIsAClone: Boolean) {
+  constructor(anElement: HTMLElement, data: Array<RawWsvData>, theRenderer: string, referenceToText: Text, aIsAClone: Boolean) {
     this._refToText = referenceToText;
     this._positionOfWSV = wsvInteractionConstants.positionType;
     this.entity = new Entity(anElement, this._refToText, this, aIsAClone);
@@ -93,10 +93,10 @@ class WordScaleVisualization implements WordScaleVisualization {
       return this._entity;
   }
 
-  set rawWSVData(value: Array<rawWsvData>) {
+  set rawWSVData(value: Array<RawWsvData>) {
       this._rawWSVData = value;
   }
-  get rawWSVData(): Array<rawWsvData> {
+  get rawWSVData(): Array<RawWsvData> {
       return this._rawWSVData;
   }
 
@@ -114,10 +114,10 @@ class WordScaleVisualization implements WordScaleVisualization {
       return this._typeOfWSV;
   }
 
-  set renderer(value: renderFunc) {
+  set renderer(value: RenderFunc) {
       this._renderer = value;
   }
-  get renderer(): renderFunc {
+  get renderer(): RenderFunc {
       return this._renderer;
   }
 

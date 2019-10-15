@@ -48,7 +48,7 @@ export interface LayoutInfo {
   viewportRight?: number,
   viewportTop?: number,
   viewportBottom?: number,
-  rowAndColumnNumbers?: NumberColAndRows,
+  rowAndColumnNumbers: NumberColAndRows,
   counts?,
   startIndex_above?: number,
   startIndex_below?: number,

@@ -1,15 +1,15 @@
-import { renderFunc, WsVisualizationType, rawWsvData } from "../../../global";
+import { RenderFunc, WsVisualizationType, RawWsvData } from "../../../global";
 
 import { wsvInteractionConstants } from '../constants';
 
 
 
 class StockPriceSparkline implements WsVisualizationType {
-  _renderer: renderFunc;
+  _renderer: RenderFunc;
 
   _settings: object = {};
 
-  _rawWsvData: Array<rawWsvData> = [];
+  _rawWsvData: Array<RawWsvData> = [];
   _transformedWsvData: Array<object> = [];
 
   _numberOfMarks: number;
@@ -19,7 +19,7 @@ class StockPriceSparkline implements WsVisualizationType {
   _height: number;
 
 
-  constructor(aRenderer: renderFunc, aRawData: Array<rawWsvData>, aPosition: string, aPaddingWidth: Boolean, aPaddingHeight: Boolean) {
+  constructor(aRenderer: RenderFunc, aRawData: Array<RawWsvData>, aPosition: string, aPaddingWidth: Boolean, aPaddingHeight: Boolean) {
     this.renderer = aRenderer;
     this.rawWsvData = aRawData;
 
@@ -43,17 +43,17 @@ class StockPriceSparkline implements WsVisualizationType {
 
 
   // getter/setter
-  set renderer(value: renderFunc) {
+  set renderer(value: RenderFunc) {
       this._renderer = value;
   }
-  get renderer(): renderFunc {
+  get renderer(): RenderFunc {
       return this._renderer;
   }
 
-  set rawWsvData(value: Array<rawWsvData>) {
+  set rawWsvData(value: Array<RawWsvData>) {
       this._rawWsvData = value;
   }
-  get rawWsvData(): Array<rawWsvData> {
+  get rawWsvData(): Array<RawWsvData> {
       return this._rawWsvData;
   }
 
@@ -72,14 +72,14 @@ class StockPriceSparkline implements WsVisualizationType {
   }
 
 
-  transformRawData(aRawData: Array<rawWsvData>): Array<rawWsvData> {
+  transformRawData(aRawData: Array<RawWsvData>): Array<RawWsvData> {
 
     // sort the stockData array
-    let transformedStockData = aRawData.map((element: rawWsvData) => {
+    let transformedStockData = aRawData.map((element: RawWsvData) => {
       return {close: element.changeToFirst, date: new Date(element.date)};
     });
 
-    transformedStockData.sort((a: rawWsvData, b: rawWsvData) => {
+    transformedStockData.sort((a: RawWsvData, b: RawWsvData) => {
       return a.date - b.date;
     });
 

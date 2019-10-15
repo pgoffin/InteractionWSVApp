@@ -192,8 +192,8 @@ class Text implements Text {
         dblClickLocation.y = event.pageY;
 
         if (this.chooseCurrentEntity(dblClickLocation)) {
-          this._theLayout.changeLayout('GridLayout')
-          this._theContextualMenu.showContextMenu(this._currentEntity);
+          this._layoutCreator.changeLayout('GridLayout')
+          this._contextualMenu.showContextMenu(this._currentEntity);
         } else {
           console.log('no current entity was found')
         }
@@ -363,7 +363,7 @@ class Text implements Text {
 
 
   // get the closest entity to the dbclicked location
-  set_closestEntityAsCurrentEntity(anEventLocation): Entity {
+  set_closestEntityAsCurrentEntity(anEventLocation: EventLocation): Entity {
 
     let closestVisibleEntity: Entity = null;
     let closestDistance: number = 1000000;
@@ -398,7 +398,7 @@ class Text implements Text {
   * @param  {[type]} entity [description]
   * @return {number}        shortest ditance between the corner closest to the point and the point
   */
-  getDistancePointClosestWSVCorner(point, entity: Entity) {
+  getDistancePointClosestWSVCorner(point: EventLocation, entity: Entity) {
     // entities are DOM elements
     const wsvBBox = entity._entityBelongsToWsv._wsvBBox;
 
