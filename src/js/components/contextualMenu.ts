@@ -135,7 +135,7 @@ class ContextualMenu {
         if (anElement.elementType === 'close') {
 
           this._refToText._layoutCreator.giveUpLayout();
-          this.cleanupAfterLayout();
+          this.cleanupTooltip();
 
         } else if (anElement.elementType === 'layout') {
 
@@ -278,7 +278,7 @@ class ContextualMenu {
     });
   }
 
-  cleanupAfterLayout() {
+  cleanupTooltip() {
     // go through all menu items and reset their class to selectable
     this._tooltipElements.forEach((aMenuElement: HTMLElement) => {
       aMenuElement.classList.remove('notSelectable');

@@ -28,26 +28,6 @@ interface Text {
 
 class Text implements Text {
 
-  // _nameOfTextFile: string;
-
-  // if there is a layout then flag should be true
-  // _isLayoutVisible: Boolean = false;
-
-  // _currentWSV: WordScaleVisualization = null;
-
-  // only tagged entities and that have data are stored here
-  // _listOfWSVs: Array<WordScaleVisualization> = [];
-  // // _listOfClonedWSVs: Array<WordScaleVisualization>;
-  //
-  // _dataForWSV: wsvDataObject = {};
-  //
-  // _currentEntity: Entity;
-  //
-  // _theContextualMenu: ContextualMenu;
-  //
-  // // _theConcreteLayoutCreator: LayoutCreator;
-
-
   // getter/setter
   set nameOfTextFile(value: string) {
       this._nameOfTextFile = value;
@@ -121,7 +101,6 @@ class Text implements Text {
       this.addSuggestedInteractivityTags();
     } else {
       console.log('ERROR: check why there is no dataset for this text');
-      // return null
     }
 
   }
@@ -136,18 +115,11 @@ class Text implements Text {
 
         console.log('event: click (give up layout)');
 
-        // if ($('#spacer').length > 0) {
-        //   removeSpacer();
-        // }
-
         this._layoutCreator.giveUpLayout();
-        this._contextualMenu.cleanupAfterLayout();
+        this._contextualMenu.cleanupTooltip();
       }
     });
 
-    // if ($('#spacer').length > 0) {
-    //   removeSpacer();
-    // }
     //
     // giveUpLayout();
     // startMenuHideTimer();
@@ -168,12 +140,8 @@ class Text implements Text {
 
         console.log('event: click (give up layout)');
 
-        // if ($('#spacer').length > 0) {
-        //  removeSpacer();
-        // }
-
         this.layoutCreator.giveUpLayout();
-        this._contextualMenu.cleanupAfterLayout();
+        this._contextualMenu.cleanupTooltip();
 
         // clearSelection();
         // // resetLayoutIcon();

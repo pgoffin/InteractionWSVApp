@@ -198,11 +198,16 @@ abstract class LayoutCreator {
 
     // remove any trails
     // removeTrail();
+
+    this.removeSpacer();
   }
 
 
   removeSpacer() {
-    document.getElementById('spacer').remove()
+
+    const spacerElement = document.getElementById('spacer');
+
+    if (spacerElement) spacerElement.remove();
 
     // change the entityBbox as the spacer was removed
     // this.updateEntityBBox();
@@ -614,11 +619,6 @@ abstract class LayoutCreator {
     return layoutInfo;
   }
 
-
-  // static getBodyBBox(): DOMRect | ClientRect {
-  //
-  //   return document.body.getBoundingClientRect();
-  // }
 
 
 }
