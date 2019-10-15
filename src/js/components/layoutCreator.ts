@@ -495,7 +495,7 @@ abstract class LayoutCreator {
   * Gets the maximal width of the entities present in the document.
   * @return {[type]} [description]
   */
-  get_entityMaxWidth(arrayOfWSVMeasurementObjects) {
+  get_entityMaxWidth(arrayOfWSVMeasurementObjects: Array<WordScaleVisualization>): number {
     var entityMaxWidth = Math.max.apply(null, arrayOfWSVMeasurementObjects.map((aWSV: WordScaleVisualization) => {
       return aWSV.entity._entityBbox.width;
     }));
@@ -509,7 +509,7 @@ abstract class LayoutCreator {
   * @param  {Array[objects]} arrayOfWSVMeasurementObjects [description]
   * @return {float}                              [description]
   */
-  get_SparklineMaxWidth(arrayOfWSVMeasurementObjects) {
+  get_SparklineMaxWidth(arrayOfWSVMeasurementObjects: Array<WordScaleVisualization>): number {
     var sparklineMaxWidth = Math.max.apply(null, arrayOfWSVMeasurementObjects.map((aWSV: WordScaleVisualization) => {
       return aWSV._wsvVisualizationBBox.width;
     }));
@@ -543,7 +543,9 @@ abstract class LayoutCreator {
 
     const whiteLayerDiv = document.createElement('div');
     whiteLayerDiv.classList.add('whiteLayer');
-    document.getElementById('text').append(whiteLayerDiv);
+
+    const textDiv = document.getElementById('text');
+    if (textDiv) textDiv.append(whiteLayerDiv);
 
     whiteLayerDiv.style.width = width + 'px';
     whiteLayerDiv.style.height = height + 'px';
@@ -555,25 +557,25 @@ abstract class LayoutCreator {
   }
 
 
-  // get the left, right, top and bottom borders of text div for optimal visualization of wsvs, same for every layout
-  static getViewportMeasurements(aLayoutRef: Layout): LayoutInfo {
-
-    let bodyBbox = LayoutCreator.getBodyBBox();
-    let viewportDimensionsLeftRight = {left: bodyBbox.left, right: bodyBbox.right};
-    let viewportDimensionsTopBottom = {top: bodyBbox.top, bottom: bodyBbox.bottom};
-
-    let layoutInfo = {};
-    if (typeof aLayoutRef !== 'undefined') {
-      aLayoutRef.layoutInfo.viewportLeft = viewportDimensionsLeftRight.left;
-      aLayoutRef.layoutInfo.viewportRight = viewportDimensionsLeftRight.right;
-      aLayoutRef.layoutInfo.viewportTop = viewportDimensionsTopBottom.top;
-      aLayoutRef.layoutInfo.viewportBottom = viewportDimensionsTopBottom.bottom;
-    } else {
-      console.log('PROBLEM: first create the layoutInfo object.')
-    }
-
-    return layoutInfo;
-  }
+  // // get the left, right, top and bottom borders of text div for optimal visualization of wsvs, same for every layout
+  // static getViewportMeasurements(aLayoutRef: Layout): LayoutInfo {
+  //
+  //   let bodyBbox = LayoutCreator.getBodyBBox();
+  //   let viewportDimensionsLeftRight = {left: bodyBbox.left, right: bodyBbox.right};
+  //   let viewportDimensionsTopBottom = {top: bodyBbox.top, bottom: bodyBbox.bottom};
+  //
+  //   let layoutInfo = {};
+  //   if (typeof aLayoutRef !== 'undefined') {
+  //     aLayoutRef.layoutInfo.viewportLeft = viewportDimensionsLeftRight.left;
+  //     aLayoutRef.layoutInfo.viewportRight = viewportDimensionsLeftRight.right;
+  //     aLayoutRef.layoutInfo.viewportTop = viewportDimensionsTopBottom.top;
+  //     aLayoutRef.layoutInfo.viewportBottom = viewportDimensionsTopBottom.bottom;
+  //   } else {
+  //     console.log('PROBLEM: first create the layoutInfo object.')
+  //   }
+  //
+  //   return layoutInfo;
+  // }
 
 
 
