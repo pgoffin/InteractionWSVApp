@@ -1,8 +1,8 @@
-import { BBox, LayoutInfo, VelocitySequence } from "../../../global";
+import { LayoutInfo, VelocitySequence } from "../../../global";
 
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
-import Entity from './entity';
+// import Entity from './entity';
 import Layout from './layout';
 import LayoutCreator from './layoutCreator'
 
@@ -39,9 +39,14 @@ class GridLayout implements Layout {
     const layoutInfo = this.layoutInfo;
     layoutInfo.type = 'grid';
 
-    const currentEntity: Entity = this._refToText.currentEntity!;
-    const bbox_currEntity: BBox = currentEntity._entityBbox;
-    const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
+    const currentEntityBBox = layoutInfo.currentEntity._entityBbox;
+
+    // const currentEntity: Entity = this._refToText.currentEntity!;
+    // const bbox_currEntity: BBox = currentEntity._entityBbox;
+    // const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
+
+    // get available space for columns and rows
+    this.getRowAndColumnInfo('middleBound');
 
     // update the counts variable
     layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._wsvsWithouCurrentWSV)
@@ -51,13 +56,13 @@ class GridLayout implements Layout {
     let topLeftCorner_left = 0;
 
     if (layoutInfo.rowAndColumnNumbers.currentEntityColumn == 0) {
-      topLeftCorner_left = bbox_currEntity.left + (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells));
+      topLeftCorner_left = currentEntityBBox.left + (layoutInfo.cellDimensions.width + (2*layoutInfo.spaceBetweenCells));
 
     } else {
-      topLeftCorner_left = bbox_currEntity.left - (layoutInfo.rowAndColumnNumbers.leftNumbColumn * (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)));
+      topLeftCorner_left = currentEntityBBox.left - (layoutInfo.rowAndColumnNumbers.leftNumbColumn * (layoutInfo.cellDimensions.width + (2*layoutInfo.spaceBetweenCells)));
     }
 
-    let topLeftCorner_top = bbox_currWSV.top - (numUsedRowsAbove * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)));
+    let topLeftCorner_top = layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.top - (numUsedRowsAbove * (layoutInfo.cellDimensions.height + (2*layoutInfo.spaceBetweenCells)));
 
     layoutInfo.topLeftCorner_left = topLeftCorner_left;
     layoutInfo.topLeftCorner_top = topLeftCorner_top;
@@ -74,22 +79,18 @@ class GridLayout implements Layout {
 
       // cloning the wsv, and changing the position from relative to absolute
       let aClonedWSV: WordScaleVisualization;
-      // if (this._layout.currentLayout == '') {
       if (!this._refToText.isLayoutVisible) {
-        // aClonedWSV = Layout.cloneEntityWithWSV(aWSV.entity, aWSV._middleBoundOffset, aWSV._offset_whiteLayer, index);
         aClonedWSV = aWSV.cloneWSV();
         aWSV._theClonedWSV = aClonedWSV;
         aClonedWSV._theOriginalWSV = aWSV;
 
         aWSV._wsv.classList.add('hasClone');
-        // aWSV.entity.entityElement.parentElement.setAttribute('opacity', '0.2');
       } else {
-        aClonedWSV = aWSV._theClonedWSV;
-        $(aClonedWSV).removeClass('hide');
+        aClonedWSV = aWSV._theClonedWSV!;
+
+        aClonedWSV._wsv.classList.remove('hide');
+
         $(aClonedWSV).children().removeClass('hide');
-        if ($('#spacer').length > 0) {
-          $('#spacer').remove();
-        }
       }
 
 
@@ -97,15 +98,15 @@ class GridLayout implements Layout {
       let newLeft = 0;
       if (aWSV._aboveOrBelow === 'above') {
 
-        newTop = topLeftCorner_top + (Math.floor(aboveIndex/layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)));
-        newLeft = topLeftCorner_left + ((aboveIndex % layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells))) + aWSV._middleBoundOffset;
+        newTop = topLeftCorner_top + (Math.floor(aboveIndex/layoutInfo.numberOfColumns) * (layoutInfo.cellDimensions.height + (2*layoutInfo.spaceBetweenCells)));
+        newLeft = topLeftCorner_left + ((aboveIndex % layoutInfo.numberOfColumns) * (layoutInfo.cellDimensions.width + (2*layoutInfo.spaceBetweenCells))) + aWSV._middleBoundOffset;
 
         aboveIndex += 1;
 
       } else if (aWSV._aboveOrBelow === 'below') {
 
-        newTop = (bbox_currWSV.bottom + (2*layoutInfo.spaceBetweenGridCells)) + (Math.floor(belowIndex/layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)));
-        newLeft = topLeftCorner_left + ((belowIndex % layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells))) + aWSV._middleBoundOffset;
+        newTop = (layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.bottom + (2*layoutInfo.spaceBetweenCells)) + (Math.floor(belowIndex/layoutInfo.numberOfColumns) * (layoutInfo.cellDimensions.height + (2*layoutInfo.spaceBetweenCells)));
+        newLeft = topLeftCorner_left + ((belowIndex % layoutInfo.numberOfColumns) * (layoutInfo.cellDimensions.width + (2*layoutInfo.spaceBetweenCells))) + aWSV._middleBoundOffset;
         belowIndex += 1;
 
       } else {
@@ -115,7 +116,7 @@ class GridLayout implements Layout {
 
       let whiteBackgroundElement: HTMLElement;
       if (!this._refToText.isLayoutVisible) {
-        whiteBackgroundElement = LayoutCreator.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
+        whiteBackgroundElement = LayoutCreator.addWhiteLayer((layoutInfo.cellDimensions.width + (2*layoutInfo.spaceBetweenCells)), (layoutInfo.cellDimensions.height + (2*layoutInfo.spaceBetweenCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
 
         aWSV._theClonedWSV._backgroundElement = whiteBackgroundElement;
       } else {
@@ -137,7 +138,7 @@ class GridLayout implements Layout {
         }
       }});
 
-      mySequence.push({e: whiteBackgroundElement, p: {left: (newLeft - layoutInfo.spaceBetweenGridCells - aWSV._offset_whiteLayer), top: (newTop - layoutInfo.spaceBetweenGridCells), opacity: 1}, o: {
+      mySequence.push({e: whiteBackgroundElement, p: {left: (newLeft - layoutInfo.spaceBetweenCells - aWSV._offsetWhiteLayer), top: (newTop - layoutInfo.spaceBetweenCells), opacity: 1}, o: {
           duration: 1000,
           sequenceQueue: false
         }
@@ -148,6 +149,71 @@ class GridLayout implements Layout {
     $.Velocity.RunSequence(mySequence);
 
     $('.sparklificated.clonedWSV.first .entity').css('background-color', 'rgb(255, 223, 128)');
+  }
+
+
+  getRowAndColumnInfo(boundToWhat: string): void {
+
+    const layoutInfo = this.layoutInfo;
+    const maxEntityWidth = LayoutCreator.getEntityMaxWidth(this._refToText.listOfWSVs);
+    const maxSparklineWidth = LayoutCreator.getSparklineMaxWidth(this._refToText.listOfWSVs);
+
+    // the width of the window
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    // these is the bbox of the text with "margin", a wsv should not go over it
+    const bodyBbox = LayoutCreator.getBodyBBox();
+    const leftWindowPadding = bodyBbox.left;
+    const rightWindowPadding = windowWidth - bodyBbox.right;
+
+    const currentEntityBBoxRight = layoutInfo.currentEntity._entityBbox.right;
+    const currentWSVBBox = layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox;
+
+    const spaceBetweenCells = layoutInfo.spaceBetweenCells;
+
+
+    if (boundToWhat === 'middleBound') {
+
+      // is there enough space available in the column where the current entity is
+      let availableSpaceForCurrentEntityColumn_left = currentEntityBBoxRight - maxEntityWidth - leftWindowPadding;
+
+      if (availableSpaceForCurrentEntityColumn_left < 0) {
+        layoutInfo.rowAndColumnNumbers.currentEntityColumn = 0;
+      } else {
+        layoutInfo.rowAndColumnNumbers.currentEntityColumn = 1;
+      }
+      // console.log('IS IT OK: ' + colsAndRowsNumber.currentEntityColumn);
+
+      // how many columns available to the left
+      let availableSpaceLeft = Math.max(0, (currentEntityBBoxRight - maxEntityWidth - spaceBetweenCells - leftWindowPadding));
+      // if (availableSpaceLeft < 0) {
+      //   colsAndRowsNumber.leftNumbColumn = 0;
+      // }
+
+      layoutInfo.rowAndColumnNumbers.leftNumbColumn = Math.floor(availableSpaceLeft / (layoutInfo.cellDimensions.width + (2 * spaceBetweenCells)));
+
+      // how many columns available to the right
+      let availableSpaceRight = Math.max(0, (windowWidth - (currentEntityBBoxRight + maxSparklineWidth + spaceBetweenCells) - rightWindowPadding));
+      // if (availableSpaceRight < 0) {
+      //   colsAndRowsNumber.rightNumbColumn = 0;
+      // }
+
+      layoutInfo.rowAndColumnNumbers.rightNumbColumn = Math.floor(availableSpaceRight / (layoutInfo.cellDimensions.width + (2 * spaceBetweenCells)));
+
+      // how many rows available above current entity
+      // top position relative to viewport
+      let availableSpaceAbove = Math.max(0, (currentWSVBBox.top - document.body.scrollTop - spaceBetweenCells));
+
+      layoutInfo.rowAndColumnNumbers.aboveNumbRow = Math.floor(availableSpaceAbove / (layoutInfo.cellDimensions.height + (2 * spaceBetweenCells)));
+
+      // how many rows available below current entity
+      // bottom position relative to viewport
+      let availableSpaceBelow = Math.max(0, (windowHeight - (currentWSVBBox.bottom - document.body.scrollTop) - spaceBetweenCells));
+
+      layoutInfo.rowAndColumnNumbers.belowNumbRow = Math.floor(availableSpaceBelow / (layoutInfo.cellDimensions.height + (2 * spaceBetweenCells)));
+
+      layoutInfo.numberOfColumns = layoutInfo.rowAndColumnNumbers.leftNumbColumn + layoutInfo.rowAndColumnNumbers.currentEntityColumn + layoutInfo.rowAndColumnNumbers.rightNumbColumn;
+    }
   }
 
 

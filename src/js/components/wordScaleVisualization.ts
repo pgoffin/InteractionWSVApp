@@ -47,7 +47,7 @@ class WordScaleVisualization implements WordScaleVisualization {
 
   _aboveOrBelow: string;
   _middleBoundOffset: number;
-  _offset_whiteLayer: number;
+  _offsetWhiteLayer: number;
   _distanceToCurrEntity: number;
 
   _backgroundElement: HTMLElement;

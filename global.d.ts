@@ -1,3 +1,5 @@
+import Entity from "./src/js/components/entity";
+
 export interface WsvDataObject {
   [key: string]: Array<RawWsvData>;
 }
@@ -28,27 +30,25 @@ export interface RawWsvData {
  [key: string]: string|number|Date;
 }
 
-export interface NumberColAndRows {
+export interface ColsAndRowsNumber {
   leftNumbColumn: number,
   rightNumbColumn: number,
   currentEntityColumn: number,
-  totalNumberOfColumns: number,
+  // totalNumberOfColumns: number,
   aboveNumbRow: number,
   belowNumbRow: number
 }
 
 export interface LayoutInfo {
-  type?: string,
+  type: string,
+  cellDimensions: CellDimension,
+  currentEntity: Entity,
+  spaceBetweenCells: number,
+  rowAndColumnNumbers: ColsAndRowsNumber,
+  numberOfColumns: number,
+
   topLeftCorner_left?: number,
   topLeftCorner_top?: number,
-  numberOfColumns?: number,
-  cell_dimensions?: {width: number, height: number},
-  spaceBetweenGridCells?: number,
-  viewportLeft?: number,
-  viewportRight?: number,
-  viewportTop?: number,
-  viewportBottom?: number,
-  rowAndColumnNumbers: NumberColAndRows,
   counts?,
   startIndex_above?: number,
   startIndex_below?: number,
@@ -76,4 +76,9 @@ export interface VelocitySequence {
   e: HTMLElement,
   p: {left: number, top: number, opacity?: number},
   o: {duration: number, sequenceQueue: Boolean, complete?: (() => void) | ((arg0: [HTMLElement]) => void)}
+}
+
+export interface CellDimension {
+  height: number,
+  width: number
 }

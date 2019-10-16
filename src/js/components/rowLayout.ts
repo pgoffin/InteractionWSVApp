@@ -54,20 +54,20 @@ class RowLayout implements Layout {
 
     let numCells_above = layoutInfo.numberOfColumns * layoutInfo.rowAndColumnNumbers.aboveNumbRow;
 
-    layoutInfo.topLeftCorner_left = bbox_currEntity.left - (layoutInfo.rowAndColumnNumbers.leftNumbColumn * (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)));;
+    layoutInfo.topLeftCorner_left = bbox_currEntity.left - (layoutInfo.rowAndColumnNumbers.leftNumbColumn * (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenCells)));;
     if (numCells_above !== 0) {
-      layoutInfo.topLeftCorner_top = bbox_currWSV.top - (layoutInfo.rowAndColumnNumbers.aboveNumbRow * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)));
+      layoutInfo.topLeftCorner_top = bbox_currWSV.top - (layoutInfo.rowAndColumnNumbers.aboveNumbRow * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenCells)));
     } else {
-      layoutInfo.topLeftCorner_top = bbox_currWSV.bottom + (2*layoutInfo.spaceBetweenGridCells);
+      layoutInfo.topLeftCorner_top = bbox_currWSV.bottom + (2*layoutInfo.spaceBetweenCells);
     }
 
     const theRestrictedDragBand = document.getElementById('restrictedDragBand');
     if (theRestrictedDragBand) {
       theRestrictedDragBand.classList.remove('hide')
-      theRestrictedDragBand.style.top = layoutInfo.topLeftCorner_top - layoutInfo.spaceBetweenGridCells + 'px';
+      theRestrictedDragBand.style.top = layoutInfo.topLeftCorner_top - layoutInfo.spaceBetweenCells + 'px';
       theRestrictedDragBand.style.left = layoutInfo.viewportLeft + 'px';
       theRestrictedDragBand.style.width = LayoutCreator.getBodyBBox().width + 'px';
-      theRestrictedDragBand.style.height = layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells) + 'px';
+      theRestrictedDragBand.style.height = layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenCells) + 'px';
     }
 
 
@@ -94,11 +94,11 @@ class RowLayout implements Layout {
       }
 
       var newTop = layoutInfo.topLeftCorner_top;
-      var newLeft = layoutInfo.topLeftCorner_left + (index * (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells))) + aWSV._middleBoundOffset;
+      var newLeft = layoutInfo.topLeftCorner_left + (index * (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenCells))) + aWSV._middleBoundOffset;
 
       let whiteBackgroundElement: HTMLElement;
       if (!this._refToText.isLayoutVisible) {
-        whiteBackgroundElement = LayoutCreator.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
+        whiteBackgroundElement = LayoutCreator.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
 
         aWSV._theClonedWSV._backgroundElement = whiteBackgroundElement;
       } else {
@@ -137,7 +137,7 @@ class RowLayout implements Layout {
         }
       }});
 
-      mySequence.push({e: whiteBackgroundElement, p: {left: (newLeft - layoutInfo.spaceBetweenGridCells - aWSV._offset_whiteLayer), top: (newTop - layoutInfo.spaceBetweenGridCells), opacity: 1}, o: {
+      mySequence.push({e: whiteBackgroundElement, p: {left: (newLeft - layoutInfo.spaceBetweenCells - aWSV._offset_whiteLayer), top: (newTop - layoutInfo.spaceBetweenCells), opacity: 1}, o: {
           duration: 1000,
           sequenceQueue: false
         }
@@ -183,7 +183,7 @@ class RowLayout implements Layout {
       leftTriangle.style.left = this.layoutInfo.viewportLeft + 'px';
 
       leftTriangle.type = 'left';
-      leftTriangle.distance = -(this.layoutInfo.cell_dimensions.width + (2*this.layoutInfo.spaceBetweenGridCells));
+      leftTriangle.distance = -(this.layoutInfo.cell_dimensions.width + (2*this.layoutInfo.spaceBetweenCells));
 
       leftTriangle.removeEventListener('click', this.triangleClickListener);
       leftTriangle.removeEventListener('dbclick', this.preventDbclickEvent);
@@ -201,7 +201,7 @@ class RowLayout implements Layout {
       rightTriangle.style.left = (viewportInfo.right - 10) + 'px';
 
       rightTriangle.type = 'right';
-      rightTriangle.distance = this.layoutInfo.cell_dimensions.width + (2*this.layoutInfo.spaceBetweenGridCells);
+      rightTriangle.distance = this.layoutInfo.cell_dimensions.width + (2*this.layoutInfo.spaceBetweenCells);
 
       rightTriangle.removeEventListener('click', this.triangleClickListener);
       rightTriangle.removeEventListener('dbclick', this.preventDbclickEvent);

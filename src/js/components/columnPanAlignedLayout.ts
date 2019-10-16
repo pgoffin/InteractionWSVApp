@@ -68,18 +68,18 @@ class ColumnPanAlignedLayout implements Layout {
     let diffRight = layoutInfo.viewportRight - bbox_currWSV.right;
     let alignedColumnLeft = false;
 
-    if (diffRight >= (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells))) {
+    if (diffRight >= (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenCells))) {
 
-      topLeftCorner_left = bbox_currEntity.left + (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells));
+      topLeftCorner_left = bbox_currEntity.left + (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenCells));
 
     } else {
 
-      topLeftCorner_left = bbox_currEntity.left - (referenceWSVWidth + (2*layoutInfo.spaceBetweenGridCells));
+      topLeftCorner_left = bbox_currEntity.left - (referenceWSVWidth + (2*layoutInfo.spaceBetweenCells));
       alignedColumnLeft = true;
     }
 
     // get top left cornerDiffs
-    topLeftCorner_top = (bbox_currWSV.bottom + layoutInfo.spaceBetweenGridCells) - (numUsedRowsAbove * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)));
+    topLeftCorner_top = (bbox_currWSV.bottom + layoutInfo.spaceBetweenCells) - (numUsedRowsAbove * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenCells)));
 
     layoutInfo.topLeftCorner_left = topLeftCorner_left;
     layoutInfo.topLeftCorner_top = topLeftCorner_top;
@@ -118,14 +118,14 @@ class ColumnPanAlignedLayout implements Layout {
       let newLeft = 0;
       if (aWSV._aboveOrBelow === 'above') {
 
-        newTop = (topLeftCorner_top + layoutInfo.spaceBetweenGridCells) + (Math.floor(aboveIndex/layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)));
+        newTop = (topLeftCorner_top + layoutInfo.spaceBetweenCells) + (Math.floor(aboveIndex/layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenCells)));
         newLeft = topLeftCorner_left + correctionOffset;
 
         aboveIndex += 1;
 
       } else if (aWSV._aboveOrBelow === 'below') {
 
-        newTop = (bbox_currWSV.bottom + (2*layoutInfo.spaceBetweenGridCells)) + (Math.floor(belowIndex/layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)));
+        newTop = (bbox_currWSV.bottom + (2*layoutInfo.spaceBetweenCells)) + (Math.floor(belowIndex/layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenCells)));
         newLeft = topLeftCorner_left + correctionOffset;
 
         belowIndex += 1;
@@ -137,7 +137,7 @@ class ColumnPanAlignedLayout implements Layout {
 
       let whiteBackgroundElement;
       if (!this._refToText.isLayoutVisible) {
-        whiteBackgroundElement = LayoutCreator.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenGridCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenGridCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
+        whiteBackgroundElement = LayoutCreator.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
 
         aWSV._theClonedWSV._backgroundElement = whiteBackgroundElement;
       } else {
@@ -159,7 +159,7 @@ class ColumnPanAlignedLayout implements Layout {
         }
       }});
 
-      mySequence.push({e: whiteBackgroundElement, p: {left: (newLeft - layoutInfo.spaceBetweenGridCells - aWSV._offset_whiteLayer), top: (newTop - layoutInfo.spaceBetweenGridCells), opacity: 1}, o: {
+      mySequence.push({e: whiteBackgroundElement, p: {left: (newLeft - layoutInfo.spaceBetweenCells - aWSV._offset_whiteLayer), top: (newTop - layoutInfo.spaceBetweenCells), opacity: 1}, o: {
           duration: 1000,
           sequenceQueue: false
         }
