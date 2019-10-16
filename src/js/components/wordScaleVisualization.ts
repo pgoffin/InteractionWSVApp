@@ -193,11 +193,32 @@ class WordScaleVisualization implements WordScaleVisualization {
 
     let clonedWSV = new WordScaleVisualization(insertedClonedEntityNode as HTMLElement, this._rawWSVData, this._rendererString, this._refToText, true);
 
-    clonedWSV.entity.entityElement.classList.add('cloned');
-    clonedWSV._wsv.classList.add('cloned');
-    clonedWSV._visualization.classList.add('cloned');
+    // clonedWSV.entity.entityElement.classList.add('cloned');
+    // clonedWSV._wsv.classList.add('cloned');
+    // clonedWSV._visualization.classList.add('cloned');
+    clonedWSV.addClassToWSV('cloned')
 
     return clonedWSV;
+  }
+
+
+  addClassToWSV(aClass: string): void {
+    this._wsv.classList.add(aClass);
+
+    const childrenOfClonedWSV = this._wsv.children;
+    for (let i = 0; i < childrenOfClonedWSV.length; i++) {
+      childrenOfClonedWSV[i].classList.add(aClass);
+    }
+  }
+
+
+  removeClassOffWSV(aClass: string): void {
+    this._wsv.classList.remove(aClass);
+
+    const childrenOfClonedWSV = this._wsv.children;
+    for (let i = 0; i < childrenOfClonedWSV.length; i++) {
+      childrenOfClonedWSV[i].classList.remove(aClass)
+    }
   }
 
 }

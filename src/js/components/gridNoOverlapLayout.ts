@@ -1,8 +1,8 @@
-import { BBox, LayoutInfo, VelocitySequence } from "../../../global";
+import { LayoutInfo, SpaceAvailability, VelocitySequence } from "../../../global";
 
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
-import Entity from './entity';
+// import Entity from './entity';
 import Layout from './layout';
 import LayoutCreator from './layoutCreator';
 
@@ -15,13 +15,15 @@ class GridNoOverlapLayout implements Layout {
 
   _layoutInfo: LayoutInfo;
   _refToText: Text;
-  _arrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>;
+  _wsvsWithouCurrentWSV: Array<WordScaleVisualization>;
+  _spaceAvailability: SpaceAvailability;
 
 
-  constructor(aLayoutInfo: LayoutInfo, aRefToText: Text, anArrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>) {
+  constructor(aLayoutInfo: LayoutInfo, aSpaceAvailability: SpaceAvailability, aRefToText: Text, anArrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>) {
     this._layoutInfo = aLayoutInfo;
     this._refToText = aRefToText;
-    this._arrayOfWSVsWithouCurrentWSV = anArrayOfWSVsWithouCurrentWSV;
+    this._wsvsWithouCurrentWSV = anArrayOfWSVsWithouCurrentWSV;
+    this._spaceAvailability = aSpaceAvailability;
   }
 
 
@@ -39,12 +41,17 @@ class GridNoOverlapLayout implements Layout {
     const layoutInfo = this.layoutInfo;
     layoutInfo.type = 'grid-no-overlap';
 
-    const currentEntity: Entity = this._refToText.currentEntity!;
-    const bbox_currEntity: BBox = currentEntity._entityBbox;
-    const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
+    const currentEntityBBox = layoutInfo.currentEntity._entityBbox;
+
+    // const currentEntity: Entity = this._refToText.currentEntity!;
+    // const bbox_currEntity: BBox = currentEntity._entityBbox;
+    // const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
+
+    // get available space for columns and rows
+    this.getRowAndColumnInfo('middleBound', this._spaceAvailability);
 
     // update the counts variable
-    layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._arrayOfWSVsWithouCurrentWSV)
+    layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._wsvsWithouCurrentWSV)
 
     // get the paragraph of the current entity
     // const currentEntityParagraph = $(currentEntity).parent().parent();
@@ -56,20 +63,20 @@ class GridNoOverlapLayout implements Layout {
     currentEntityParagraph.parentNode.insertBefore(spacerNode, currentEntityParagraph.nextSibling);
     // currentEntityParagraph.after("<div id='spacer'></div>");
 
-    const numTotal_rows = Math.floor(this._arrayOfWSVsWithouCurrentWSV.length/layoutInfo.numberOfColumns);
+    const numTotal_rows = Math.floor(this._wsvsWithouCurrentWSV.length/layoutInfo.numberOfColumns);
 
-    var sizeSmallMultiples = this.getSizeOfSmallMultiple(layoutInfo.numberOfColumns, numTotal_rows, layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenCells), layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenCells));
+    var sizeSmallMultiples = this.getSizeOfSmallMultiple(layoutInfo.numberOfColumns, numTotal_rows, layoutInfo.cellDimensions.width + (2*layoutInfo.spaceBetweenCells), layoutInfo.cellDimensions.height + (2*layoutInfo.spaceBetweenCells));
 
     // $('#spacer').height(sizeSmallMultiples.height);
     document.getElementById('spacer').style.height = sizeSmallMultiples.height
 
-    var shiftDown = currentEntityParagraph.getBoundingClientRect().bottom + document.body.scrollTop - (bbox_currWSV.bottom);
+    var shiftDown = currentEntityParagraph.getBoundingClientRect().bottom + document.body.scrollTop - (layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.bottom);
 
 
-    const topLeftCorner_left = bbox_currEntity.left - (layoutInfo.rowAndColumnNumbers.leftNumbColumn * (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenCells)));
+    const topLeftCorner_left = currentEntityBBox.left - (layoutInfo.rowAndColumnNumbers.leftNumbColumn * (layoutInfo.cellDimensions.width + (2*layoutInfo.spaceBetweenCells)));
 
     let mySequence: Array<VelocitySequence> = [];
-    this._arrayOfWSVsWithouCurrentWSV.forEach((aWSV, index) => {
+    this._wsvsWithouCurrentWSV.forEach((aWSV, index) => {
 
       // cloning the wsv, and changing the position from relative to absolute
       let aClonedWSV: WordScaleVisualization;
@@ -85,14 +92,14 @@ class GridNoOverlapLayout implements Layout {
         $(aClonedWSV).children().removeClass('hide');
       }
 
-      let newTop = bbox_currWSV.bottom + (2*layoutInfo.spaceBetweenCells) + shiftDown + (Math.floor(index/layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenCells)));
+      let newTop = layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.bottom + (2*layoutInfo.spaceBetweenCells) + shiftDown + (Math.floor(index/layoutInfo.numberOfColumns) * (layoutInfo.cellDimensions.height + (2*layoutInfo.spaceBetweenCells)));
 
-      let newLeft = topLeftCorner_left + ((index % layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenCells))) + aWSV._middleBoundOffset;
+      let newLeft = topLeftCorner_left + ((index % layoutInfo.numberOfColumns) * (layoutInfo.cellDimensions.width + (2*layoutInfo.spaceBetweenCells))) + aWSV._middleBoundOffset;
 
 
       let whiteBackgroundElement: HTMLElement;
       if (!this._refToText.isLayoutVisible) {
-        whiteBackgroundElement = LayoutCreator.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
+        whiteBackgroundElement = LayoutCreator.addWhiteLayer((layoutInfo.cellDimensions.width + (2*layoutInfo.spaceBetweenCells)), (layoutInfo.cellDimensions.height + (2*layoutInfo.spaceBetweenCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
 
         aWSV._theClonedWSV._backgroundElement = whiteBackgroundElement;
       } else {
@@ -114,7 +121,7 @@ class GridNoOverlapLayout implements Layout {
         }
       }});
 
-      mySequence.push({e: whiteBackgroundElement, p: {left: (newLeft - layoutInfo.spaceBetweenCells - aWSV._offset_whiteLayer), top: (newTop - layoutInfo.spaceBetweenCells), opacity: 1}, o: {
+      mySequence.push({e: whiteBackgroundElement, p: {left: (newLeft - layoutInfo.spaceBetweenCells - aWSV._offsetWhiteLayer), top: (newTop - layoutInfo.spaceBetweenCells), opacity: 1}, o: {
           duration: 1000,
           sequenceQueue: false
         }
@@ -122,8 +129,6 @@ class GridNoOverlapLayout implements Layout {
     });
 
     $.Velocity.RunSequence(mySequence);
-
-    $('.sparklificated.clonedWSV.first .entity').css('background-color', 'rgb(255, 223, 128)');
   }
 
 
@@ -135,6 +140,40 @@ class GridNoOverlapLayout implements Layout {
     result.height = countCells_y * cellHeight;
 
     return result;
+  }
+
+
+  // based on available space around the current Entity and the layout, provide number of columns and rows to be used
+  getRowAndColumnInfo(boundToWhat: string, aSpaceAvailability: SpaceAvailability): void {
+
+    const layoutInfo = this.layoutInfo;
+    const spaceBetweenCells = layoutInfo.spaceBetweenCells;
+
+    if (boundToWhat === 'middleBound') {
+
+      // is there enough space available in the column where the current entity is
+      if (aSpaceAvailability.currentEntityColumn < 0) {
+        layoutInfo.rowAndColumnNumbers.currentEntityColumn = 0;
+      } else {
+        layoutInfo.rowAndColumnNumbers.currentEntityColumn = 1;
+      }
+
+      // how many columns available to the left
+      layoutInfo.rowAndColumnNumbers.leftNumbColumn = Math.floor(aSpaceAvailability.left / (layoutInfo.cellDimensions.width + (2 * spaceBetweenCells)));
+
+      // how many columns available to the right
+      layoutInfo.rowAndColumnNumbers.rightNumbColumn = Math.floor(aSpaceAvailability.right / (layoutInfo.cellDimensions.width + (2 * spaceBetweenCells)));
+
+      // how many rows available above current entity
+      // top position relative to viewport
+      layoutInfo.rowAndColumnNumbers.aboveNumbRow = Math.floor(aSpaceAvailability.above / (layoutInfo.cellDimensions.height + (2 * spaceBetweenCells)));
+
+      // how many rows available below current entity
+      // bottom position relative to viewport
+      layoutInfo.rowAndColumnNumbers.belowNumbRow = Math.floor(aSpaceAvailability.below / (layoutInfo.cellDimensions.height + (2 * spaceBetweenCells)));
+
+      layoutInfo.numberOfColumns = layoutInfo.rowAndColumnNumbers.leftNumbColumn + layoutInfo.rowAndColumnNumbers.currentEntityColumn + layoutInfo.rowAndColumnNumbers.rightNumbColumn;
+    }
   }
 
 

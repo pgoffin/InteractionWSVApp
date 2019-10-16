@@ -1,4 +1,4 @@
-import { LayoutInfo } from "../../../global";
+import { LayoutInfo, SpaceAvailability } from "../../../global";
 
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
@@ -10,9 +10,10 @@ interface Layout {
   _refToText: Text;
   _wsvsWithouCurrentWSV: Array<WordScaleVisualization>;
 
-  applyLayout(): void;
 
+  applyLayout(): void;
   cleanUpAfterLayout(): void;
+  getRowAndColumnInfo(boundToWhat: string, aSpaceAvailability: SpaceAvailability): void;
 
 }
 

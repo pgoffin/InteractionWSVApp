@@ -210,8 +210,8 @@ class Entity implements Entity {
     // }
 
 
-    const xSource = sourceElementBBox.left + (sourceElementBBox.width/2.0) - sourceElementBBox.left;
-    const ySource = sourceElementBBox.top + (sourceElementBBox.height/2.0) - sourceElementBBox.top;
+    const xSource = sourceElementBBox.left + (sourceElementBBox.width/2.0) - bboxBody.left;
+    const ySource = sourceElementBBox.top + (sourceElementBBox.height/2.0) - bboxBody.top;
 
     // dragged element
     const xTarget = targetElementBBox.left + (targetElementBBox.width/2.0) - bboxBody.left;

@@ -1,4 +1,4 @@
-import { LayoutInfo, VelocitySequence } from "../../../global";
+import { LayoutInfo, SpaceAvailability, VelocitySequence } from "../../../global";
 
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
@@ -16,12 +16,14 @@ class GridLayout implements Layout {
   _layoutInfo: LayoutInfo;
   _refToText: Text;
   _wsvsWithouCurrentWSV: Array<WordScaleVisualization>;
+  _spaceAvailability: SpaceAvailability;
 
 
-  constructor(aLayoutInfo: LayoutInfo, aRefToText: Text, anArrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>) {
+  constructor(aLayoutInfo: LayoutInfo, aSpaceAvailability: SpaceAvailability, aRefToText: Text, anArrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>) {
     this._layoutInfo = aLayoutInfo;
     this._refToText = aRefToText;
     this._wsvsWithouCurrentWSV = anArrayOfWSVsWithouCurrentWSV;
+    this._spaceAvailability = aSpaceAvailability;
   }
 
 
@@ -46,7 +48,7 @@ class GridLayout implements Layout {
     // const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
 
     // get available space for columns and rows
-    this.getRowAndColumnInfo('middleBound');
+    this.getRowAndColumnInfo('middleBound', this._spaceAvailability);
 
     // update the counts variable
     layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._wsvsWithouCurrentWSV)
@@ -87,10 +89,8 @@ class GridLayout implements Layout {
         aWSV._wsv.classList.add('hasClone');
       } else {
         aClonedWSV = aWSV._theClonedWSV!;
+        aClonedWSV.removeClassOffWSV('hide');
 
-        aClonedWSV._wsv.classList.remove('hide');
-
-        $(aClonedWSV).children().removeClass('hide');
       }
 
 
@@ -148,69 +148,37 @@ class GridLayout implements Layout {
 
     $.Velocity.RunSequence(mySequence);
 
-    $('.sparklificated.clonedWSV.first .entity').css('background-color', 'rgb(255, 223, 128)');
+    // $('.sparklificated.clonedWSV.first .entity').css('background-color', 'rgb(255, 223, 128)');
   }
 
-
-  getRowAndColumnInfo(boundToWhat: string): void {
+  // based on available space around the current Entity and the layout, provide number of columns and rows to be used
+  getRowAndColumnInfo(boundToWhat: string, aSpaceAvailability: SpaceAvailability): void {
 
     const layoutInfo = this.layoutInfo;
-    const maxEntityWidth = LayoutCreator.getEntityMaxWidth(this._refToText.listOfWSVs);
-    const maxSparklineWidth = LayoutCreator.getSparklineMaxWidth(this._refToText.listOfWSVs);
-
-    // the width of the window
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
-    // these is the bbox of the text with "margin", a wsv should not go over it
-    const bodyBbox = LayoutCreator.getBodyBBox();
-    const leftWindowPadding = bodyBbox.left;
-    const rightWindowPadding = windowWidth - bodyBbox.right;
-
-    const currentEntityBBoxRight = layoutInfo.currentEntity._entityBbox.right;
-    const currentWSVBBox = layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox;
-
     const spaceBetweenCells = layoutInfo.spaceBetweenCells;
-
 
     if (boundToWhat === 'middleBound') {
 
       // is there enough space available in the column where the current entity is
-      let availableSpaceForCurrentEntityColumn_left = currentEntityBBoxRight - maxEntityWidth - leftWindowPadding;
-
-      if (availableSpaceForCurrentEntityColumn_left < 0) {
+      if (aSpaceAvailability.currentEntityColumn < 0) {
         layoutInfo.rowAndColumnNumbers.currentEntityColumn = 0;
       } else {
         layoutInfo.rowAndColumnNumbers.currentEntityColumn = 1;
       }
-      // console.log('IS IT OK: ' + colsAndRowsNumber.currentEntityColumn);
 
       // how many columns available to the left
-      let availableSpaceLeft = Math.max(0, (currentEntityBBoxRight - maxEntityWidth - spaceBetweenCells - leftWindowPadding));
-      // if (availableSpaceLeft < 0) {
-      //   colsAndRowsNumber.leftNumbColumn = 0;
-      // }
-
-      layoutInfo.rowAndColumnNumbers.leftNumbColumn = Math.floor(availableSpaceLeft / (layoutInfo.cellDimensions.width + (2 * spaceBetweenCells)));
+      layoutInfo.rowAndColumnNumbers.leftNumbColumn = Math.floor(aSpaceAvailability.left / (layoutInfo.cellDimensions.width + (2 * spaceBetweenCells)));
 
       // how many columns available to the right
-      let availableSpaceRight = Math.max(0, (windowWidth - (currentEntityBBoxRight + maxSparklineWidth + spaceBetweenCells) - rightWindowPadding));
-      // if (availableSpaceRight < 0) {
-      //   colsAndRowsNumber.rightNumbColumn = 0;
-      // }
-
-      layoutInfo.rowAndColumnNumbers.rightNumbColumn = Math.floor(availableSpaceRight / (layoutInfo.cellDimensions.width + (2 * spaceBetweenCells)));
+      layoutInfo.rowAndColumnNumbers.rightNumbColumn = Math.floor(aSpaceAvailability.right / (layoutInfo.cellDimensions.width + (2 * spaceBetweenCells)));
 
       // how many rows available above current entity
       // top position relative to viewport
-      let availableSpaceAbove = Math.max(0, (currentWSVBBox.top - document.body.scrollTop - spaceBetweenCells));
-
-      layoutInfo.rowAndColumnNumbers.aboveNumbRow = Math.floor(availableSpaceAbove / (layoutInfo.cellDimensions.height + (2 * spaceBetweenCells)));
+      layoutInfo.rowAndColumnNumbers.aboveNumbRow = Math.floor(aSpaceAvailability.above / (layoutInfo.cellDimensions.height + (2 * spaceBetweenCells)));
 
       // how many rows available below current entity
       // bottom position relative to viewport
-      let availableSpaceBelow = Math.max(0, (windowHeight - (currentWSVBBox.bottom - document.body.scrollTop) - spaceBetweenCells));
-
-      layoutInfo.rowAndColumnNumbers.belowNumbRow = Math.floor(availableSpaceBelow / (layoutInfo.cellDimensions.height + (2 * spaceBetweenCells)));
+      layoutInfo.rowAndColumnNumbers.belowNumbRow = Math.floor(aSpaceAvailability.below / (layoutInfo.cellDimensions.height + (2 * spaceBetweenCells)));
 
       layoutInfo.numberOfColumns = layoutInfo.rowAndColumnNumbers.leftNumbColumn + layoutInfo.rowAndColumnNumbers.currentEntityColumn + layoutInfo.rowAndColumnNumbers.rightNumbColumn;
     }

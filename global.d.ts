@@ -82,3 +82,11 @@ export interface CellDimension {
   height: number,
   width: number
 }
+
+export interface SpaceAvailability {
+  currentEntityColumn: number,
+  left: number,
+  above: number,
+  right: number,
+  below: number
+}

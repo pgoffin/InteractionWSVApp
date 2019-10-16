@@ -1,4 +1,4 @@
-import { LayoutInfo } from "../../../global";
+import { LayoutInfo, SpaceAvailability } from "../../../global";
 
 import LayoutCreator from './layoutCreator';
 import Layout from './layout';
@@ -28,9 +28,9 @@ class ConcreteLayoutCreator extends LayoutCreator {
   }
 
 
-  layoutFactory(aLayoutName: string, initialLayoutInfo: LayoutInfo, refToText: Text, arrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>): Layout {
+  layoutFactory(aLayoutName: string, aLayoutInfo: LayoutInfo, spaceAvailability: SpaceAvailability, refToText: Text, wsvsWithouCurrentWSV: Array<WordScaleVisualization>): Layout {
 
-    return new this.layouts[aLayoutName](initialLayoutInfo, refToText, arrayOfWSVsWithouCurrentWSV)
+    return new this.layouts[aLayoutName](aLayoutInfo, spaceAvailability, refToText, wsvsWithouCurrentWSV)
 
   }
 

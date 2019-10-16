@@ -1,8 +1,8 @@
-import { BBox, LayoutInfo, VelocitySequence } from "../../../global";
+import { LayoutInfo, SpaceAvailability, VelocitySequence } from "../../../global";
 
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
-import Entity from './entity';
+// import Entity from './entity';
 import Layout from './layout';
 import LayoutCreator from './layoutCreator';
 
@@ -15,13 +15,15 @@ class ColumnPanAlignedLayout implements Layout {
 
   _layoutInfo: LayoutInfo;
   _refToText: Text;
-  _arrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>;
+  _wsvsWithouCurrentWSV: Array<WordScaleVisualization>;
+  _spaceAvailability: SpaceAvailability;
 
 
-  constructor(aLayoutInfo: LayoutInfo, aRefToText: Text, anArrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>) {
+  constructor(aLayoutInfo: LayoutInfo, aSpaceAvailability: SpaceAvailability, aRefToText: Text, aWsvsWithouCurrentWSV: Array<WordScaleVisualization>) {
     this._layoutInfo = aLayoutInfo;
     this._refToText = aRefToText;
-    this._arrayOfWSVsWithouCurrentWSV = anArrayOfWSVsWithouCurrentWSV;
+    this._wsvsWithouCurrentWSV = aWsvsWithouCurrentWSV;
+    this._spaceAvailability = aSpaceAvailability;
   }
 
 
@@ -39,23 +41,27 @@ class ColumnPanAlignedLayout implements Layout {
     const layoutInfo = this.layoutInfo;
     layoutInfo.type = 'column-pan-aligned';
 
-    const currentEntity: Entity = this._refToText.currentEntity!;
-    const bbox_currEntity: BBox = currentEntity._entityBbox;
-    const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
+    // const currentEntity: Entity = this._refToText.currentEntity!;
+    // const bbox_currEntity: BBox = currentEntity._entityBbox;
+    // const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
+
+    const currentEntityBBox = layoutInfo.currentEntity._entityBbox;
+
+    this.getRowAndColumnInfo('middleBound', this._spaceAvailability);
 
     // update the row and columns number
-    layoutInfo.numberOfColumns = 1;
+    // layoutInfo.numberOfColumns = 1;
 
     // update the counts variable
-    layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._arrayOfWSVsWithouCurrentWSV)
+    layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._wsvsWithouCurrentWSV)
 
     // reference for the alignement
     let referenceClonedWSV
     if (layoutInfo.counts.above === 0) {
       // if all the wsvs are below the current entity
-      referenceClonedWSV = this._arrayOfWSVsWithouCurrentWSV[0]
+      referenceClonedWSV = this._wsvsWithouCurrentWSV[0]
     } else {
-      referenceClonedWSV = this._arrayOfWSVsWithouCurrentWSV[layoutInfo.counts.above-1]
+      referenceClonedWSV = this._wsvsWithouCurrentWSV[layoutInfo.counts.above-1]
     }
 
     const referenceWidth = referenceClonedWSV._entity._entityBbox.width;
@@ -65,21 +71,21 @@ class ColumnPanAlignedLayout implements Layout {
     let topLeftCorner_left = 0;
     let topLeftCorner_top = 0;
     const numUsedRowsAbove = Math.ceil(layoutInfo.counts.above/layoutInfo.numberOfColumns);
-    let diffRight = layoutInfo.viewportRight - bbox_currWSV.right;
+    let diffRight = document.body.getBoundingClientRect().right - layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.right;
     let alignedColumnLeft = false;
 
-    if (diffRight >= (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenCells))) {
+    if (diffRight >= (layoutInfo.cellDimensions.width + (2*layoutInfo.spaceBetweenCells))) {
 
-      topLeftCorner_left = bbox_currEntity.left + (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenCells));
+      topLeftCorner_left = currentEntityBBox.left + (layoutInfo.cellDimensions.width + (2*layoutInfo.spaceBetweenCells));
 
     } else {
 
-      topLeftCorner_left = bbox_currEntity.left - (referenceWSVWidth + (2*layoutInfo.spaceBetweenCells));
+      topLeftCorner_left = currentEntityBBox.left - (referenceWSVWidth + (2*layoutInfo.spaceBetweenCells));
       alignedColumnLeft = true;
     }
 
     // get top left cornerDiffs
-    topLeftCorner_top = (bbox_currWSV.bottom + layoutInfo.spaceBetweenCells) - (numUsedRowsAbove * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenCells)));
+    topLeftCorner_top = (layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.bottom + layoutInfo.spaceBetweenCells) - (numUsedRowsAbove * (layoutInfo.cellDimensions.height + (2*layoutInfo.spaceBetweenCells)));
 
     layoutInfo.topLeftCorner_left = topLeftCorner_left;
     layoutInfo.topLeftCorner_top = topLeftCorner_top;
@@ -88,7 +94,7 @@ class ColumnPanAlignedLayout implements Layout {
     let aboveIndex = 0;
     let belowIndex = 0;
     // $.each(WSV_cloned, function(index, value) {
-    this._arrayOfWSVsWithouCurrentWSV.forEach(aWSV => {
+    this._wsvsWithouCurrentWSV.forEach(aWSV => {
 
       // cloning the wsv, and changing the position from relative to absolute
       let aClonedWSV: WordScaleVisualization;
@@ -100,11 +106,7 @@ class ColumnPanAlignedLayout implements Layout {
         aWSV._wsv.classList.add('hasClone');
       } else {
         aClonedWSV = aWSV._theClonedWSV;
-        $(aClonedWSV).removeClass('hide');
-        $(aClonedWSV).children().removeClass('hide');
-        if ($('#spacer').length > 0) {
-          $('#spacer').remove();
-        }
+        aClonedWSV.removeClassOffWSV('hide');
       }
 
       // set the correct offset depending on being aligned left or right (majority of cases)
@@ -118,14 +120,14 @@ class ColumnPanAlignedLayout implements Layout {
       let newLeft = 0;
       if (aWSV._aboveOrBelow === 'above') {
 
-        newTop = (topLeftCorner_top + layoutInfo.spaceBetweenCells) + (Math.floor(aboveIndex/layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenCells)));
+        newTop = (topLeftCorner_top + layoutInfo.spaceBetweenCells) + (Math.floor(aboveIndex/layoutInfo.numberOfColumns) * (layoutInfo.cellDimensions.height + (2*layoutInfo.spaceBetweenCells)));
         newLeft = topLeftCorner_left + correctionOffset;
 
         aboveIndex += 1;
 
       } else if (aWSV._aboveOrBelow === 'below') {
 
-        newTop = (bbox_currWSV.bottom + (2*layoutInfo.spaceBetweenCells)) + (Math.floor(belowIndex/layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenCells)));
+        newTop = (layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.bottom + (2*layoutInfo.spaceBetweenCells)) + (Math.floor(belowIndex/layoutInfo.numberOfColumns) * (layoutInfo.cellDimensions.height + (2*layoutInfo.spaceBetweenCells)));
         newLeft = topLeftCorner_left + correctionOffset;
 
         belowIndex += 1;
@@ -137,7 +139,7 @@ class ColumnPanAlignedLayout implements Layout {
 
       let whiteBackgroundElement;
       if (!this._refToText.isLayoutVisible) {
-        whiteBackgroundElement = LayoutCreator.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
+        whiteBackgroundElement = LayoutCreator.addWhiteLayer((layoutInfo.cellDimensions.width + (2*layoutInfo.spaceBetweenCells)), (layoutInfo.cellDimensions.height + (2*layoutInfo.spaceBetweenCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
 
         aWSV._theClonedWSV._backgroundElement = whiteBackgroundElement;
       } else {
@@ -159,7 +161,7 @@ class ColumnPanAlignedLayout implements Layout {
         }
       }});
 
-      mySequence.push({e: whiteBackgroundElement, p: {left: (newLeft - layoutInfo.spaceBetweenCells - aWSV._offset_whiteLayer), top: (newTop - layoutInfo.spaceBetweenCells), opacity: 1}, o: {
+      mySequence.push({e: whiteBackgroundElement, p: {left: (newLeft - layoutInfo.spaceBetweenCells - aWSV._offsetWhiteLayer), top: (newTop - layoutInfo.spaceBetweenCells), opacity: 1}, o: {
           duration: 1000,
           sequenceQueue: false
         }
@@ -167,8 +169,36 @@ class ColumnPanAlignedLayout implements Layout {
     });
 
     $.Velocity.RunSequence(mySequence);
+  }
 
-    $('.sparklificated.clonedWSV.first .entity').css('background-color', 'rgb(255, 223, 128)');
+
+  // based on available space around the current Entity and the layout, provide number of columns and rows to be used
+  getRowAndColumnInfo(boundToWhat: string, aSpaceAvailability: SpaceAvailability): void {
+
+    const layoutInfo = this.layoutInfo;
+    const spaceBetweenCells = layoutInfo.spaceBetweenCells;
+
+    if (boundToWhat === 'middleBound') {
+
+      // is there enough space available in the column where the current entity is
+      layoutInfo.rowAndColumnNumbers.currentEntityColumn = 0;
+
+      // how many columns available to the left
+      layoutInfo.rowAndColumnNumbers.leftNumbColumn = 1;
+
+      // how many columns available to the right
+      layoutInfo.rowAndColumnNumbers.rightNumbColumn = 1;
+
+      // how many rows available above current entity
+      // top position relative to viewport
+      layoutInfo.rowAndColumnNumbers.aboveNumbRow = Math.floor(aSpaceAvailability.above / (layoutInfo.cellDimensions.height + (2 * spaceBetweenCells)));
+
+      // how many rows available below current entity
+      // bottom position relative to viewport
+      layoutInfo.rowAndColumnNumbers.belowNumbRow = Math.floor(aSpaceAvailability.below / (layoutInfo.cellDimensions.height + (2 * spaceBetweenCells)));
+
+      layoutInfo.numberOfColumns = 1;
+    }
   }
 
 

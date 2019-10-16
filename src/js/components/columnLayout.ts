@@ -1,8 +1,8 @@
-import { BBox, LayoutInfo, VelocitySequence } from "../../../global";
+import { LayoutInfo, SpaceAvailability, VelocitySequence } from "../../../global";
 
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
-import Entity from './entity';
+// import Entity from './entity';
 import LayoutCreator from './layoutCreator';
 import Layout from './layout';
 
@@ -15,13 +15,15 @@ class ColumnLayout implements Layout {
 
   _layoutInfo: LayoutInfo;
   _refToText: Text;
-  _arrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>;
+  _wsvsWithouCurrentWSV: Array<WordScaleVisualization>;
+  _spaceAvailability: SpaceAvailability;
 
 
-  constructor(aLayoutInfo: LayoutInfo, aRefToText: Text, anArrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>) {
+  constructor(aLayoutInfo: LayoutInfo, aSpaceAvailability: SpaceAvailability, aRefToText: Text, aWsvsWithouCurrentWSV: Array<WordScaleVisualization>) {
     this._layoutInfo = aLayoutInfo;
     this._refToText = aRefToText;
-    this._arrayOfWSVsWithouCurrentWSV = anArrayOfWSVsWithouCurrentWSV;
+    this._wsvsWithouCurrentWSV = aWsvsWithouCurrentWSV;
+    this._spaceAvailability = aSpaceAvailability;
   }
 
 
@@ -39,22 +41,31 @@ class ColumnLayout implements Layout {
     const layoutInfo = this.layoutInfo;
     layoutInfo.type = 'column';
 
-    const currentEntity: Entity = this._refToText.currentEntity!;
-    const bbox_currEntity: BBox = currentEntity._entityBbox;
-    const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
+    // const currentEntity: Entity = this._refToText.currentEntity!;
+    // const bbox_currEntity: BBox = currentEntity._entityBbox;
+    // const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
+
+    const currentEntityBBox = layoutInfo.currentEntity._entityBbox;
+
+    // const currentEntity: Entity = this._refToText.currentEntity!;
+    // const bbox_currEntity: BBox = currentEntity._entityBbox;
+    // const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
+
+    // get available space for columns and rows
+    this.getRowAndColumnInfo('middleBound', this._spaceAvailability);
 
     // update the row and columns number
-    layoutInfo.numberOfColumns = 1;
+    // layoutInfo.numberOfColumns = 1;
 
     // update the counts variable
-    layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._arrayOfWSVsWithouCurrentWSV)
+    layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._wsvsWithouCurrentWSV)
 
 
     // get top left cornerDiffs
     const numUsedRowsAbove = Math.ceil(layoutInfo.counts.above/layoutInfo.numberOfColumns);
 
-    const topLeftCorner_left = bbox_currEntity.left - (layoutInfo.rowAndColumnNumbers.leftNumbColumn * (layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenCells)));
-    const topLeftCorner_top = bbox_currWSV.top - (numUsedRowsAbove * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenCells)));
+    const topLeftCorner_left = currentEntityBBox.left - (layoutInfo.rowAndColumnNumbers.leftNumbColumn * (layoutInfo.cellDimensions.width + (2*layoutInfo.spaceBetweenCells)));
+    const topLeftCorner_top = layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.top - (numUsedRowsAbove * (layoutInfo.cellDimensions.height + (2*layoutInfo.spaceBetweenCells)));
 
     layoutInfo.topLeftCorner_left = topLeftCorner_left;
     layoutInfo.topLeftCorner_top = topLeftCorner_top;
@@ -62,7 +73,7 @@ class ColumnLayout implements Layout {
     const mySequence: Array<VelocitySequence> = [];
     let aboveIndex = 0;
     let belowIndex = 0;
-    this._arrayOfWSVsWithouCurrentWSV.forEach(aWSV => {
+    this._wsvsWithouCurrentWSV.forEach(aWSV => {
       // cloning the wsv, and changing the position from relative to absolute
       let aClonedWSV: WordScaleVisualization;
       if (!this._refToText.isLayoutVisible) {
@@ -73,24 +84,20 @@ class ColumnLayout implements Layout {
         aWSV._wsv.classList.add('hasClone');
       } else {
         aClonedWSV = aWSV._theClonedWSV;
-        $(aClonedWSV).removeClass('hide');
-        $(aClonedWSV).children().removeClass('hide');
-        if ($('#spacer').length > 0) {
-          $('#spacer').remove();
-        }
+        aClonedWSV.removeClassOffWSV('hide');
       }
 
       let newTop = 0;
       let newLeft = topLeftCorner_left + aWSV._middleBoundOffset;
       if (aWSV._aboveOrBelow === 'above') {
 
-        newTop = topLeftCorner_top + (Math.floor(aboveIndex/layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenCells)));
+        newTop = topLeftCorner_top + (Math.floor(aboveIndex/layoutInfo.numberOfColumns) * (layoutInfo.cellDimensions.height + (2*layoutInfo.spaceBetweenCells)));
 
         aboveIndex += 1;
 
       } else if (aWSV._aboveOrBelow === 'below') {
 
-        newTop = (bbox_currWSV.bottom + (2*layoutInfo.spaceBetweenCells)) + (Math.floor(belowIndex/layoutInfo.numberOfColumns) * (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenCells)));
+        newTop = (layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.bottom + (2*layoutInfo.spaceBetweenCells)) + (Math.floor(belowIndex/layoutInfo.numberOfColumns) * (layoutInfo.cellDimensions.height + (2*layoutInfo.spaceBetweenCells)));
 
         belowIndex += 1;
 
@@ -103,7 +110,7 @@ class ColumnLayout implements Layout {
 
       let whiteBackgroundElement: HTMLElement;
       if (!this._refToText.isLayoutVisible) {
-        whiteBackgroundElement = LayoutCreator.addWhiteLayer((layoutInfo.cell_dimensions.width + (2*layoutInfo.spaceBetweenCells)), (layoutInfo.cell_dimensions.height + (2*layoutInfo.spaceBetweenCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
+        whiteBackgroundElement = LayoutCreator.addWhiteLayer((layoutInfo.cellDimensions.width + (2*layoutInfo.spaceBetweenCells)), (layoutInfo.cellDimensions.height + (2*layoutInfo.spaceBetweenCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
 
         aWSV._theClonedWSV._backgroundElement = whiteBackgroundElement;
       } else {
@@ -124,7 +131,7 @@ class ColumnLayout implements Layout {
         }
       }});
 
-      mySequence.push({e: whiteBackgroundElement, p: {left: (newLeft - layoutInfo.spaceBetweenCells - aWSV._offset_whiteLayer), top: (newTop - layoutInfo.spaceBetweenCells), opacity: 1}, o: {
+      mySequence.push({e: whiteBackgroundElement, p: {left: (newLeft - layoutInfo.spaceBetweenCells - aWSV._offsetWhiteLayer), top: (newTop - layoutInfo.spaceBetweenCells), opacity: 1}, o: {
           duration: 1000,
           sequenceQueue: false
         }
@@ -133,8 +140,36 @@ class ColumnLayout implements Layout {
     });
 
     $.Velocity.RunSequence(mySequence);
+  }
 
-    $('.sparklificated.clonedWSV.first .entity').css('background-color', 'rgb(255, 223, 128)');
+
+  // based on available space around the current Entity and the layout, provide number of columns and rows to be used
+  getRowAndColumnInfo(boundToWhat: string, aSpaceAvailability: SpaceAvailability): void {
+
+    const layoutInfo = this.layoutInfo;
+    const spaceBetweenCells = layoutInfo.spaceBetweenCells;
+
+    if (boundToWhat === 'middleBound') {
+
+      // is there enough space available in the column where the current entity is
+      layoutInfo.rowAndColumnNumbers.currentEntityColumn = 1;
+
+      // how many columns available to the left
+      layoutInfo.rowAndColumnNumbers.leftNumbColumn = 0;
+
+      // how many columns available to the right
+      layoutInfo.rowAndColumnNumbers.rightNumbColumn = 0;
+
+      // how many rows available above current entity
+      // top position relative to viewport
+      layoutInfo.rowAndColumnNumbers.aboveNumbRow = Math.floor(aSpaceAvailability.above / (layoutInfo.cellDimensions.height + (2 * spaceBetweenCells)));
+
+      // how many rows available below current entity
+      // bottom position relative to viewport
+      layoutInfo.rowAndColumnNumbers.belowNumbRow = Math.floor(aSpaceAvailability.below / (layoutInfo.cellDimensions.height + (2 * spaceBetweenCells)));
+
+      layoutInfo.numberOfColumns = layoutInfo.rowAndColumnNumbers.leftNumbColumn + layoutInfo.rowAndColumnNumbers.currentEntityColumn + layoutInfo.rowAndColumnNumbers.rightNumbColumn;
+    }
   }
 
 
