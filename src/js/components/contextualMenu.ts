@@ -66,6 +66,7 @@ class ContextualMenu {
 
     const menuDiv = document.createElement("div");
     menuDiv.setAttribute('id', 'tooltip');
+    menuDiv.classList.add('hide');
     this.tooltip = menuDiv;
 
     this._menuItems.forEach((anElement: MenuItemType) => {
@@ -275,7 +276,6 @@ class ContextualMenu {
   * makes all icons selectable
   */
   setAllMenuItemsAsSelectable() {
-
     this._tooltipElements.forEach(aTooltipItem => {
       aTooltipItem.classList.remove('notSelectable');
       aTooltipItem.classList.add('selectable');
@@ -296,5 +296,4 @@ class ContextualMenu {
 
 }
 
-// export let contextualMenu = new ContextualMenu();
 export default ContextualMenu

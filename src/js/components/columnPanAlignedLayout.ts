@@ -100,12 +100,8 @@ class ColumnPanAlignedLayout implements Layout {
       let aClonedWSV: WordScaleVisualization;
       if (!this._refToText.isLayoutVisible) {
         aClonedWSV = aWSV.cloneWSV();
-        aWSV._theClonedWSV = aClonedWSV;
-        aClonedWSV._theOriginalWSV = aWSV;
-
-        aWSV._wsv.classList.add('hasClone');
       } else {
-        aClonedWSV = aWSV._theClonedWSV;
+        aClonedWSV = aWSV._clonedWSV;
         aClonedWSV.removeClassOffWSV('hide');
       }
 
@@ -141,12 +137,12 @@ class ColumnPanAlignedLayout implements Layout {
       if (!this._refToText.isLayoutVisible) {
         whiteBackgroundElement = LayoutCreator.addWhiteLayer((layoutInfo.cellDimensions.width + (2*layoutInfo.spaceBetweenCells)), (layoutInfo.cellDimensions.height + (2*layoutInfo.spaceBetweenCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
 
-        aWSV._theClonedWSV._backgroundElement = whiteBackgroundElement;
+        aWSV._clonedWSV._backgroundElement = whiteBackgroundElement;
       } else {
         // the layout before might have hidden some of the whiteLayer, therefore unhide
-        aWSV._theClonedWSV._backgroundElement.classList.remove('hide');
+        aWSV._clonedWSV._backgroundElement.classList.remove('hide');
 
-        whiteBackgroundElement = aWSV._theClonedWSV._backgroundElement;
+        whiteBackgroundElement = aWSV._clonedWSV._backgroundElement;
       }
 
 

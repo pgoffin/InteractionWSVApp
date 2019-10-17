@@ -86,13 +86,10 @@ class RowLayout implements Layout {
       let aClonedWSV: WordScaleVisualization;
       if (!this._refToText.isLayoutVisible) {
         aClonedWSV = aWSV.cloneWSV();
-        aWSV._theClonedWSV = aClonedWSV;
-        aClonedWSV._theOriginalWSV = aWSV;
-        aClonedWSV._offsetWhiteLayer = this.layoutInfo.cellDimensions.width - aClonedWSV._wsvVisualizationBBox.width - aClonedWSV.entity._entityBbox.width;
 
-        aWSV._wsv.classList.add('hasClone');
+        aClonedWSV._offsetWhiteLayer = this.layoutInfo.cellDimensions.width - aClonedWSV._wsvVisualizationBBox.width - aClonedWSV.entity._entityBbox.width;
       } else {
-        aClonedWSV = aWSV._theClonedWSV!;
+        aClonedWSV = aWSV._clonedWSV!;
         aClonedWSV.removeClassOffWSV('hide');
 
       }
@@ -104,12 +101,12 @@ class RowLayout implements Layout {
       if (!this._refToText.isLayoutVisible) {
         whiteBackgroundElement = LayoutCreator.addWhiteLayer((layoutInfo.cellDimensions.width + (2*layoutInfo.spaceBetweenCells)), (layoutInfo.cellDimensions.height + (2*layoutInfo.spaceBetweenCells)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
 
-        aWSV._theClonedWSV._backgroundElement = whiteBackgroundElement;
+        aWSV._clonedWSV._backgroundElement = whiteBackgroundElement;
       } else {
         // the layout before might have hidden some of the whiteLayer, therefore unhide
-        aWSV._theClonedWSV._backgroundElement.classList.remove('hide');
+        aWSV._clonedWSV._backgroundElement.classList.remove('hide');
 
-        whiteBackgroundElement = aWSV._theClonedWSV._backgroundElement;
+        whiteBackgroundElement = aWSV._clonedWSV._backgroundElement;
       }
 
       mySequence.push({e: aClonedWSV._wsv, p: {left: (newLeft), top: (newTop)}, o: {
@@ -223,8 +220,8 @@ class RowLayout implements Layout {
       // const startOffsetRowlayout = WSV_cloned[0].wsvBoxClonedObject.left - WSV_cloned[0].offset_whiteLayer;
       // const bandLength = WSV_cloned[WSV_cloned.length - 1].wsvBoxClonedObject.right - startOffsetRowlayout;
 
-      const startOffsetRowlayout = this._wsvsWithouCurrentWSV[0]._theClonedWSV._wsvBBox.left - this._wsvsWithouCurrentWSV[0]._theClonedWSV._offsetWhiteLayer;
-      const bandLength = this._wsvsWithouCurrentWSV[this._wsvsWithouCurrentWSV.length - 1]._theClonedWSV._wsvBBox.right - startOffsetRowlayout;
+      const startOffsetRowlayout = this._wsvsWithouCurrentWSV[0]._clonedWSV._wsvBBox.left - this._wsvsWithouCurrentWSV[0]._clonedWSV._offsetWhiteLayer;
+      const bandLength = this._wsvsWithouCurrentWSV[this._wsvsWithouCurrentWSV.length - 1]._clonedWSV._wsvBBox.right - startOffsetRowlayout;
 
       // const snapPositions = [];
       // $('.sparklificated.clonedWSV:not(.hide)').each(function() {
@@ -245,7 +242,7 @@ class RowLayout implements Layout {
     let tmpLeftPosition: number = 0;
 
     this._wsvsWithouCurrentWSV.forEach((aWSV, index) => {
-      let clonedWSV = aWSV._theClonedWSV;
+      let clonedWSV = aWSV._clonedWSV;
 
       let nextWSVsLeftPosition;
 
@@ -269,7 +266,7 @@ class RowLayout implements Layout {
         } else {
           // nextWSVsLeftPosition = d3.select(WSV_cloned[nextIndex].theClonedWSV[0]).datum().x - d3.select(WSV_cloned[nextIndex].theClonedWSV[0]).datum().offset_whiteLayer;
           // nextWSVsLeftPosition = nextWSVsLeftPosition + d3_otherWSV_data.offset_whiteLayer;
-          let nextClonedWSV = this._wsvsWithouCurrentWSV[nextIndex]._theClonedWSV;
+          let nextClonedWSV = this._wsvsWithouCurrentWSV[nextIndex]._clonedWSV;
           nextWSVsLeftPosition = nextClonedWSV._wsvBBox.left - nextClonedWSV._offsetWhiteLayer + clonedWSV._offsetWhiteLayer
         }
       } else {
@@ -278,7 +275,7 @@ class RowLayout implements Layout {
 
         if (previousIndex < 0) {
           previousIndex = this._wsvsWithouCurrentWSV.length - 1;
-          let previousClonedWSV = this._wsvsWithouCurrentWSV[previousIndex]._theClonedWSV;
+          let previousClonedWSV = this._wsvsWithouCurrentWSV[previousIndex]._clonedWSV;
 
           // nextWSVsLeftPosition = d3.select(WSV_cloned[previousIndex].theClonedWSV[0]).datum().x - d3.select(WSV_cloned[previousIndex].theClonedWSV[0]).datum().offset_whiteLayer;
           // nextWSVsLeftPosition = nextWSVsLeftPosition + d3_otherWSV_data.offset_whiteLayer;

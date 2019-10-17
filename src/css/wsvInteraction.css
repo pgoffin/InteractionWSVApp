@@ -82,16 +82,22 @@ body {
   pointer-events: none;
 }
 
-.hoveringTrail {
+#bodyOverlay {
 	position: absolute;
 	pointer-events: none;
 	z-index: 410;
 }
 
-.hoveringTrail path {
+#bodyOverlay path.hoverTrail {
 	fill: none;
 	stroke: blue;
 	stroke-width: 1.5px;
+}
+
+#bodyOverlay path.connectionTrail {
+	fill: none;
+	stroke: black;
+	stroke-width: 1px;
 }
 
 .hide {

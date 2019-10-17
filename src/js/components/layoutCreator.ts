@@ -97,15 +97,14 @@ abstract class LayoutCreator {
     this._wsvsThatHaveAClone.forEach((aWSV, index) => {
 
       let originalWSVBBox = aWSV._wsvBBox;
-      let whiteBackgroundElement = aWSV._theClonedWSV._backgroundElement;
+      let whiteBackgroundElement = aWSV._clonedWSV._backgroundElement;
 
-      giveUpAnimationSequence.push({e: aWSV._theClonedWSV._wsv,
+      giveUpAnimationSequence.push({e: aWSV._clonedWSV._wsv,
                                     p: {left: originalWSVBBox.left, top: originalWSVBBox.top},
                                     o: {sequenceQueue: false,
                                         duration: 800,
-                                        complete: clonedWSV => {
-                                          clonedWSV[0].remove();
-                                          aWSV._theClonedWSV = null;
+                                        complete: () => {
+                                          aWSV._clonedWSV.removeClone()
                                         }
                                       }
                                   });
@@ -194,7 +193,7 @@ abstract class LayoutCreator {
   // updateEntityBBox() {
   //
   //   this._wsvsThatHaveAClone.forEach(aWSV => {
-  //     aWSV._theClonedWSV._entity.setBBoxOfEntity();
+  //     aWSV._clonedWSV._entity.setBBoxOfEntity();
   //
   //   });
   // }

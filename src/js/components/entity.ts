@@ -89,13 +89,13 @@ class Entity implements Entity {
       this.entityElement.addEventListener('mouseenter', () => {
         console.log('mouseenter on cloned entity');
 
-        this.drawConnectionLine('hoveringTrail', this, null)
+        this.drawHoveringnLineTo(this._entityBelongsToWsv._originalWSV._entity)
       });
 
       this.entityElement.addEventListener('mouseleave', () => {
         console.log('mouseleave on cloned entity');
 
-        this.removeTrail()
+        this.removeHoverTrail();
       });
     }
   }
@@ -160,55 +160,33 @@ class Entity implements Entity {
   }
 
 
-  drawConnectionLine(type: string, source: Entity, target: Entity | null) {
+  drawHoveringnLineTo(target: Entity) {
 
     let svgContainer;
 
     // added the svg to the root body and not the text div, will make calculation easier
-    if (d3.select('body svg.' + type).empty()) {
+    if (d3.select('#bodyOverlay').empty()) {
       const height = Number(d3.select('body').style('height').slice(0, -2))
       const width = Number(d3.select('body').style('width').slice(0, -2))
 
       svgContainer = d3.select('body').insert('svg', ':first-child')
                                       .attr('width', width)
                                       .attr('height', height)
-                                      .attr('class', type);
+                                      .attr('id', 'bodyOverlay');
     } else {
-      svgContainer = d3.select('body svg.' + type);
+      svgContainer = d3.select('#bodyOverlay');
     }
 
+    // const bboxText = {top: document.getElementById('text').getBoundingClientRect().top, left: document.getElementById('text').getBoundingClientRect().left}
+    // const bboxBody = {top: document.body.getBoundingClientRect().top - document.body.scrollTop, left: document.body.getBoundingClientRect().left}
     const bboxText = $('#text').offset();
     const bboxBody = $('body').offset();
 
-    // let sourceElement;
-    // let targetElement;
 
-    // origin element
-    let sourceElementBBox: BBox = this._entityBbox;
     // cloned element
-    let targetElementBBox: BBox = this._entityBelongsToWsv._theOriginalWSV._entity._entityBbox;
-
-
-    // if (type === 'diffLine') {
-    //   // source element
-    //   sourceElement = source._entityElement;
-    //
-    //   // dragged element
-    //   if (target) {
-    //     targetElement = target._entityElement;
-    //   } else {
-    //     console.log('ERROR: target is null')
-    //   }
-    // }
-
-    // } else {
-    //
-    //   // origin element
-    //   sourceElementBBox = this._entityBbox;
-    //   // cloned element
-    //   targetElementBBox = this._entityBelongsToWsv._theOriginalWSV._entity._entityBbox;
-    // }
-
+    let sourceElementBBox: BBox = this._entityBbox;
+    // origin element
+    let targetElementBBox: BBox = target._entityBbox;
 
     const xSource = sourceElementBBox.left + (sourceElementBBox.width/2.0) - bboxBody.left;
     const ySource = sourceElementBBox.top + (sourceElementBBox.height/2.0) - bboxBody.top;
@@ -222,46 +200,37 @@ class Entity implements Entity {
     const t = {x: xTarget, y: yTarget};
 
 
-    let lineEndpoints;
     let line;
-    if (type === 'hoveringTrail') {
 
-      lineEndpoints = {'source': s, 'target': t};
+    const lineEndpoints = {'source': s, 'target': t};
 
-      line = d3.linkHorizontal()
-               .x(function(d) { return d.x; })
-               .y(function(d) { return d.y; });
-
-    } else {
-
-      lineEndpoints = [[s, t]];
-
-      line = d3.svg.line()
-                   .x(function(d) { return d.x; })
-                   .y(function(d) { return d.y; });
-    }
+    const curvedline = d3.linkHorizontal()
+                         .x(function(d) { return d.x; })
+                         .y(function(d) { return d.y; });
 
     // svgContainer.append('path')
     //             .attr('d', line(lineEndpoints))
     //             .attr('class', 'hoveringTrail');
 
-    let theLine = svgContainer.selectAll('.' + type)
-                              .data([lineEndpoints]);
+    const theLine = svgContainer.selectAll('.hoverTrail')
+                                .data([lineEndpoints]);
 
-    theLine.attr('d', line(lineEndpoints));
+    theLine.attr('d', curvedline(lineEndpoints));
 
     theLine.enter().append('path')
-                   .attr('class', type)
-                   .attr('d', function(d) {return line(d)})
+                   .attr('class', 'hoverTrail')
+                   .attr('d', function(d) {return curvedline(d)})
 
     theLine.exit().remove();
   }
 
 
-  removeTrail() {
-    d3.select('body .hoveringTrail .hoverTrail').remove();
+  removeBodyOverlay() {
+    d3.select('#bodyOverlay').remove();
+  }
 
-    d3.select('body .hoveringTrail').remove();
+  removeHoverTrail() {
+    d3.select('.hoverTrail').remove();
   }
 
 

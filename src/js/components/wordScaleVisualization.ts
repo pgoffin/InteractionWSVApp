@@ -5,6 +5,8 @@ import Text from './text';
 
 import { wsvInteractionConstants } from '../constants';
 
+import * as d3 from "d3";
+
 // to run sparklificator
 require('webpack-jquery-ui/widgets');
 const renderers = require('../../lib/renderers');
@@ -51,8 +53,10 @@ class WordScaleVisualization implements WordScaleVisualization {
   _distanceToCurrEntity: number;
 
   _backgroundElement: HTMLElement;
-  _theClonedWSV: WordScaleVisualization | null;
-  _theOriginalWSV: WordScaleVisualization | null;
+  _clonedWSV: WordScaleVisualization | null;
+  _originalWSV: WordScaleVisualization | null;
+
+  _isAClone: Boolean;
 
 
 
@@ -62,6 +66,8 @@ class WordScaleVisualization implements WordScaleVisualization {
     this.entity = new Entity(anElement, this._refToText, this, aIsAClone);
 
     this.rawWSVData = data;
+
+    this._isAClone = false;
 
     this.renderer = renderers[theRenderer];
     this._rendererString = theRenderer;
@@ -193,12 +199,118 @@ class WordScaleVisualization implements WordScaleVisualization {
 
     let clonedWSV = new WordScaleVisualization(insertedClonedEntityNode as HTMLElement, this._rawWSVData, this._rendererString, this._refToText, true);
 
+    // set reference to cloned and original WSV
+    this._clonedWSV = clonedWSV;
+    clonedWSV._originalWSV = this;
+
+    this._wsv.classList.add('hasClone');
+
+    clonedWSV._isAClone = true;
+
     // clonedWSV.entity.entityElement.classList.add('cloned');
     // clonedWSV._wsv.classList.add('cloned');
     // clonedWSV._visualization.classList.add('cloned');
     clonedWSV.addClassToWSV('cloned')
 
+    clonedWSV.addEventsToWSV();
+
     return clonedWSV;
+  }
+
+
+  removeClone() {
+    if (this._isAClone) {
+      this._wsv.remove();
+      this._originalWSV._clonedWSV = null;
+    }
+  }
+
+
+  addEventsToWSV() {
+
+    if (this._isAClone) {
+      this._wsv.addEventListener('dblclick', event => {
+        console.log('dblclick on cloned wsv');
+
+        // so dblclick in $(html) is not triggered
+        event.stopPropagation();
+
+        const animationSequence = [];
+
+        this.drawConnectionLineTo(this._originalWSV);
+
+        // let toBeColoredBefore;
+        // let toBeColoredAfter;
+        // // select the sentence parts to be colored
+        // if (theEntity.parent().prev().text().slice(-1) === '.') {
+        //   toBeColoredAfter = $(theEntity).parent().next().next();
+        // } else {
+        //   toBeColoredBefore = $(theEntity).parent().prev();
+        //   toBeColoredAfter = $(theEntity).parent().next().next();
+        // }
+
+        // calculating offset depending on the distance between bottom of wsv and bottom of document
+        let topWSVToWindowTop = window.innerHeight/2.0;
+        let topWSVToBottomDoc = document.body.scrollHeight - this._originalWSV._wsvBBox.top + window.pageYOffset;
+        if ((topWSVToBottomDoc - this._originalWSV._wsvBBox.height) < window.innerHeight/2.0) {
+          topWSVToWindowTop = (this._originalWSV._wsvBBox.top + window.pageYOffset) - document.body.scrollHeight + window.innerHeight;
+        }
+        topWSVToWindowTop = -topWSVToWindowTop;
+
+        // give up the layout, but exclude the dbclicked clones wsv
+        const aLayoutCreator = this._refToText._layoutCreator
+        aLayoutCreator._wsvsThatHaveAClone = aLayoutCreator._wsvsThatHaveAClone.filter(aWSV => aWSV !== this._originalWSV);
+        aLayoutCreator.giveUpLayout();
+        this._refToText.contextualMenu.cleanupTooltip();
+
+
+        animationSequence.push({e: this._originalWSV._wsv,
+                                p: "scroll",
+                                o: {duration: 3500,
+                                    offset: topWSVToWindowTop,
+                                    easing: [ .45, 0, .45, 1 ]}
+                                });
+
+        // disappearing white background
+        animationSequence.push({e: this._backgroundElement,
+                                p: {opacity: 0},
+                                o: {display: "none",
+                                    sequenceQueue: false,
+                                    duration: 1500}
+                              });
+
+        animationSequence.push({e: this._wsv,
+                                p: {left: this._originalWSV._wsv.offsetLeft, top: this._originalWSV._wsv.offsetTop},
+                                o: {duration: 3500,
+                                    sequenceQueue: false,
+                                    easing: [ .45, 0, .45, 1 ],
+                                    complete: (clonedWSV: [HTMLElement]) => {
+                                      console.log('animation over');
+                                      clonedWSV[0].remove();
+                                      this._originalWSV._clonedWSV = null;
+
+                                      this.removeConnectionTrail();
+
+                                      // // color the sentence parts
+                                      // if (typeof toBeColoredBefore !== 'undefined') {
+                                      //   toBeColoredBefore.css('background-color','#FFE0EB');
+                                      //   toBeColoredBefore.css('color','#000000');
+                                      // }
+                                      //
+                                      // if (typeof toBeColoredAfter !== 'undefined') {
+                                      //   toBeColoredAfter.css('background-color','#FFE0EB');
+                                      //   toBeColoredAfter.css('color','#000000');
+                                      // }
+
+                                      // remove white background
+                                      this._backgroundElement.remove();
+                                    }
+                                }
+                              });
+
+        $.Velocity.RunSequence(animationSequence);
+      });
+    }
   }
 
 
@@ -219,6 +331,67 @@ class WordScaleVisualization implements WordScaleVisualization {
     for (let i = 0; i < childrenOfClonedWSV.length; i++) {
       childrenOfClonedWSV[i].classList.remove(aClass)
     }
+  }
+
+
+  drawConnectionLineTo(target: WordScaleVisualization) {
+    let svgContainer;
+
+    // added the svg to the root body and not the text div, will make calculation easier
+    if (d3.select('#bodyOverlay').empty()) {
+      const height = Number(d3.select('body').style('height').slice(0, -2))
+      const width = Number(d3.select('body').style('width').slice(0, -2))
+
+      svgContainer = d3.select('body').insert('svg', ':first-child')
+                                      .attr('width', width)
+                                      .attr('height', height)
+                                      .attr('id', 'bodyOverlay');
+    } else {
+      svgContainer = d3.select('#bodyOverlay');
+    }
+
+    const bboxText = $('#text').offset();
+    const bboxBody = $('body').offset();
+
+    const sourceElementBBox: BBox = this._wsvBBox;
+    const targetElementBBox: BBox = target._wsvBBox;
+
+
+    const xSource = sourceElementBBox.left + (sourceElementBBox.width/2.0) - bboxBody.left;
+    const ySource = sourceElementBBox.top + (sourceElementBBox.height/2.0) - bboxBody.top;
+
+    const xTarget = targetElementBBox.left + (targetElementBBox.width/2.0) - bboxBody.left;
+    const yTarget = targetElementBBox.top + (targetElementBBox.height/2.0) - bboxText.top;
+
+    // based on this http://stackoverflow.com/questions/15007877/how-to-use-the-d3-diagonal-function-to-draw-curved-lines
+    const s = {x: xSource, y: ySource};
+    const t = {x: xTarget, y: yTarget};
+
+
+    const lineEndpoints = [s, t];
+
+    const connectionLine = d3.line()
+                             .x(function(d) { return d.x; })
+                             .y(function(d) { return d.y; });
+
+    // svgContainer.append('path')
+    //             .attr('d', line(lineEndpoints))
+    //             .attr('class', 'hoveringTrail');
+
+    let theLine = svgContainer.selectAll('connectionTrail')
+                              .data([lineEndpoints]);
+
+    theLine.attr('d', connectionLine(lineEndpoints));
+
+    theLine.enter().append('path')
+                   .attr('class', 'connectionTrail')
+                   .attr('d', function(d) {return connectionLine(d)})
+
+    theLine.exit().remove();
+  }
+
+  removeConnectionTrail() {
+    d3.select('.connectionTrail').remove();
   }
 
 }
