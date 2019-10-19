@@ -5,6 +5,14 @@ export const wsvInteractionConstants = {
   typeOfWSV: 'stockLineChart',
   positionType: 'right',
 
+  // Layout
+  defaultLayout: 'GridLayout',
+
+  // sorting
+  defaultSorting: 'DocumentPositionSort',
+
+
+
   // time line chart constants
   timelineSize: { width: 100,
                   height: 20},

@@ -1,8 +1,10 @@
-import * as d3 from "d3";
-
 import { BBox } from "../../../global";
+
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
+
+import * as d3 from "d3";
+
 
 interface Entity {
   _entityName: string;
@@ -104,7 +106,6 @@ class Entity implements Entity {
   setAsCurrentEntity() {
     // only the entity gets class 'currentEntity'
     this.entityElement.classList.add('currentEntity');
-    // this.entityElement.setAttribute('z-index', '6');
 
     if (this.entityElement.classList.contains('selected')) {
       this.entityElement.classList.remove('selected');
@@ -229,11 +230,15 @@ class Entity implements Entity {
     d3.select('#bodyOverlay').remove();
   }
 
+
   removeHoverTrail() {
     d3.select('.hoverTrail').remove();
   }
 
 
+  getDifftoCurrEntity(currentEntity: Entity): number {
+    return currentEntity._entityBbox.width - this._entityBbox.width;
+  }
 
 }
 

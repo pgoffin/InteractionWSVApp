@@ -2,10 +2,13 @@
 
 import { wsvInteractionConstants } from '../constants';
 
+import Entity from './entity';
 import Layout from './layout';
+import Sorter from '../sorting/sorter';
+import sortingFactoryClass from '../sorting/sortingFactoryClass';
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
-import Entity from './entity';
+
 const dl = require('../../lib/datalib.min.js');
 
 import 'velocity-animate';
@@ -20,6 +23,7 @@ abstract class LayoutCreator {
   _theLayout: Layout;
   _wsvsThatHaveAClone: Array<WordScaleVisualization>;
   _spaceUsableInteractively: SpaceAvailability;
+  _layoutClass: string;
 
 
 
@@ -45,7 +49,9 @@ abstract class LayoutCreator {
   abstract layoutFactory(aLayoutName: string, layoutInfo: LayoutInfo, spaceAvailability: SpaceAvailability, refToText: Text, wsvsWithouCurrentWSV: Array<WordScaleVisualization>): Layout
 
 
-  changeLayout(layoutType: string) {
+  changeLayout(layoutType: string, sorting: string) {
+
+    this._layoutClass = layoutType;
 
     const layoutInfo = this.layoutInfo;
 
@@ -60,9 +66,14 @@ abstract class LayoutCreator {
 
     this._wsvsThatHaveAClone = this._refToText.listOfWSVs.filter(aWSV => aWSV != this._refToText._currentWSV);
 
+    const sortingFactory = sortingFactoryClass(sorting, this._wsvsThatHaveAClone, this._refToText)
+    this._wsvsThatHaveAClone = sortingFactory.sort();
+    sortingFactory.setComparator(this._refToText.currentWSV);
+
     this._wsvsThatHaveAClone.forEach(aWSV => {
       let aEntityBBox = aWSV.entity._entityBbox;
-      aWSV._aboveOrBelow = (aEntityBBox.top > bboxCurrEntity.bottom) ? 'below' : 'above';
+      // aWSV._aboveOrBelow = (aEntityBBox.top > bboxCurrEntity.bottom) ? 'below' : 'above';
+      aWSV._aboveOrBelow = sortingFactory.compare(aWSV);
 
       if (wsvInteractionConstants.positionType === 'right') {
         aWSV._middleBoundOffset = bboxCurrEntity.width - aEntityBBox.width;
@@ -70,11 +81,11 @@ abstract class LayoutCreator {
         aWSV._offsetWhiteLayer = layoutInfo.cellDimensions.width - aWSV._wsvVisualizationBBox.width - aEntityBBox.width;
       }
 
-      aWSV._distanceToCurrEntity = bboxCurrEntity.top - aEntityBBox.top;
+      // aWSV._distanceToCurrEntity = bboxCurrEntity.top - aEntityBBox.top;
     });
 
-    // order first by above or below, then use distance to to the currentEntity
-    this._wsvsThatHaveAClone.sort(dl.comparator(['+aboveOrBelow', '-distanceToCurrEntity']));
+    // // order first by above or below, then use distance to the currentEntity
+    // this._wsvsThatHaveAClone.sort(dl.comparator(['+_aboveOrBelow', '-_distanceToCurrEntity']));
 
 
     // let rowAndColumnNumbers: ColsAndRowsNumber = this.spaceAvailabilityColsAndRowsNumber(currentEntity, wsvInteractionConstants.positionType, layoutType, 'middleBound', this._refToText.listOfWSVs, layoutInfo.cellDimensions, layoutInfo.spaceBetweenCells);
@@ -176,7 +187,7 @@ abstract class LayoutCreator {
 
     this._refToText._isLayoutVisible = false;
 
-    // hide tooltip
+    // hide contextualMenu
     this._refToText._contextualMenu.hideContextualMenu(this._refToText._currentEntity!);
 
     this.layoutInfo.bandLength = 0;

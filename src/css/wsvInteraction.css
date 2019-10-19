@@ -104,7 +104,7 @@ body {
 	display: none;
 }
 
-#tooltip {
+#contextualMenu {
 	background: #eee;
 	padding: 2px;
 	position: absolute;

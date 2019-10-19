@@ -1,4 +1,4 @@
-import { WsvDataObject, RawWsvData, RenderFunc, WsVisualizationType, BBox } from "../../../global";
+import { BBox, EventLocation, RawWsvData, RenderFunc, WsvDataObject, WsVisualizationType } from "../../../global";
 import Entity from './entity';
 import wsvRendererFactoryClass from './wsvRendererFactoryClass';
 import Text from './text';
@@ -32,7 +32,7 @@ class WordScaleVisualization implements WordScaleVisualization {
 
   _renderer: RenderFunc;
 
-  _transformedData: WsvDataObject;
+  // _transformedData: WsvDataObject;
 
   _rendererAsClass: string;
   _rendererString: string;
@@ -261,7 +261,7 @@ class WordScaleVisualization implements WordScaleVisualization {
         const aLayoutCreator = this._refToText._layoutCreator
         aLayoutCreator._wsvsThatHaveAClone = aLayoutCreator._wsvsThatHaveAClone.filter(aWSV => aWSV !== this._originalWSV);
         aLayoutCreator.giveUpLayout();
-        this._refToText.contextualMenu.cleanupTooltip();
+        this._refToText.contextualMenu.cleanupContextualMenu();
 
 
         animationSequence.push({e: this._originalWSV._wsv,
@@ -390,9 +390,68 @@ class WordScaleVisualization implements WordScaleVisualization {
     theLine.exit().remove();
   }
 
+
   removeConnectionTrail() {
     d3.select('.connectionTrail').remove();
   }
+
+
+  /**
+  * Gets the shortest distance between a point and the closest point on the bbox of the wsv
+  */
+  getDistancePointClosestWSVCorner(point: EventLocation): number {
+    // entities are DOM elements
+    const wsvBBox = this._wsvBBox;
+
+    // does not matter which corner --> array of corner and not object
+    const wsvCorners = [{'left': wsvBBox.left, 'top': wsvBBox.top},
+                        {'left': wsvBBox.left + wsvBBox.width, 'top': wsvBBox.top},
+                        {'left': wsvBBox.left, 'top': wsvBBox.top + wsvBBox.height},
+                        {'left': wsvBBox.left + wsvBBox.width, 'top': wsvBBox.top + wsvBBox.height}];
+
+    let squaredDistance = 10000000;
+    wsvCorners.forEach(aCorner => {
+      let newSquaredDistance = ((point.x - aCorner.left) * (point.x - aCorner.left)) + ((point.y - aCorner.top) * (point.y - aCorner.top));
+
+      if (newSquaredDistance < squaredDistance) {
+        squaredDistance = newSquaredDistance
+      }
+    });
+
+    if (point.x > wsvBBox.left && point.x < wsvBBox.left + wsvBBox.width) {
+      const distanceToSegmentTop = Math.abs(point.y - wsvBBox.top);
+      const distanceToSegmentBottom = Math.abs(point.y - (wsvBBox.top + wsvBBox.height));
+
+      const distanceToSegmentTop_squared = distanceToSegmentTop * distanceToSegmentTop;
+      if (distanceToSegmentTop_squared < squaredDistance) {
+        squaredDistance = distanceToSegmentTop_squared;
+      }
+
+      const distanceToSegmentBottom_squared = distanceToSegmentBottom * distanceToSegmentBottom;
+      if (distanceToSegmentBottom_squared < squaredDistance) {
+        squaredDistance = distanceToSegmentBottom_squared;
+      }
+
+    } else if (point.y > wsvBBox.top && point.y < wsvBBox.top + wsvBBox.height) {
+      const distanceToSegmentLeft = Math.abs(point.x - wsvBBox.left);
+      const distanceToSegmentRight = Math.abs(point.x - (wsvBBox.left + wsvBBox.width));
+
+      const distanceToSegmentLeft_squared = distanceToSegmentLeft * distanceToSegmentLeft;
+      if (distanceToSegmentLeft_squared < squaredDistance) {
+        squaredDistance = distanceToSegmentLeft_squared;
+      }
+
+      const distanceToSegmentRight_squared = distanceToSegmentRight * distanceToSegmentRight;
+      if (distanceToSegmentRight_squared < squaredDistance) {
+        squaredDistance = distanceToSegmentRight_squared;
+      }
+    }
+
+    return squaredDistance;
+  }
+
+
+
 
 }
 

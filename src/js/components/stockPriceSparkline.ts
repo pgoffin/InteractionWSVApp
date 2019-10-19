@@ -18,6 +18,8 @@ class StockPriceSparkline implements WsVisualizationType {
   _width: number;
   _height: number;
 
+  _sortingBy = ['lastValueSort', 'entityNameSort', 'maxValueSort', 'minValueSort '];
+
 
   constructor(aRenderer: RenderFunc, aRawData: Array<RawWsvData>, aPosition: string, aPaddingWidth: Boolean, aPaddingHeight: Boolean) {
     this.renderer = aRenderer;

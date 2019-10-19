@@ -193,7 +193,7 @@ class RowLayout implements Layout {
 
     const rightTriangle = document.getElementById('triangle_right');
     if (rightTriangle) {
-      const viewportInfo = this._refToText.getViewportInfo()
+      const viewportInfo = Text.getViewportInfo()
 
       rightTriangle.classList.remove('hide');
       rightTriangle.style.top = this.layoutInfo.topLeftCorner_top + 'px';
@@ -298,7 +298,7 @@ class RowLayout implements Layout {
 
 
       // d3.select(currentWSV).datum().x = newClonedWSV_left;
-      const viewportInfo = this._refToText.getViewportInfo();
+      const viewportInfo = Text.getViewportInfo();
 
       // set the position of the cloned element
       d3.select(clonedWSV._wsv).style('left', newClonedWSV_left);

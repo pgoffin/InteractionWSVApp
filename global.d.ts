@@ -1,4 +1,17 @@
 import Entity from "./src/js/components/entity";
+import WordScaleVisualization from "./src/js/components/wordScaleVisualization";
+
+
+interface Text {
+  _nameOfTextFile: string | null;
+  _isLayoutVisible: Boolean;
+  _currentWSV: WordScaleVisualization | null;
+  _currentEntity: Entity | null;
+  _listOfWSVs: Array<WordScaleVisualization>;
+  _dataForWSV: WsvDataObject;
+  _contextualMenu: ContextualMenu;
+  _layoutCreator: LayoutCreator;
+}
 
 export interface WsvDataObject {
   [key: string]: Array<RawWsvData>;
