@@ -78,7 +78,8 @@ abstract class LayoutCreator {
       if (wsvInteractionConstants.positionType === 'right') {
         aWSV._middleBoundOffset = bboxCurrEntity.width - aEntityBBox.width;
 
-        aWSV._offsetWhiteLayer = layoutInfo.cellDimensions.width - aWSV._wsvVisualizationBBox.width - aEntityBBox.width;
+        // aWSV._offsetWhiteLayer = layoutInfo.cellDimensions.width - aWSV._wsvVisualizationBBox.width - aEntityBBox.width;
+        aWSV._offsetWhiteLayer = layoutInfo.cellDimensions.width - aWSV._wsvBBox.width;
       }
 
       // aWSV._distanceToCurrEntity = bboxCurrEntity.top - aEntityBBox.top;

@@ -3,7 +3,9 @@ import { BBox } from "../../../global";
 import Text from './text';
 import WordScaleVisualization from './wordScaleVisualization';
 
-import * as d3 from "d3";
+// import * as d3 from "d3";
+import { select } from 'd3-selection';
+import { linkHorizontal } from 'd3-shape';
 
 
 interface Entity {
@@ -166,16 +168,16 @@ class Entity implements Entity {
     let svgContainer;
 
     // added the svg to the root body and not the text div, will make calculation easier
-    if (d3.select('#bodyOverlay').empty()) {
-      const height = Number(d3.select('body').style('height').slice(0, -2))
-      const width = Number(d3.select('body').style('width').slice(0, -2))
+    if (select('#bodyOverlay').empty()) {
+      const height = Number(select('body').style('height').slice(0, -2))
+      const width = Number(select('body').style('width').slice(0, -2))
 
-      svgContainer = d3.select('body').insert('svg', ':first-child')
-                                      .attr('width', width)
-                                      .attr('height', height)
-                                      .attr('id', 'bodyOverlay');
+      svgContainer = select('body').insert('svg', ':first-child')
+                                   .attr('width', width)
+                                   .attr('height', height)
+                                   .attr('id', 'bodyOverlay');
     } else {
-      svgContainer = d3.select('#bodyOverlay');
+      svgContainer = select('#bodyOverlay');
     }
 
     // const bboxText = {top: document.getElementById('text').getBoundingClientRect().top, left: document.getElementById('text').getBoundingClientRect().left}
@@ -205,7 +207,7 @@ class Entity implements Entity {
 
     const lineEndpoints = {'source': s, 'target': t};
 
-    const curvedline = d3.linkHorizontal()
+    const curvedline = linkHorizontal()
                          .x(function(d) { return d.x; })
                          .y(function(d) { return d.y; });
 
@@ -227,12 +229,12 @@ class Entity implements Entity {
 
 
   removeBodyOverlay() {
-    d3.select('#bodyOverlay').remove();
+    select('#bodyOverlay').remove();
   }
 
 
   removeHoverTrail() {
-    d3.select('.hoverTrail').remove();
+    select('.hoverTrail').remove();
   }
 
 

@@ -1,3 +1,4 @@
+import { BBox } from "../../../global";
 import { wsvInteractionConstants } from '../constants';
 
 const menuItems = require('./menuItems');
@@ -256,7 +257,7 @@ class ContextualMenu {
 
   positionMenu(entityMenuIsCalledOn: Entity) {
 
-    if (this._contextualMenuBBox.left < Text.getViewportInfo().left) {
+    if (this._contextualMenuBBox.left < ContextualMenu.getViewportInfo().left) {
       this._contextualMenuBBox.left = entityMenuIsCalledOn._entityBbox.right + this._contextualMenuBBox.offset;
       this.contextualMenu.classList.remove('leftPos');
       this.contextualMenu.classList.add('rightPos');
@@ -301,6 +302,9 @@ class ContextualMenu {
     this._selectedLayoutMenuItem = null;
   }
 
+  private static getViewportInfo(): BBox {
+    return document.body.getBoundingClientRect();
+  }
 
 }
 
