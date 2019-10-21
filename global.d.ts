@@ -56,7 +56,7 @@ export interface LayoutInfo {
   type: string,
   cellDimensions: CellDimension,
   currentEntity: Entity,
-  spaceBetweenCells: number,
+  cellPadding: number,
   rowAndColumnNumbers: ColsAndRowsNumber,
   numberOfColumns: number,
 

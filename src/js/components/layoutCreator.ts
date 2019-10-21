@@ -29,7 +29,7 @@ abstract class LayoutCreator {
 
   constructor(aRefToText: Text) {
     this._layoutInfo = {rowAndColumnNumbers: {}};
-    this._layoutInfo.spaceBetweenCells = 4;
+    this._layoutInfo.cellPadding = 4;
 
     this._refToText = aRefToText;
     this._wsvsThatHaveAClone = []
@@ -70,6 +70,14 @@ abstract class LayoutCreator {
     this._wsvsThatHaveAClone = sortingFactory.sort();
     sortingFactory.setComparator(this._refToText.currentWSV);
 
+    const maxEntityWidth = LayoutCreator.getEntityMaxWidth(this._refToText.listOfWSVs);
+
+    this._refToText._listOfWSVs.forEach(aWSV => {
+      // max entity provides left most extension of an entity -> diff between max entity and the entity
+      aWSV._offsetEntity = maxEntityWidth - aWSV._entity._entityBbox.width;
+    })
+
+
     this._wsvsThatHaveAClone.forEach(aWSV => {
       let aEntityBBox = aWSV.entity._entityBbox;
       // aWSV._aboveOrBelow = (aEntityBBox.top > bboxCurrEntity.bottom) ? 'below' : 'above';
@@ -77,9 +85,10 @@ abstract class LayoutCreator {
 
       if (wsvInteractionConstants.positionType === 'right') {
         aWSV._middleBoundOffset = bboxCurrEntity.width - aEntityBBox.width;
-
-        // aWSV._offsetWhiteLayer = layoutInfo.cellDimensions.width - aWSV._wsvVisualizationBBox.width - aEntityBBox.width;
         aWSV._offsetWhiteLayer = layoutInfo.cellDimensions.width - aWSV._wsvBBox.width;
+
+        // max entity provides left most extension of an entity -> diff between max entity and the entity
+        // aWSV._offsetEntity = maxEntityWidth - aWSV._entity._entityBbox.width;
       }
 
       // aWSV._distanceToCurrEntity = bboxCurrEntity.top - aEntityBBox.top;
@@ -89,7 +98,7 @@ abstract class LayoutCreator {
     // this._wsvsThatHaveAClone.sort(dl.comparator(['+_aboveOrBelow', '-_distanceToCurrEntity']));
 
 
-    // let rowAndColumnNumbers: ColsAndRowsNumber = this.spaceAvailabilityColsAndRowsNumber(currentEntity, wsvInteractionConstants.positionType, layoutType, 'middleBound', this._refToText.listOfWSVs, layoutInfo.cellDimensions, layoutInfo.spaceBetweenCells);
+    // let rowAndColumnNumbers: ColsAndRowsNumber = this.spaceAvailabilityColsAndRowsNumber(currentEntity, wsvInteractionConstants.positionType, layoutType, 'middleBound', this._refToText.listOfWSVs, layoutInfo.cellDimensions, layoutInfo.cellPadding);
     //
     // layoutInfo.rowAndColumnNumbers = rowAndColumnNumbers;
     // layoutInfo = ['numberOfColumns', rowAndColumnNumbers.totalNumberOfColumns];
@@ -258,24 +267,24 @@ abstract class LayoutCreator {
     const currentEntityBBoxRight = layoutInfo.currentEntity._entityBbox.right;
     const currentWSVBBox = layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox;
 
-    const spaceBetweenCells = layoutInfo.spaceBetweenCells;
+    const cellPadding = layoutInfo.cellPadding;
 
     // is there enough space available in the column where the current entity is
     let availableSpaceForCurrentEntityColumn_left = currentEntityBBoxRight - maxEntityWidth - leftWindowPadding;
 
     // how many columns available to the left
-    let availableSpaceLeft = Math.max(0, (currentEntityBBoxRight - maxEntityWidth - spaceBetweenCells - leftWindowPadding));
+    let availableSpaceLeft = Math.max(0, (currentEntityBBoxRight - maxEntityWidth - cellPadding - leftWindowPadding));
 
     // how many columns available to the right
-    let availableSpaceRight = Math.max(0, (windowWidth - (currentEntityBBoxRight + maxSparklineWidth + spaceBetweenCells) - rightWindowPadding));
+    let availableSpaceRight = Math.max(0, (windowWidth - (currentEntityBBoxRight + maxSparklineWidth + cellPadding) - rightWindowPadding));
 
     // how many rows available above current entity
     // top position relative to viewport
-    let availableSpaceAbove = Math.max(0, (currentWSVBBox.top - document.body.scrollTop - spaceBetweenCells));
+    let availableSpaceAbove = Math.max(0, (currentWSVBBox.top - document.body.scrollTop - cellPadding));
 
     // how many rows available below current entity
     // bottom position relative to viewport
-    let availableSpaceBelow = Math.max(0, (windowHeight - (currentWSVBBox.bottom - document.body.scrollTop) - spaceBetweenCells));
+    let availableSpaceBelow = Math.max(0, (windowHeight - (currentWSVBBox.bottom - document.body.scrollTop) - cellPadding));
 
     let spaceAvailability = {currentEntityColumn: availableSpaceForCurrentEntityColumn_left,
                              left: availableSpaceLeft,
@@ -288,7 +297,7 @@ abstract class LayoutCreator {
 
 
   // // Calculates the possible number of columns/rows above and below the current entity.
-  // spaceAvailabilityColsAndRowsNumber(aCurrentEntity, layoutInfo, aPositionType, layoutType, boundToWhat, arrayOfWSVs, aCellDimension, spaceBetweenCells): ColsAndRowsNumber {
+  // spaceAvailabilityColsAndRowsNumber(aCurrentEntity, layoutInfo, aPositionType, layoutType, boundToWhat, arrayOfWSVs, aCellDimension, cellPadding): ColsAndRowsNumber {
   //
   //   //TODO layoutTpe variable not yet used, do I need to use it
   //
@@ -346,32 +355,32 @@ abstract class LayoutCreator {
   //       console.log('IS IT OK: ' + colsAndRowsNumber.currentEntityColumn);
   //
   //       // how many columns available to the left
-  //       availableSpace_left = currentEntity_rightPosition - max_entityWidth - spaceBetweenCells - leftBuffer;
+  //       availableSpace_left = currentEntity_rightPosition - max_entityWidth - cellPadding - leftBuffer;
   //       if (availableSpace_left < 0) {
   //         availableSpace_left = 0;
   //       }
   //
-  //       numbColumnsPossible_left = Math.floor(availableSpace_left / (aCellDimension.width + (2 * spaceBetweenCells)));
+  //       numbColumnsPossible_left = Math.floor(availableSpace_left / (aCellDimension.width + (2 * cellPadding)));
   //       colsAndRowsNumber.leftNumbColumn = numbColumnsPossible_left;
   //
   //       // how many columns available to the right
-  //       availableSpace_right = widthAvailableForInteraction - (currentEntity_rightPosition + max_sparklineWidth + spaceBetweenCells) - rightBuffer;
+  //       availableSpace_right = widthAvailableForInteraction - (currentEntity_rightPosition + max_sparklineWidth + cellPadding) - rightBuffer;
   //
-  //       numbColumnsPossible_right = Math.floor(availableSpace_right / (aCellDimension.width + (2 * spaceBetweenCells)));
+  //       numbColumnsPossible_right = Math.floor(availableSpace_right / (aCellDimension.width + (2 * cellPadding)));
   //       colsAndRowsNumber.rightNumbColumn = numbColumnsPossible_right;
   //
   //       // how many rows available above current entity
   //       // top position relative to viewport
-  //       availableSpace_above = Math.max(0, (currentWSV_topPosition - document.body.scrollTop - spaceBetweenCells));
+  //       availableSpace_above = Math.max(0, (currentWSV_topPosition - document.body.scrollTop - cellPadding));
   //
-  //       numRowsPossible_above = Math.floor(availableSpace_above / (aCellDimension.height + (2 * spaceBetweenCells)));
+  //       numRowsPossible_above = Math.floor(availableSpace_above / (aCellDimension.height + (2 * cellPadding)));
   //       colsAndRowsNumber.aboveNumbRow = numRowsPossible_above;
   //
   //       // how many rows available below current entity
   //       // bottom position relative to viewport
-  //       availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - document.body.scrollTop) - spaceBetweenCells));
+  //       availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - document.body.scrollTop) - cellPadding));
   //
-  //       numRowsPossible_below = Math.floor(availableSpace_below / (aCellDimension.height + (2 * spaceBetweenCells)));
+  //       numRowsPossible_below = Math.floor(availableSpace_below / (aCellDimension.height + (2 * cellPadding)));
   //       colsAndRowsNumber.belowNumbRow = numRowsPossible_below;
   //
   //     } else if (boundToWhat === 'rightBound') {
@@ -381,32 +390,32 @@ abstract class LayoutCreator {
   //   } else if (layoutType === 'ColumnLayout') {
   //     if (boundToWhat === 'middleBound') {
   //       // how many columns available to the left
-  //       availableSpace_left = currentEntity_rightPosition - max_entityWidth - spaceBetweenCells;
+  //       availableSpace_left = currentEntity_rightPosition - max_entityWidth - cellPadding;
   //       if (availableSpace_left < 0) {
   //         availableSpace_left = 0;
   //       }
   //
-  //       // numbColumnsPossible_left = Math.floor(availableSpace_left / (aCellWidth + (2 * spaceBetweenCells)));
+  //       // numbColumnsPossible_left = Math.floor(availableSpace_left / (aCellWidth + (2 * cellPadding)));
   //       // ColsAndRowsNumber.leftNumbColumn = numbColumnsPossible_left;
   //       colsAndRowsNumber.leftNumbColumn = 0;
   //
   //       // how many columns available to the right
-  //       availableSpace_right = widthAvailableForInteraction - (currentEntity_rightPosition + max_sparklineWidth + spaceBetweenCells);
+  //       availableSpace_right = widthAvailableForInteraction - (currentEntity_rightPosition + max_sparklineWidth + cellPadding);
   //
-  //       // numbColumnsPossible_right = Math.floor(availableSpace_right / (aCellWidth + (2 * spaceBetweenCells)));
+  //       // numbColumnsPossible_right = Math.floor(availableSpace_right / (aCellWidth + (2 * cellPadding)));
   //       // colsAndRowsNumber.rightNumbColumn = numbColumnsPossible_right;
   //       colsAndRowsNumber.rightNumbColumn = 0;
   //
   //       // how many rows available above current entity
-  //       availableSpace_above = Math.max(0, (currentWSV_topPosition - document.body.scrollTop - spaceBetweenCells));
+  //       availableSpace_above = Math.max(0, (currentWSV_topPosition - document.body.scrollTop - cellPadding));
   //
-  //       numRowsPossible_above = Math.floor(availableSpace_above / (aCellDimension.height + (2 * spaceBetweenCells)));
+  //       numRowsPossible_above = Math.floor(availableSpace_above / (aCellDimension.height + (2 * cellPadding)));
   //       colsAndRowsNumber.aboveNumbRow = numRowsPossible_above;
   //
   //       // how many rows available below current entity
-  //       availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - document.body.scrollTop) - spaceBetweenCells));
+  //       availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - document.body.scrollTop) - cellPadding));
   //
-  //       numRowsPossible_below = Math.floor(availableSpace_below / (aCellDimension.height + (2 * spaceBetweenCells)));
+  //       numRowsPossible_below = Math.floor(availableSpace_below / (aCellDimension.height + (2 * cellPadding)));
   //       colsAndRowsNumber.belowNumbRow = numRowsPossible_below;
   //
   //     } else if (boundToWhat === 'rightBound') {
@@ -416,32 +425,32 @@ abstract class LayoutCreator {
   //   } else if (layoutType === 'ColumnPanAlignedLayout') {
   //     if (boundToWhat === 'middleBound') {
   //       // how many columns available to the left
-  //       availableSpace_left = currentEntity_rightPosition - max_entityWidth - spaceBetweenCells;
+  //       availableSpace_left = currentEntity_rightPosition - max_entityWidth - cellPadding;
   //       if (availableSpace_left < 0) {
   //         availableSpace_left = 0;
   //       }
   //
-  //       //numbColumnsPossible_left = Math.floor(availableSpace_left / (aCellWidth + (2 * spaceBetweenCells)));
+  //       //numbColumnsPossible_left = Math.floor(availableSpace_left / (aCellWidth + (2 * cellPadding)));
   //       // colsAndRowsNumber.leftNumbColumn = numbColumnsPossible_left;
   //       colsAndRowsNumber.leftNumbColumn = 1;
   //
   //       // how many columns available to the right
-  //       availableSpace_right = widthAvailableForInteraction - (currentEntity_rightPosition + max_sparklineWidth + spaceBetweenCells);
+  //       availableSpace_right = widthAvailableForInteraction - (currentEntity_rightPosition + max_sparklineWidth + cellPadding);
   //
-  //       // numbColumnsPossible_right = Math.floor(availableSpace_right / (aCellWidth + (2 * spaceBetweenCells)));
+  //       // numbColumnsPossible_right = Math.floor(availableSpace_right / (aCellWidth + (2 * cellPadding)));
   //       // colsAndRowsNumber.rightNumbColumn = numbColumnsPossible_right;
   //       colsAndRowsNumber.rightNumbColumn = 1;
   //
   //       // how many rows available above current entity
-  //       availableSpace_above = Math.max(0, (currentWSV_topPosition - document.body.scrollTop - spaceBetweenCells));
+  //       availableSpace_above = Math.max(0, (currentWSV_topPosition - document.body.scrollTop - cellPadding));
   //
-  //       numRowsPossible_above = Math.floor(availableSpace_above / (aCellDimension.height + (2 * spaceBetweenCells)));
+  //       numRowsPossible_above = Math.floor(availableSpace_above / (aCellDimension.height + (2 * cellPadding)));
   //       colsAndRowsNumber.aboveNumbRow = numRowsPossible_above;
   //
   //       // how many rows available below current entity
-  //       availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - document.body.scrollTop) - spaceBetweenCells));
+  //       availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - document.body.scrollTop) - cellPadding));
   //
-  //       numRowsPossible_below = Math.floor(availableSpace_below / (aCellDimension.height + (2 * spaceBetweenCells)));
+  //       numRowsPossible_below = Math.floor(availableSpace_below / (aCellDimension.height + (2 * cellPadding)));
   //       colsAndRowsNumber.belowNumbRow = numRowsPossible_below;
   //
   //     } else if (boundToWhat === 'rightBound') {
@@ -451,26 +460,26 @@ abstract class LayoutCreator {
   //   } else if (layoutType === 'RowLayout') {
   //     if (boundToWhat === 'middleBound') {
   //       // how many columns available to the left
-  //       availableSpace_left = currentEntity_rightPosition - max_entityWidth - spaceBetweenCells - leftBuffer;
+  //       availableSpace_left = currentEntity_rightPosition - max_entityWidth - cellPadding - leftBuffer;
   //       if (availableSpace_left < 0) {
   //         availableSpace_left = 0;
   //       }
   //
-  //       numbColumnsPossible_left = Math.floor(availableSpace_left / (aCellDimension.width + (2 * spaceBetweenCells)));
+  //       numbColumnsPossible_left = Math.floor(availableSpace_left / (aCellDimension.width + (2 * cellPadding)));
   //       colsAndRowsNumber.leftNumbColumn = numbColumnsPossible_left;
   //
   //       // how many columns available to the right
-  //       availableSpace_right = widthAvailableForInteraction - (currentEntity_rightPosition + max_sparklineWidth + spaceBetweenCells) - rightBuffer;
+  //       availableSpace_right = widthAvailableForInteraction - (currentEntity_rightPosition + max_sparklineWidth + cellPadding) - rightBuffer;
   //
-  //       numbColumnsPossible_right = Math.floor(availableSpace_right / (aCellDimension.width + (2 * spaceBetweenCells)));
+  //       numbColumnsPossible_right = Math.floor(availableSpace_right / (aCellDimension.width + (2 * cellPadding)));
   //       colsAndRowsNumber.rightNumbColumn = numbColumnsPossible_right;
   //
   //       // how many rows available above current entity
-  //       availableSpace_above = Math.max(0, (currentWSV_topPosition - document.body.scrollTop - spaceBetweenCells));
-  //       numRowsPossible_above = Math.floor(availableSpace_above / (aCellDimension.height + (2 * spaceBetweenCells)));
+  //       availableSpace_above = Math.max(0, (currentWSV_topPosition - document.body.scrollTop - cellPadding));
+  //       numRowsPossible_above = Math.floor(availableSpace_above / (aCellDimension.height + (2 * cellPadding)));
   //
-  //       availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - document.body.scrollTop) - spaceBetweenCells));
-  //       numRowsPossible_below = Math.floor(availableSpace_below / (aCellDimension.height + (2 * spaceBetweenCells)));
+  //       availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - document.body.scrollTop) - cellPadding));
+  //       numRowsPossible_below = Math.floor(availableSpace_below / (aCellDimension.height + (2 * cellPadding)));
   //
   //       if (numRowsPossible_above > 0) {
   //         colsAndRowsNumber.aboveNumbRow = 1;
@@ -492,30 +501,30 @@ abstract class LayoutCreator {
   //   } else if (layoutType === 'GridNoOverlapLayout') {
   //     if (boundToWhat === 'middleBound') {
   //       // how many columns available to the left
-  //       availableSpace_left = currentEntity_rightPosition - max_entityWidth - spaceBetweenCells;
+  //       availableSpace_left = currentEntity_rightPosition - max_entityWidth - cellPadding;
   //       if (availableSpace_left < 0) {
   //         availableSpace_left = 0;
   //       }
   //
-  //       numbColumnsPossible_left = Math.floor(availableSpace_left / (aCellDimension.width + (2 * spaceBetweenCells)));
+  //       numbColumnsPossible_left = Math.floor(availableSpace_left / (aCellDimension.width + (2 * cellPadding)));
   //       colsAndRowsNumber.leftNumbColumn = numbColumnsPossible_left;
   //
   //       // how many columns available to the right
-  //       availableSpace_right = widthAvailableForInteraction - (currentEntity_rightPosition + max_sparklineWidth + spaceBetweenCells);
+  //       availableSpace_right = widthAvailableForInteraction - (currentEntity_rightPosition + max_sparklineWidth + cellPadding);
   //
-  //       numbColumnsPossible_right = Math.floor(availableSpace_right / (aCellDimension.width + (2 * spaceBetweenCells)));
+  //       numbColumnsPossible_right = Math.floor(availableSpace_right / (aCellDimension.width + (2 * cellPadding)));
   //       colsAndRowsNumber.rightNumbColumn = numbColumnsPossible_right;
   //
   //       // how many rows available above current entity
-  //       availableSpace_above = Math.max(0, (currentWSV_topPosition - document.body.scrollTop - spaceBetweenCells));
+  //       availableSpace_above = Math.max(0, (currentWSV_topPosition - document.body.scrollTop - cellPadding));
   //
-  //       numRowsPossible_above = Math.floor(availableSpace_above / (aCellDimension.height + (2 * spaceBetweenCells)));
+  //       numRowsPossible_above = Math.floor(availableSpace_above / (aCellDimension.height + (2 * cellPadding)));
   //       colsAndRowsNumber.aboveNumbRow = numRowsPossible_above;
   //
   //       // how many rows available below current entity
-  //       availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - document.body.scrollTop) - spaceBetweenCells));
+  //       availableSpace_below = Math.max(0, (heightAvailableForInteraction - (currentWSV_bottomPosition - document.body.scrollTop) - cellPadding));
   //
-  //       numRowsPossible_below = Math.floor(availableSpace_below / (aCellDimension.height + (2 * spaceBetweenCells)));
+  //       numRowsPossible_below = Math.floor(availableSpace_below / (aCellDimension.height + (2 * cellPadding)));
   //       colsAndRowsNumber.belowNumbRow = numRowsPossible_below;
   //
   //     } else if (boundToWhat === 'rightBound') {
@@ -535,7 +544,7 @@ abstract class LayoutCreator {
   * @return {[type]} [description]
   */
   static getEntityMaxWidth(arrayOfWSVMeasurementObjects: Array<WordScaleVisualization>): number {
-    var entityMaxWidth = Math.max.apply(null, arrayOfWSVMeasurementObjects.map((aWSV: WordScaleVisualization) => {
+    const entityMaxWidth = Math.max.apply(null, arrayOfWSVMeasurementObjects.map((aWSV: WordScaleVisualization) => {
       return aWSV.entity._entityBbox.width;
     }));
 
@@ -549,7 +558,7 @@ abstract class LayoutCreator {
   * @return {float}                              [description]
   */
   static getSparklineMaxWidth(arrayOfWSVMeasurementObjects: Array<WordScaleVisualization>): number {
-    var sparklineMaxWidth = Math.max.apply(null, arrayOfWSVMeasurementObjects.map((aWSV: WordScaleVisualization) => {
+    const sparklineMaxWidth = Math.max.apply(null, arrayOfWSVMeasurementObjects.map((aWSV: WordScaleVisualization) => {
       return aWSV._wsvVisualizationBBox.width;
     }));
 

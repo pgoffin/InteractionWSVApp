@@ -58,6 +58,8 @@ class WordScaleVisualization implements WordScaleVisualization {
 
   _positionLeftTopCorner: CornerPosition;
 
+  _offsetEntity: number;
+
   _isAClone: Boolean;
 
 
