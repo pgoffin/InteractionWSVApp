@@ -15,14 +15,14 @@ class ColumnLayout implements Layout {
 
   _layoutInfo: LayoutInfo;
   _refToText: Text;
-  _wsvsWithouCurrentWSV: Array<WordScaleVisualization>;
+  _wsvsWithoutCurrentWSV: Array<WordScaleVisualization>;
   _spaceAvailability: SpaceAvailability;
 
 
-  constructor(aLayoutInfo: LayoutInfo, aSpaceAvailability: SpaceAvailability, aRefToText: Text, aWsvsWithouCurrentWSV: Array<WordScaleVisualization>) {
+  constructor(aLayoutInfo: LayoutInfo, aSpaceAvailability: SpaceAvailability, aRefToText: Text, awsvsWithoutCurrentWSV: Array<WordScaleVisualization>) {
     this._layoutInfo = aLayoutInfo;
     this._refToText = aRefToText;
-    this._wsvsWithouCurrentWSV = aWsvsWithouCurrentWSV;
+    this._wsvsWithoutCurrentWSV = awsvsWithoutCurrentWSV;
     this._spaceAvailability = aSpaceAvailability;
   }
 
@@ -58,7 +58,7 @@ class ColumnLayout implements Layout {
     // layoutInfo.numberOfColumns = 1;
 
     // update the counts variable
-    layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._wsvsWithouCurrentWSV)
+    layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._wsvsWithoutCurrentWSV)
 
 
     // get top left cornerDiffs
@@ -73,7 +73,7 @@ class ColumnLayout implements Layout {
     const mySequence: Array<VelocitySequence> = [];
     let aboveIndex = 0;
     let belowIndex = 0;
-    this._wsvsWithouCurrentWSV.forEach(aWSV => {
+    this._wsvsWithoutCurrentWSV.forEach(aWSV => {
       // cloning the wsv, and changing the position from relative to absolute
       let aClonedWSV: WordScaleVisualization;
       if (!this._refToText.isLayoutVisible) {

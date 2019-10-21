@@ -44,7 +44,7 @@ class Text implements Text {
       this.contextualMenu = new ContextualMenu(this);
 
       this.addEventsToDocument();
-      Text.addSuggestedInteractivityTags();
+      // Text.addSuggestedInteractivityTags();
     } else {
       console.log('ERROR: check why there is no dataset for this text');
     }
@@ -154,25 +154,25 @@ class Text implements Text {
   }
 
 
-  static addSuggestedInteractivityTags(): void {
-
-    const hideClass = 'hide';
-
-    const restrictedDragBandDiv = document.createElement("div");
-    restrictedDragBandDiv.setAttribute('id', 'restrictedDragBand');
-    restrictedDragBandDiv.setAttribute('class', hideClass);
-    document.body.appendChild(restrictedDragBandDiv);
-
-    const leftTriangleDiv = document.createElement("div");
-    leftTriangleDiv.setAttribute('id', 'triangle_left');
-    leftTriangleDiv.setAttribute('class', hideClass);
-    document.body.appendChild(leftTriangleDiv);
-
-    const rightTriangleDiv = document.createElement("div");
-    rightTriangleDiv.setAttribute('id', 'triangle_right');
-    rightTriangleDiv.setAttribute('class', hideClass);
-    document.body.appendChild(rightTriangleDiv);
-  }
+  // static addSuggestedInteractivityTags(): void {
+  //
+  //   const hideClass = 'hide';
+  //
+  //   const restrictedDragBandDiv = document.createElement("div");
+  //   restrictedDragBandDiv.setAttribute('id', 'restrictedDragBand');
+  //   restrictedDragBandDiv.setAttribute('class', hideClass);
+  //   document.body.appendChild(restrictedDragBandDiv);
+  //
+  //   const leftTriangleDiv = document.createElement("div");
+  //   leftTriangleDiv.setAttribute('id', 'triangle_left');
+  //   leftTriangleDiv.setAttribute('class', hideClass);
+  //   document.body.appendChild(leftTriangleDiv);
+  //
+  //   const rightTriangleDiv = document.createElement("div");
+  //   rightTriangleDiv.setAttribute('id', 'triangle_right');
+  //   rightTriangleDiv.setAttribute('class', hideClass);
+  //   document.body.appendChild(rightTriangleDiv);
+  // }
 
 
   // check if currentEntity is set

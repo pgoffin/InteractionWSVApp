@@ -15,14 +15,14 @@ class GridLayout implements Layout {
 
   _layoutInfo: LayoutInfo;
   _refToText: Text;
-  _wsvsWithouCurrentWSV: Array<WordScaleVisualization>;
+  _wsvsWithoutCurrentWSV: Array<WordScaleVisualization>;
   _spaceAvailability: SpaceAvailability;
 
 
-  constructor(aLayoutInfo: LayoutInfo, aSpaceAvailability: SpaceAvailability, aRefToText: Text, anArrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>) {
+  constructor(aLayoutInfo: LayoutInfo, aSpaceAvailability: SpaceAvailability, aRefToText: Text, anArrayOfwsvsWithoutCurrentWSV: Array<WordScaleVisualization>) {
     this._layoutInfo = aLayoutInfo;
     this._refToText = aRefToText;
-    this._wsvsWithouCurrentWSV = anArrayOfWSVsWithouCurrentWSV;
+    this._wsvsWithoutCurrentWSV = anArrayOfwsvsWithoutCurrentWSV;
     this._spaceAvailability = aSpaceAvailability;
   }
 
@@ -51,7 +51,7 @@ class GridLayout implements Layout {
     this.getRowAndColumnInfo('middleBound', this._spaceAvailability);
 
     // update the counts variable
-    layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._wsvsWithouCurrentWSV)
+    layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._wsvsWithoutCurrentWSV)
 
     // get top left cornerDiffs
     const numUsedRowsAbove = Math.ceil(layoutInfo.counts.above/layoutInfo.numberOfColumns);
@@ -77,7 +77,7 @@ class GridLayout implements Layout {
     let belowIndex = 0;
     layoutInfo.startIndex_below = 0;
 
-    this._wsvsWithouCurrentWSV.forEach(aWSV => {
+    this._wsvsWithoutCurrentWSV.forEach(aWSV => {
 
       // cloning the wsv, and changing the position from relative to absolute
       let aClonedWSV: WordScaleVisualization;
@@ -86,7 +86,6 @@ class GridLayout implements Layout {
       } else {
         aClonedWSV = aWSV._clonedWSV!;
         aClonedWSV.removeClassOffWSV('hide');
-
       }
 
 
@@ -143,8 +142,6 @@ class GridLayout implements Layout {
     });
 
     $.Velocity.RunSequence(mySequence);
-
-    // $('.sparklificated.clonedWSV.first .entity').css('background-color', 'rgb(255, 223, 128)');
   }
 
   // based on available space around the current Entity and the layout, provide number of columns and rows to be used

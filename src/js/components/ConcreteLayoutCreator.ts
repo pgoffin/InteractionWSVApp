@@ -28,9 +28,9 @@ class ConcreteLayoutCreator extends LayoutCreator {
   }
 
 
-  layoutFactory(aLayoutName: string, aLayoutInfo: LayoutInfo, spaceAvailability: SpaceAvailability, refToText: Text, wsvsWithouCurrentWSV: Array<WordScaleVisualization>): Layout {
+  layoutFactory(aLayoutName: string, aLayoutInfo: LayoutInfo, spaceAvailability: SpaceAvailability, refToText: Text, wsvsWithoutCurrentWSV: Array<WordScaleVisualization>): Layout {
 
-    return new this.layouts[aLayoutName](aLayoutInfo, spaceAvailability, refToText, wsvsWithouCurrentWSV)
+    return new this.layouts[aLayoutName](aLayoutInfo, spaceAvailability, refToText, wsvsWithoutCurrentWSV)
 
   }
 

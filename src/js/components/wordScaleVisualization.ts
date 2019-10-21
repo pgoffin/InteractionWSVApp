@@ -1,4 +1,4 @@
-import { BBox, EventLocation, RawWsvData, RenderFunc, WsvDataObject, WsVisualizationType } from "../../../global";
+import { BBox, CornerPosition, EventLocation, RawWsvData, RenderFunc, WsvDataObject, WsVisualizationType } from "../../../global";
 import Entity from './entity';
 import wsvRendererFactoryClass from './wsvRendererFactoryClass';
 import Text from './text';
@@ -56,6 +56,8 @@ class WordScaleVisualization implements WordScaleVisualization {
   _clonedWSV: WordScaleVisualization | null;
   _originalWSV: WordScaleVisualization | null;
 
+  _positionLeftTopCorner: CornerPosition;
+
   _isAClone: Boolean;
 
 
@@ -89,6 +91,10 @@ class WordScaleVisualization implements WordScaleVisualization {
     // bboxes
     this.setBBoxOfSparkline();
     this.setBBoxOfWSV();
+
+    this._positionLeftTopCorner = {top: 0, left: 0};
+    this._positionLeftTopCorner.top = this._wsvBBox.top;
+    this._positionLeftTopCorner.left = this._wsvBBox.left;
   }
 
 

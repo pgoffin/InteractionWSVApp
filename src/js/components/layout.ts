@@ -8,7 +8,7 @@ interface Layout {
 
   _layoutInfo: LayoutInfo;
   _refToText: Text;
-  _wsvsWithouCurrentWSV: Array<WordScaleVisualization>;
+  _wsvsWithoutCurrentWSV: Array<WordScaleVisualization>;
 
 
   applyLayout(): void;

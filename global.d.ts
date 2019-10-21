@@ -85,6 +85,11 @@ export interface EventLocation {
   y: number
 }
 
+export interface CornerPosition {
+  left: number,
+  top: number
+}
+
 export interface VelocitySequence {
   e: HTMLElement,
   p: {left: number, top: number, opacity?: number},

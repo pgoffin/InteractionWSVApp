@@ -15,14 +15,14 @@ class ColumnPanAlignedLayout implements Layout {
 
   _layoutInfo: LayoutInfo;
   _refToText: Text;
-  _wsvsWithouCurrentWSV: Array<WordScaleVisualization>;
+  _wsvsWithoutCurrentWSV: Array<WordScaleVisualization>;
   _spaceAvailability: SpaceAvailability;
 
 
-  constructor(aLayoutInfo: LayoutInfo, aSpaceAvailability: SpaceAvailability, aRefToText: Text, aWsvsWithouCurrentWSV: Array<WordScaleVisualization>) {
+  constructor(aLayoutInfo: LayoutInfo, aSpaceAvailability: SpaceAvailability, aRefToText: Text, awsvsWithoutCurrentWSV: Array<WordScaleVisualization>) {
     this._layoutInfo = aLayoutInfo;
     this._refToText = aRefToText;
-    this._wsvsWithouCurrentWSV = aWsvsWithouCurrentWSV;
+    this._wsvsWithoutCurrentWSV = awsvsWithoutCurrentWSV;
     this._spaceAvailability = aSpaceAvailability;
   }
 
@@ -53,15 +53,15 @@ class ColumnPanAlignedLayout implements Layout {
     // layoutInfo.numberOfColumns = 1;
 
     // update the counts variable
-    layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._wsvsWithouCurrentWSV)
+    layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._wsvsWithoutCurrentWSV)
 
     // reference for the alignement
     let referenceClonedWSV
     if (layoutInfo.counts.above === 0) {
       // if all the wsvs are below the current entity
-      referenceClonedWSV = this._wsvsWithouCurrentWSV[0]
+      referenceClonedWSV = this._wsvsWithoutCurrentWSV[0]
     } else {
-      referenceClonedWSV = this._wsvsWithouCurrentWSV[layoutInfo.counts.above-1]
+      referenceClonedWSV = this._wsvsWithoutCurrentWSV[layoutInfo.counts.above-1]
     }
 
     const referenceWidth = referenceClonedWSV._entity._entityBbox.width;
@@ -93,8 +93,7 @@ class ColumnPanAlignedLayout implements Layout {
     let mySequence: Array<VelocitySequence> = [];
     let aboveIndex = 0;
     let belowIndex = 0;
-    // $.each(WSV_cloned, function(index, value) {
-    this._wsvsWithouCurrentWSV.forEach(aWSV => {
+    this._wsvsWithoutCurrentWSV.forEach(aWSV => {
 
       // cloning the wsv, and changing the position from relative to absolute
       let aClonedWSV: WordScaleVisualization;

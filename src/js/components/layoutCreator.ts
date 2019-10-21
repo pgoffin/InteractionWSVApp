@@ -46,7 +46,7 @@ abstract class LayoutCreator {
 
 
 
-  abstract layoutFactory(aLayoutName: string, layoutInfo: LayoutInfo, spaceAvailability: SpaceAvailability, refToText: Text, wsvsWithouCurrentWSV: Array<WordScaleVisualization>): Layout
+  abstract layoutFactory(aLayoutName: string, layoutInfo: LayoutInfo, spaceAvailability: SpaceAvailability, refToText: Text, wsvsWithoutCurrentWSV: Array<WordScaleVisualization>): Layout
 
 
   changeLayout(layoutType: string, sorting: string) {

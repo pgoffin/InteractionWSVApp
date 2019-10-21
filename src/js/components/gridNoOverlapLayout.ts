@@ -15,14 +15,14 @@ class GridNoOverlapLayout implements Layout {
 
   _layoutInfo: LayoutInfo;
   _refToText: Text;
-  _wsvsWithouCurrentWSV: Array<WordScaleVisualization>;
+  _wsvsWithoutCurrentWSV: Array<WordScaleVisualization>;
   _spaceAvailability: SpaceAvailability;
 
 
-  constructor(aLayoutInfo: LayoutInfo, aSpaceAvailability: SpaceAvailability, aRefToText: Text, anArrayOfWSVsWithouCurrentWSV: Array<WordScaleVisualization>) {
+  constructor(aLayoutInfo: LayoutInfo, aSpaceAvailability: SpaceAvailability, aRefToText: Text, anArrayOfwsvsWithoutCurrentWSV: Array<WordScaleVisualization>) {
     this._layoutInfo = aLayoutInfo;
     this._refToText = aRefToText;
-    this._wsvsWithouCurrentWSV = anArrayOfWSVsWithouCurrentWSV;
+    this._wsvsWithoutCurrentWSV = anArrayOfwsvsWithoutCurrentWSV;
     this._spaceAvailability = aSpaceAvailability;
   }
 
@@ -51,7 +51,7 @@ class GridNoOverlapLayout implements Layout {
     this.getRowAndColumnInfo('middleBound', this._spaceAvailability);
 
     // update the counts variable
-    layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._wsvsWithouCurrentWSV)
+    layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._wsvsWithoutCurrentWSV)
 
     // get the paragraph of the current entity
     // const currentEntityParagraph = $(currentEntity).parent().parent();
@@ -63,20 +63,20 @@ class GridNoOverlapLayout implements Layout {
     currentEntityParagraph.parentNode.insertBefore(spacerNode, currentEntityParagraph.nextSibling);
     // currentEntityParagraph.after("<div id='spacer'></div>");
 
-    const numTotal_rows = Math.floor(this._wsvsWithouCurrentWSV.length/layoutInfo.numberOfColumns);
+    const numTotal_rows = Math.floor(this._wsvsWithoutCurrentWSV.length/layoutInfo.numberOfColumns);
 
-    var sizeSmallMultiples = this.getSizeOfSmallMultiple(layoutInfo.numberOfColumns, numTotal_rows, layoutInfo.cellDimensions.width + (2*layoutInfo.spaceBetweenCells), layoutInfo.cellDimensions.height + (2*layoutInfo.spaceBetweenCells));
+    const sizeSmallMultiples = this.getSizeOfSmallMultiple(layoutInfo.numberOfColumns, numTotal_rows, layoutInfo.cellDimensions.width + (2*layoutInfo.spaceBetweenCells), layoutInfo.cellDimensions.height + (2*layoutInfo.spaceBetweenCells));
 
     // $('#spacer').height(sizeSmallMultiples.height);
     document.getElementById('spacer').style.height = sizeSmallMultiples.height
 
-    var shiftDown = currentEntityParagraph.getBoundingClientRect().bottom + document.body.scrollTop - (layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.bottom);
+    const shiftDown = currentEntityParagraph.getBoundingClientRect().bottom + document.body.scrollTop - (layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.bottom);
 
 
     const topLeftCorner_left = currentEntityBBox.left - (layoutInfo.rowAndColumnNumbers.leftNumbColumn * (layoutInfo.cellDimensions.width + (2*layoutInfo.spaceBetweenCells)));
 
     let mySequence: Array<VelocitySequence> = [];
-    this._wsvsWithouCurrentWSV.forEach((aWSV, index) => {
+    this._wsvsWithoutCurrentWSV.forEach((aWSV, index) => {
 
       // cloning the wsv, and changing the position from relative to absolute
       let aClonedWSV: WordScaleVisualization;
@@ -84,8 +84,7 @@ class GridNoOverlapLayout implements Layout {
         aClonedWSV = aWSV.cloneWSV();
       } else {
         aClonedWSV = aWSV._clonedWSV;
-        $(aClonedWSV).removeClass('hide');
-        $(aClonedWSV).children().removeClass('hide');
+        aClonedWSV.removeClassOffWSV('hide');
       }
 
       let newTop = layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.bottom + (2*layoutInfo.spaceBetweenCells) + shiftDown + (Math.floor(index/layoutInfo.numberOfColumns) * (layoutInfo.cellDimensions.height + (2*layoutInfo.spaceBetweenCells)));
