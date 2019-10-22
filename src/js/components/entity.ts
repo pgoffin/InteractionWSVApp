@@ -61,7 +61,7 @@ class Entity implements Entity {
 
     this._entityBelongsToWsv = theWSV;
 
-    this.setBBoxOfEntity();
+    // this.setBBoxOfEntity();
 
     this.addEventsToEntity()
   }

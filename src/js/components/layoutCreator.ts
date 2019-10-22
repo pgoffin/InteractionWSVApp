@@ -29,7 +29,7 @@ abstract class LayoutCreator {
 
   constructor(aRefToText: Text) {
     this._layoutInfo = {rowAndColumnNumbers: {}};
-    this._layoutInfo.cellPadding = 4;
+    this._layoutInfo.cellPadding = 5;
 
     this._refToText = aRefToText;
     this._wsvsThatHaveAClone = []
@@ -59,10 +59,9 @@ abstract class LayoutCreator {
     layoutInfo.currentEntity = currentEntity;
 
     const bboxCurrEntity = currentEntity._entityBbox;
-    // const bboxCurrWSV = currentEntity._entityBelongsToWsv._wsvBBox
 
     // get dimensions of cell, where a cell is a rectangle around the wsv
-    layoutInfo.cellDimensions = this.getCellDimensions(this._refToText.listOfWSVs);
+    layoutInfo.cellDimensions = this.getCellDimensions(this._refToText.listOfWSVs, this._layoutInfo.cellPadding);
 
     this._wsvsThatHaveAClone = this._refToText.listOfWSVs.filter(aWSV => aWSV != this._refToText._currentWSV);
 
@@ -220,22 +219,21 @@ abstract class LayoutCreator {
   // }
 
 
-  static comparing2DCoordinates(oldCoordinates, newCoordinates) {
-
-    if ((oldCoordinates.x === newCoordinates.x) && (oldCoordinates.y === newCoordinates.y)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
+  // static comparing2DCoordinates(oldCoordinates, newCoordinates) {
+  //
+  //   if ((oldCoordinates.x === newCoordinates.x) && (oldCoordinates.y === newCoordinates.y)) {
+  //     return true;
+  //   } else {
+  //     return false;
+  //   }
+  // }
 
 
   /**
-  * A cell is where the wsv (sparkline + entity) is embedded.
-  * The cell might have some padding, but the margin is not added (hidden) here
+  * A cell is where the wsv (sparkline + entity) is embedded + padding.
   * @return {object} - custom object with the height and width of the cell
   */
-  getCellDimensions(arrayOfWSVs: Array<WordScaleVisualization>): CellDimension {
+  getCellDimensions(arrayOfWSVs: Array<WordScaleVisualization>, padding: number): CellDimension {
 
     // initialize the return object
     const cellDimensions = {height: 0,
@@ -243,9 +241,11 @@ abstract class LayoutCreator {
 
     // get the max wsv height
     cellDimensions.height = Math.max.apply(null, arrayOfWSVs.map(aWSV => aWSV._wsvBBox.height));
+    cellDimensions.height = cellDimensions.height + (2 * padding);
 
     // get the max wsv width
     cellDimensions.width = Math.max.apply(null, arrayOfWSVs.map(aWSV => aWSV._wsvBBox.width));
+    cellDimensions.width = cellDimensions.width + (2 * padding);
 
     return cellDimensions;
   }

@@ -185,6 +185,13 @@ class Text implements Text {
   }
 
 
+  sanitizeWSVspan(anElement: HTMLElement) {
+    let sanitizedTextContent = anElement.innerHTML.trim()
+    anElement.innerText = '';
+    anElement.innerText = sanitizedTextContent;
+  }
+
+
   /**
   * Goes through each element tagged as entity and that has data, and creates a wsv and puts it into an array.
   **/
@@ -197,12 +204,14 @@ class Text implements Text {
       // get data for the entity
       let anHTMLElement = anElement as HTMLElement;
 
+      this.sanitizeWSVspan(anHTMLElement)
+
       let entityName = Text.getEntityName(anHTMLElement);
       let dataForEntity = this.dataForWSV[entityName]
 
       if (!((typeof dataForEntity == 'undefined') || (dataForEntity.length == 0))) {
         if (anHTMLElement.dataset.wsvRenderer) {
-          let aWSV = new WordScaleVisualization(anHTMLElement, dataForEntity, anHTMLElement.dataset.wsvRenderer, this, false);
+          let aWSV = new WordScaleVisualization(anHTMLElement, dataForEntity, anHTMLElement.dataset.wsvRenderer, this, false, false);
 
           tmpWSVList.push(aWSV);
         } else {

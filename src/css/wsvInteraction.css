@@ -33,6 +33,7 @@ body {
 
 .entity.cloned {
 	cursor: pointer;
+	position: absolute;
 }
 
 .entity.currentEntity {

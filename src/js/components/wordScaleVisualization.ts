@@ -62,9 +62,12 @@ class WordScaleVisualization implements WordScaleVisualization {
 
   _isAClone: Boolean;
 
+  _nextWSV: WordScaleVisualization | null;
+  _previousWSV: WordScaleVisualization | null;
 
 
-  constructor(anElement: HTMLElement, data: Array<RawWsvData>, theRenderer: string, referenceToText: Text, aIsAClone: Boolean) {
+
+  constructor(anElement: HTMLElement, data: Array<RawWsvData>, theRenderer: string, referenceToText: Text, aIsAClone: Boolean, isAClone: Boolean) {
     this._refToText = referenceToText;
     this._positionOfWSV = wsvInteractionConstants.positionType;
     this.entity = new Entity(anElement, this._refToText, this, aIsAClone);
@@ -80,9 +83,11 @@ class WordScaleVisualization implements WordScaleVisualization {
     this.wsvClass = wsvRendererFactoryClass(this._rendererAsClass, this.renderer, this.rawWSVData, this._positionOfWSV, true, true)
 
     $(this.entity.entityElement).sparklificator();
+    this._wsv = this.entity.entityElement.parentElement;
+    if (isAClone) this._wsv.classList.add('cloned');
     $(this.entity.entityElement).sparklificator('option', this.wsvClass._settings);
 
-    this._wsv = this.entity.entityElement.parentElement;
+    // this._wsv = this.entity.entityElement.parentElement;
 
     if (this._wsv) {
       this._visualization = this._wsv.querySelector('span.sparkline');
@@ -91,6 +96,7 @@ class WordScaleVisualization implements WordScaleVisualization {
     this.typeOfWSV = wsvInteractionConstants.typeOfWSV;
 
     // bboxes
+    this.entity.setBBoxOfEntity();
     this.setBBoxOfSparkline();
     this.setBBoxOfWSV();
 
@@ -202,10 +208,14 @@ class WordScaleVisualization implements WordScaleVisualization {
 
   cloneWSV(): WordScaleVisualization {
 
-    let cloneEntityElement = this.entity.entityElement.cloneNode(true)
+    let cloneEntityElement = this.entity.entityElement.cloneNode(true);
+    // cloned has position absolute => teyxt is not moved around, cloned entity is overlaid
+    cloneEntityElement.classList.add('cloned');
     let insertedClonedEntityNode = this._wsv.parentNode.insertBefore(cloneEntityElement, this._wsv.nextSibling)
 
-    let clonedWSV = new WordScaleVisualization(insertedClonedEntityNode as HTMLElement, this._rawWSVData, this._rendererString, this._refToText, true);
+    let clonedWSV = new WordScaleVisualization(insertedClonedEntityNode as HTMLElement, this._rawWSVData, this._rendererString, this._refToText, true, true);
+
+    d3.select(clonedWSV._wsv).style('left', this._wsvBBox.left);
 
     // set reference to cloned and original WSV
     this._clonedWSV = clonedWSV;
