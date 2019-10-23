@@ -1,16 +1,14 @@
 import { BBox, CornerPosition, LayoutInfo, SpaceAvailability, VelocitySequence } from "../../../global";
 
-import * as d3 from "d3";
+import { select as d3Select } from 'd3-selection';
 
-import Text from './text';
-import WordScaleVisualization from './wordScaleVisualization';
-// import Entity from './entity';
 import Layout from './layout';
 import LayoutCreator from './layoutCreator';
+import Text from './text';
+import WordScaleVisualization from './wordScaleVisualization';
 
 import 'velocity-animate';
 import 'velocity-ui-pack';
-
 
 
 class RowLayout implements Layout {
@@ -51,16 +49,12 @@ class RowLayout implements Layout {
     this.getRowAndColumnInfo('middleBound', this._spaceAvailability);
 
     // update the counts variable
-    layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._wsvsWithoutCurrentWSV)
+    layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._wsvsWithoutCurrentWSV);
 
-    let numCells_above = layoutInfo.numberOfColumns * layoutInfo.rowAndColumnNumbers.aboveNumbRow;
+    layoutInfo.topLeftCorner_left = (currentEntityBBox.left - currentWSV._offsetEntity - layoutInfo.cellPadding) - (layoutInfo.rowAndColumnNumbers.leftNumbColumn * (layoutInfo.cellDimensions.width));
 
-    // const maxEntityWidth = LayoutCreator.getEntityMaxWidth(this._refToText.listOfWSVs);
-    // const aDiff = maxEntityWidth - currentEntityBBox.width;
-
-    layoutInfo.topLeftCorner_left = (currentEntityBBox.left - currentWSV._offsetEntity - layoutInfo.cellPadding) - (layoutInfo.rowAndColumnNumbers.leftNumbColumn * (layoutInfo.cellDimensions.width));;
-
-    if (numCells_above !== 0) {
+    // if at least 1 row above put row layout above else below
+    if (layoutInfo.rowAndColumnNumbers.aboveNumbRow !== 0) {
       layoutInfo.topLeftCorner_top = currentWSV._wsvBBox.top - (layoutInfo.rowAndColumnNumbers.aboveNumbRow * (layoutInfo.cellDimensions.height));
     } else {
       layoutInfo.topLeftCorner_top = currentWSV._wsvBBox.bottom + layoutInfo.cellPadding;
@@ -81,28 +75,25 @@ class RowLayout implements Layout {
         aClonedWSV.removeClassOffWSV('hide');
       }
 
-      const aClonedWSVBBox = aClonedWSV._wsvBBox;
-
-      const newTop = layoutInfo.topLeftCorner_top;
       const newLeft = layoutInfo.topLeftCorner_left + (index * layoutInfo.cellDimensions.width) + layoutInfo.cellPadding + aClonedWSV._offsetEntity;
 
-      let whiteBackgroundElement: HTMLElement;
+      let backgroundElement: HTMLElement;
       if (!this._refToText.isLayoutVisible) {
-        whiteBackgroundElement = LayoutCreator.addWhiteLayer(layoutInfo.cellDimensions.width, layoutInfo.cellDimensions.height, aWSV._wsvBBox.top - layoutInfo.cellPadding, aWSV._wsvBBox.left - aWSV._offsetEntity - layoutInfo.cellPadding);
+        // use the position of the original wsv to fix position of background element
+        backgroundElement = LayoutCreator.addWhiteLayer(layoutInfo.cellDimensions.width, layoutInfo.cellDimensions.height, aWSV._wsvBBox.top - layoutInfo.cellPadding, aWSV._wsvBBox.left - aWSV._offsetEntity - layoutInfo.cellPadding);
 
-        aClonedWSV._backgroundElement = whiteBackgroundElement;
+        aClonedWSV._backgroundElement = backgroundElement;
       } else {
-        // the layout before might have hidden some of the whiteLayer, therefore unhide
-        aClonedWSV._backgroundElement.classList.remove('hide');
+        backgroundElement = aClonedWSV._backgroundElement;
 
-        whiteBackgroundElement = aClonedWSV._backgroundElement;
+        // the layout before might have hidden some of the whiteLayer, therefore unhide
+        backgroundElement.classList.remove('hide');
       }
 
-      aClonedWSV._positionLeftTopCorner.top = newTop;
+      aClonedWSV._positionLeftTopCorner.top = layoutInfo.topLeftCorner_top;
       aClonedWSV._positionLeftTopCorner.left = newLeft;
-      // console.log(aClonedWSV._entity._entityName, newLeft)
 
-      mySequence.push({e: aClonedWSV._wsv, p: {left: (newLeft), top: (newTop)}, o: {
+      mySequence.push({e: aClonedWSV._wsv, p: {left: (newLeft), top: (layoutInfo.topLeftCorner_top)}, o: {
         duration: 1000,
         sequenceQueue: false,
 
@@ -111,27 +102,26 @@ class RowLayout implements Layout {
           aClonedWSV.setBBoxOfSparkline();
           aClonedWSV.setBBoxOfWSV();
 
-          // set all left and right for clonedWSV that are hidden to 0 ==> no horizontal scrolling possibl
+          // set all left and right for clonedWSV that are hidden to 0 ==> no horizontal scrolling possible
           // inline styles takes priority over stylesheets
           if (index === 0) {
             aClonedWSV._wsv.classList.add('first')
-            $(aClonedWSV._wsv).children('.entity').css('background-color', '#a6bddb');
-          } else if (index === (layoutInfo.numberOfColumns - 1)) {
+            // $(aClonedWSV._wsv).children('.entity').css('background-color', '#a6bddb');
+          } else if (index === (this._wsvsWithoutCurrentWSV.length - 1)) {
             aClonedWSV._wsv.classList.add('last')
           }
 
-          if ((aClonedWSV._wsvBBox.left - aClonedWSV._offsetEntity - layoutInfo.cellPadding < document.body.getBoundingClientRect().left) || (aClonedWSV._wsvBBox.right > document.body.getBoundingClientRect().right + layoutInfo.cellPadding)) {
-            aClonedWSV._wsv.classList.add('hide')
-            aClonedWSV._wsv.childNodes.forEach(aChildNode => {
-              (aChildNode as HTMLElement).classList.add('hide')
-            })
+          let cellOfClonedWSV_left = aClonedWSV._wsvBBox.left - aClonedWSV._offsetEntity - layoutInfo.cellPadding;
+          let cellOfClonedWSV_right = aClonedWSV._wsvBBox.right + layoutInfo.cellPadding;
+          if ((cellOfClonedWSV_left < document.body.getBoundingClientRect().left) || (cellOfClonedWSV_right > document.body.getBoundingClientRect().right)) {
+            aClonedWSV.addClassToWSV('hide');
 
-            whiteBackgroundElement.classList.add('hide');
+            backgroundElement.classList.add('hide');
           }
         }
       }});
 
-      mySequence.push({e: whiteBackgroundElement, p: {left: (newLeft - layoutInfo.cellPadding - aClonedWSV._offsetEntity), top: (newTop - layoutInfo.cellPadding), opacity: 1}, o: {
+      mySequence.push({e: backgroundElement, p: {left: (newLeft - layoutInfo.cellPadding - aClonedWSV._offsetEntity), top: (layoutInfo.topLeftCorner_top - layoutInfo.cellPadding), opacity: 1}, o: {
           duration: 1000,
           sequenceQueue: false
         }
@@ -145,39 +135,31 @@ class RowLayout implements Layout {
     this._wsvsWithoutCurrentWSV.forEach((aWSV, index) => {
       let aClonedWSV = aWSV._clonedWSV;
 
-      let nextWSVIndex = index + 1;
-      if (nextWSVIndex === this._wsvsWithoutCurrentWSV.length) {
-        aClonedWSV._nextWSV = this._wsvsWithoutCurrentWSV[0]._clonedWSV
-      } else {
-        aClonedWSV._nextWSV = this._wsvsWithoutCurrentWSV[nextWSVIndex]._clonedWSV
-      }
+      if (aClonedWSV) {
 
-      let previousWSVIndex = index - 1;
-      if (previousWSVIndex < 0) {
-        aClonedWSV._previousWSV = this._wsvsWithoutCurrentWSV[this._wsvsWithoutCurrentWSV.length-1]._clonedWSV
-      } else {
-        aClonedWSV._previousWSV = this._wsvsWithoutCurrentWSV[previousWSVIndex]._clonedWSV
-      }
+        let nextWSVIndex = index + 1;
+        if (nextWSVIndex === this._wsvsWithoutCurrentWSV.length) {
+          aClonedWSV._nextWSV = this._wsvsWithoutCurrentWSV[0]._clonedWSV
+        } else {
+          aClonedWSV._nextWSV = this._wsvsWithoutCurrentWSV[nextWSVIndex]._clonedWSV
+        }
 
-      // console.log(aClonedWSV._entity._entityName, aClonedWSV._nextWSV._entity._entityName, aClonedWSV._previousWSV._entity._entityName)
+        let previousWSVIndex = index - 1;
+        if (previousWSVIndex < 0) {
+          aClonedWSV._previousWSV = this._wsvsWithoutCurrentWSV[this._wsvsWithoutCurrentWSV.length-1]._clonedWSV
+        } else {
+          aClonedWSV._previousWSV = this._wsvsWithoutCurrentWSV[previousWSVIndex]._clonedWSV
+        }
+      }
     });
 
-
-    const leftTriangleDiv = document.createElement("div");
-    leftTriangleDiv.setAttribute('id', 'triangle_left');
-    document.body.appendChild(leftTriangleDiv);
-
-    const rightTriangleDiv = document.createElement("div");
-    rightTriangleDiv.setAttribute('id', 'triangle_right');
-    document.body.appendChild(rightTriangleDiv);
-
-    this.add_SuggestedInteractivity();
+    this.addSuggestedInteractivity();
   }
 
 
   preventDbclickEvent(event: Event) {
     // Prevent double-click in case of fast animation or sloppy browser.
-    console.log("double-clicked but did nothing");
+    console.log('double-clicked but did nothing');
 
     event.stopPropagation();
     event.preventDefault();
@@ -185,12 +167,11 @@ class RowLayout implements Layout {
 
 
   triangleClickListener = (event: Event) => {
+    if (event.currentTarget) {
       console.log('clicked on ' + event.currentTarget.type + ' triangle');
 
       // so click in $(html) is not triggered
       event.stopPropagation();
-
-      // this.set_up_dynamic_row_layout();
 
       if (event.currentTarget.distance >= 0) {
         // right triangle was clicked
@@ -199,75 +180,53 @@ class RowLayout implements Layout {
         // left triangle was clicked
         this.moveRowWsvs(event.currentTarget.distance, this._wsvsWithoutCurrentWSV.slice().reverse());
       }
+    }
   }
 
 
-  add_SuggestedInteractivity() {
+  addSuggestedInteractivity() {
 
-    const leftTriangle = document.getElementById('triangle_left');
-    if (leftTriangle) {
-      leftTriangle.classList.remove('hide');
-      leftTriangle.style.top = this.layoutInfo.topLeftCorner_top + 'px';
-      leftTriangle.style.left = document.body.getBoundingClientRect().left + 'px';
+    const leftTriangleDiv = document.createElement("div");
+    leftTriangleDiv.setAttribute('id', 'triangle_left');
+    document.body.appendChild(leftTriangleDiv);
 
-      leftTriangle.type = 'left';
-      leftTriangle.distance = -(this.layoutInfo.cellDimensions.width);
+    leftTriangleDiv.classList.remove('hide');
+    leftTriangleDiv.style.top = this.layoutInfo.topLeftCorner_top + 'px';
+    leftTriangleDiv.style.left = document.body.getBoundingClientRect().left + 'px';
 
-      leftTriangle.removeEventListener('click', this.triangleClickListener);
-      leftTriangle.removeEventListener('dblclick', this.preventDbclickEvent);
+    leftTriangleDiv.type = 'left';
+    leftTriangleDiv.distance = -(this.layoutInfo.cellDimensions.width);
 
-      leftTriangle.addEventListener('click', this.triangleClickListener);
-      leftTriangle.addEventListener('dblclick', this.preventDbclickEvent);
-    }
+    leftTriangleDiv.removeEventListener('click', this.triangleClickListener);
+    leftTriangleDiv.removeEventListener('dblclick', this.preventDbclickEvent);
 
-    const rightTriangle = document.getElementById('triangle_right');
-    if (rightTriangle) {
-      const viewportInfo = RowLayout.getViewportInfo()
+    leftTriangleDiv.addEventListener('click', this.triangleClickListener);
+    leftTriangleDiv.addEventListener('dblclick', this.preventDbclickEvent);
 
-      rightTriangle.classList.remove('hide');
-      rightTriangle.style.top = this.layoutInfo.topLeftCorner_top + 'px';
-      rightTriangle.style.left = (viewportInfo.right - 10) + 'px';
 
-      rightTriangle.type = 'right';
-      rightTriangle.distance = this.layoutInfo.cellDimensions.width;
 
-      rightTriangle.removeEventListener('click', this.triangleClickListener);
-      rightTriangle.removeEventListener('dblclick', this.preventDbclickEvent);
+    const rightTriangleDiv = document.createElement("div");
+    rightTriangleDiv.setAttribute('id', 'triangle_right');
+    document.body.appendChild(rightTriangleDiv);
 
-      rightTriangle.addEventListener('click', this.triangleClickListener);
-      rightTriangle.addEventListener('dblclick', this.preventDbclickEvent);
-    }
+    const viewportInfo = RowLayout.getViewportInfo()
 
+    rightTriangleDiv.classList.remove('hide');
+    rightTriangleDiv.style.top = this.layoutInfo.topLeftCorner_top + 'px';
+    rightTriangleDiv.style.left = (viewportInfo.right - 10) + 'px';
+
+    rightTriangleDiv.type = 'right';
+    rightTriangleDiv.distance = this.layoutInfo.cellDimensions.width;
+
+    rightTriangleDiv.removeEventListener('click', this.triangleClickListener);
+    rightTriangleDiv.removeEventListener('dblclick', this.preventDbclickEvent);
+
+    rightTriangleDiv.addEventListener('click', this.triangleClickListener);
+    rightTriangleDiv.addEventListener('dblclick', this.preventDbclickEvent);
   }
-
-
-  // set_up_dynamic_row_layout() {
-  //
-  //   if (this.layoutInfo.bandLength === 0 && this.layoutInfo.startOffsetRowlayout === 0) {
-  //     // && this.layoutInfo.snapPositions.length === 0) {
-  //
-  //     // const startOffsetRowlayout = WSV_cloned[0].wsvBoxClonedObject.left - WSV_cloned[0].offset_whiteLayer;
-  //     // const bandLength = WSV_cloned[WSV_cloned.length - 1].wsvBoxClonedObject.right - startOffsetRowlayout;
-  //
-  //     const startOffsetRowlayout = this._wsvsWithoutCurrentWSV[0]._clonedWSV._wsvBBox.left - this._wsvsWithoutCurrentWSV[0]._clonedWSV._offsetWhiteLayer;
-  //     const bandLength = this._wsvsWithoutCurrentWSV[this._wsvsWithoutCurrentWSV.length - 1]._clonedWSV._wsvBBox.right - startOffsetRowlayout;
-  //
-  //     // const snapPositions = [];
-  //     // $('.sparklificated.clonedWSV:not(.hide)').each(function() {
-  //     //   let offset = d3.select(this).datum().offset_whiteLayer;
-  //     //   snapPositions.push(parseFloat(d3.select(this).datum().x) - offset);
-  //     // });
-  //
-  //     this.layoutInfo.bandLength = bandLength;
-  //     this.layoutInfo.startOffsetRowlayout = startOffsetRowlayout;
-  //     // this.layoutInfo.snapPositions = snapPositions;
-  //   }
-  // }
 
 
   moveRowWsvs(distance: number, wsvsToAlign: Array<WordScaleVisualization>) {
-
-    // const maxEntityWidth = LayoutCreator.getEntityMaxWidth(this._refToText.listOfWSVs);
 
     let index0OldPosition: CornerPosition;
     let newClonedWSV_left;
@@ -282,50 +241,52 @@ class RowLayout implements Layout {
         nextClonedWSV = clonedWSV._previousWSV;
       }
 
-      // let diff = maxEntityWidth - clonedWSV._entity._entityBbox.width;
 
       if (index === 0) {
         // shallow copy is enough
         index0OldPosition = {...clonedWSV._positionLeftTopCorner};
       }
 
-      // get the next element in wsv_cloned its left position
-      // let nextDiff = maxEntityWidth - nextClonedWSV._entity._entityBbox.width;
+      if (nextClonedWSV) {
+        // get the next element in wsv_cloned its left position
+        if (index === this._wsvsWithoutCurrentWSV.length - 1) {
+          newClonedWSV_left = (index0OldPosition.left - nextClonedWSV._offsetEntity) + clonedWSV._offsetEntity;
+        } else {
+          newClonedWSV_left = (nextClonedWSV._positionLeftTopCorner.left - nextClonedWSV._offsetEntity) + clonedWSV._offsetEntity
+        }
 
-      if (index === this._wsvsWithoutCurrentWSV.length - 1) {
-        newClonedWSV_left = (index0OldPosition.left - nextClonedWSV._offsetEntity) + clonedWSV._offsetEntity;
-      } else {
-        newClonedWSV_left = (nextClonedWSV._positionLeftTopCorner.left - nextClonedWSV._offsetEntity) + clonedWSV._offsetEntity
-      }
+        const viewportInfo = RowLayout.getViewportInfo();
 
-      const viewportInfo = RowLayout.getViewportInfo();
+        // set the position of the cloned element
+        d3Select(clonedWSV._wsv).style('left', newClonedWSV_left);
+        clonedWSV._positionLeftTopCorner.left = newClonedWSV_left
 
-      // set the position of the cloned element
-      d3.select(clonedWSV._wsv).style('left', newClonedWSV_left);
-      clonedWSV._positionLeftTopCorner.left = newClonedWSV_left
-      // console.log(clonedWSV._entity._entityName, newClonedWSV_left)
-
-      // unhide wsv to get the bboxes
-      clonedWSV.removeClassOffWSV('hide')
-
-      clonedWSV._entity.setBBoxOfEntity()
-      clonedWSV.setBBoxOfWSV()
-
-      const whiteOtherBackgroundElement = clonedWSV._backgroundElement;
-      d3.select(whiteOtherBackgroundElement).classed('hide', false);
-      d3.select(whiteOtherBackgroundElement).style('left', (newClonedWSV_left - clonedWSV._offsetEntity - this.layoutInfo.cellPadding));
-
-
-      if (!d3.select(clonedWSV._wsv).classed('hide') && ((clonedWSV._wsvBBox.left - this.layoutInfo.cellPadding - clonedWSV._offsetEntity < viewportInfo.left) || (clonedWSV._wsvBBox.right > viewportInfo.right))) {
-        // is visible and just crossed left border
-        clonedWSV.addClassToWSV('hide');
-        d3.select(whiteOtherBackgroundElement).classed('hide', true);
-
-      } else if (d3.select(clonedWSV._wsv).classed('hide') && (((newClonedWSV_left - this.layoutInfo.cellPadding - clonedWSV._offsetEntity < viewportInfo.right) && (newClonedWSV_left - this.layoutInfo.cellPadding - clonedWSV._offsetEntity > viewportInfo.left)) || ((clonedWSV._wsvBBox.right < viewportInfo.right) && (clonedWSV._wsvBBox.right > viewportInfo.left)))) {
-        // is hidden and just crossed the left or right border
-
+        // unhide wsv to get the bboxes
         clonedWSV.removeClassOffWSV('hide')
-        d3.select(whiteOtherBackgroundElement).classed('hide', false);
+
+        clonedWSV._entity.setBBoxOfEntity()
+        clonedWSV.setBBoxOfWSV()
+
+
+        const backgroundElement = clonedWSV._backgroundElement;
+        d3Select(backgroundElement).classed('hide', false);
+        d3Select(backgroundElement).style('left', (newClonedWSV_left - clonedWSV._offsetEntity - this.layoutInfo.cellPadding));
+
+        let cellOfClonedWSV_left = newClonedWSV_left - clonedWSV._offsetEntity - this.layoutInfo.cellPadding
+
+        if (!d3Select(clonedWSV._wsv).classed('hide') && ((cellOfClonedWSV_left < viewportInfo.left) || (clonedWSV._wsvBBox.right > viewportInfo.right))) {
+          // is visible and just crossed left border
+          clonedWSV.addClassToWSV('hide');
+          d3Select(backgroundElement).classed('hide', true);
+
+        } else if (d3Select(clonedWSV._wsv).classed('hide') && (((cellOfClonedWSV_left < viewportInfo.right) && (cellOfClonedWSV_left > viewportInfo.left)) || ((clonedWSV._wsvBBox.right < viewportInfo.right) && (clonedWSV._wsvBBox.right > viewportInfo.left)))) {
+          // is hidden and just crossed the left or right border
+
+          clonedWSV.removeClassOffWSV('hide')
+          d3Select(backgroundElement).classed('hide', false);
+        }
+      } else {
+        console.log('ERROR: missing link to next WSV')
       }
     });
   }
@@ -338,14 +299,6 @@ class RowLayout implements Layout {
     const cellPadding = layoutInfo.cellPadding;
 
     if (boundToWhat === 'middleBound') {
-
-      // if (numRowsPossible_above > 0) {
-      //   colsAndRowsNumber.aboveNumbRow = 1;
-      //   colsAndRowsNumber.belowNumbRow = 0;
-      // } else if (numRowsPossible_below > 0) {
-      //   colsAndRowsNumber.aboveNumbRow = 0;
-      //   colsAndRowsNumber.belowNumbRow = 1;
-      // }
 
       // is there enough space available in the column where the current entity is
       if (aSpaceAvailability.currentEntityColumn < 0) {

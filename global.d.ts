@@ -59,9 +59,10 @@ export interface LayoutInfo {
   cellPadding: number,
   rowAndColumnNumbers: ColsAndRowsNumber,
   numberOfColumns: number,
+  topLeftCorner_left: number,
+  topLeftCorner_top: number,
 
-  topLeftCorner_left?: number,
-  topLeftCorner_top?: number,
+
   counts?,
   startIndex_above?: number,
   startIndex_below?: number,
