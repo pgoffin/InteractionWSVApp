@@ -27,7 +27,7 @@ body {
 	background-color: #ffdf80;
 }
 
-.entity.noWSV {
+.entity.nodataForWSV {
 	background-color: transparent;
 }
 

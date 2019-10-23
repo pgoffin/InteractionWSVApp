@@ -217,6 +217,9 @@ class Text implements Text {
         } else {
           console.log('ERROR: wsv has no renderer assigned through data attribute data-wsv-renderer')
         }
+      } else {
+        // no data for this entity -> keep tag but remove background color
+        anHTMLElement.classList.add('nodataForWSV');
       }
     });
 
