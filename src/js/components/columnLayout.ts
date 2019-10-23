@@ -41,21 +41,11 @@ class ColumnLayout implements Layout {
     const layoutInfo = this.layoutInfo;
     layoutInfo.type = 'column';
 
-    // const currentEntity: Entity = this._refToText.currentEntity!;
-    // const bbox_currEntity: BBox = currentEntity._entityBbox;
-    // const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
-
     const currentEntityBBox = layoutInfo.currentEntity._entityBbox;
-
-    // const currentEntity: Entity = this._refToText.currentEntity!;
-    // const bbox_currEntity: BBox = currentEntity._entityBbox;
-    // const bbox_currWSV: BBox = currentEntity._entityBelongsToWsv._wsvBBox;
+    const currentWSV = layoutInfo.currentEntity._entityBelongsToWsv;
 
     // get available space for columns and rows
     this.getRowAndColumnInfo('middleBound', this._spaceAvailability);
-
-    // update the row and columns number
-    // layoutInfo.numberOfColumns = 1;
 
     // update the counts variable
     layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._wsvsWithoutCurrentWSV)
@@ -64,11 +54,13 @@ class ColumnLayout implements Layout {
     // get top left cornerDiffs
     const numUsedRowsAbove = Math.ceil(layoutInfo.counts.above/layoutInfo.numberOfColumns);
 
-    const topLeftCorner_left = currentEntityBBox.left - (layoutInfo.rowAndColumnNumbers.leftNumbColumn * (layoutInfo.cellDimensions.width + (2*layoutInfo.cellPadding)));
-    const topLeftCorner_top = layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.top - (numUsedRowsAbove * (layoutInfo.cellDimensions.height + (2*layoutInfo.cellPadding)));
+    const topLeftCorner_left = (currentEntityBBox.left - currentWSV._offsetEntity - layoutInfo.cellPadding) - (layoutInfo.rowAndColumnNumbers.leftNumbColumn * layoutInfo.cellDimensions.width);
+    const topLeftCorner_top =  layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.top - layoutInfo.cellPadding - (numUsedRowsAbove * layoutInfo.cellDimensions.height);
 
     layoutInfo.topLeftCorner_left = topLeftCorner_left;
     layoutInfo.topLeftCorner_top = topLeftCorner_top;
+
+    const maxEntityWidth = LayoutCreator.getEntityMaxWidth(this._refToText.listOfWSVs);
 
     const mySequence: Array<VelocitySequence> = [];
     let aboveIndex = 0;
@@ -78,22 +70,23 @@ class ColumnLayout implements Layout {
       let aClonedWSV: WordScaleVisualization;
       if (!this._refToText.isLayoutVisible) {
         aClonedWSV = aWSV.cloneWSV();
+        aClonedWSV._offsetEntity = maxEntityWidth - aClonedWSV._entity._entityBbox.width;
       } else {
-        aClonedWSV = aWSV._clonedWSV;
+        aClonedWSV = aWSV._clonedWSV!;
         aClonedWSV.removeClassOffWSV('hide');
       }
 
       let newTop = 0;
-      let newLeft = topLeftCorner_left + aWSV._middleBoundOffset;
+      let newLeft = topLeftCorner_left + layoutInfo.cellPadding + aWSV._offsetEntity;
       if (aWSV._aboveOrBelow === 'above') {
 
-        newTop = topLeftCorner_top + (Math.floor(aboveIndex/layoutInfo.numberOfColumns) * (layoutInfo.cellDimensions.height + (2*layoutInfo.cellPadding)));
+        newTop = topLeftCorner_top + (Math.floor(aboveIndex/layoutInfo.numberOfColumns) * layoutInfo.cellDimensions.height) + layoutInfo.cellPadding;
 
         aboveIndex += 1;
 
       } else if (aWSV._aboveOrBelow === 'below') {
 
-        newTop = (layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.bottom + (2*layoutInfo.cellPadding)) + (Math.floor(belowIndex/layoutInfo.numberOfColumns) * (layoutInfo.cellDimensions.height + (2*layoutInfo.cellPadding)));
+        newTop = (layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.bottom + layoutInfo.cellPadding) + (Math.floor(belowIndex/layoutInfo.numberOfColumns) * layoutInfo.cellDimensions.height) + layoutInfo.cellPadding;
 
         belowIndex += 1;
 
@@ -104,34 +97,38 @@ class ColumnLayout implements Layout {
       // the wsv position is controlled over the bottom and left of the entity and not the wsv as a whole or the sparkline
       // clonedWSV is the sparklificated span, due to that have to add position plus substract the size of the sparkline
 
-      let whiteBackgroundElement: HTMLElement;
+      let backgroundElement: HTMLElement;
       if (!this._refToText.isLayoutVisible) {
-        whiteBackgroundElement = LayoutCreator.addWhiteLayer((layoutInfo.cellDimensions.width + (2*layoutInfo.cellPadding)), (layoutInfo.cellDimensions.height + (2*layoutInfo.cellPadding)), (aWSV.entity._entityBbox.top), (aWSV.entity._entityBbox.left));
+        backgroundElement = LayoutCreator.addWhiteLayer(layoutInfo.cellDimensions.width, layoutInfo.cellDimensions.height, aWSV._wsvBBox.top - layoutInfo.cellPadding, aWSV._wsvBBox.left - aWSV._offsetEntity - layoutInfo.cellPadding);
 
-        aWSV._clonedWSV._backgroundElement = whiteBackgroundElement;
+        aClonedWSV._backgroundElement = backgroundElement;
       } else {
+        backgroundElement = aClonedWSV._backgroundElement;
         // the layout before might have hidden some of the whiteLayer, therefore unhide
-        aWSV._clonedWSV._backgroundElement.classList.remove('hide');
+        backgroundElement.classList.remove('hide');
 
-        whiteBackgroundElement = aWSV._clonedWSV._backgroundElement;
+
       }
 
-      mySequence.push({e: aClonedWSV._wsv, p: {left: (newLeft), top: (newTop)}, o: {
-        duration: 1000,
-        sequenceQueue: false,
+      mySequence.push({ e: aClonedWSV._wsv,
+                        p: {left: (newLeft), top: (newTop)},
+                        o: {duration: 1000,
+                            sequenceQueue: false,
 
-        complete: () => {
-          aClonedWSV._entity.setBBoxOfEntity();
-          aClonedWSV.setBBoxOfSparkline();
-          aClonedWSV.setBBoxOfWSV();
-        }
-      }});
+                            complete: () => {
+                              aClonedWSV._entity.setBBoxOfEntity();
+                              aClonedWSV.setBBoxOfSparkline();
+                              aClonedWSV.setBBoxOfWSV();
+                            }
+                          }
+                      });
 
-      mySequence.push({e: whiteBackgroundElement, p: {left: (newLeft - layoutInfo.cellPadding - aWSV._offsetWhiteLayer), top: (newTop - layoutInfo.cellPadding), opacity: 1}, o: {
-          duration: 1000,
-          sequenceQueue: false
-        }
-      });
+      mySequence.push({ e: backgroundElement,
+                        p: {left: (newLeft - layoutInfo.cellPadding - aWSV._offsetEntity), top: (newTop - layoutInfo.cellPadding), opacity: 1},
+                        o: {duration: 1000,
+                            sequenceQueue: false
+                          }
+                      });
 
     });
 

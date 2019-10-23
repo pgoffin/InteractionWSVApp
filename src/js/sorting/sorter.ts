@@ -10,7 +10,7 @@ interface Sorter {
 
   setComparator(): void;
 
-  getComparator();
+  getComparator(): any;
 
   compare(): string;
 

@@ -93,39 +93,42 @@ class RowLayout implements Layout {
       aClonedWSV._positionLeftTopCorner.top = layoutInfo.topLeftCorner_top;
       aClonedWSV._positionLeftTopCorner.left = newLeft;
 
-      mySequence.push({e: aClonedWSV._wsv, p: {left: (newLeft), top: (layoutInfo.topLeftCorner_top)}, o: {
-        duration: 1000,
-        sequenceQueue: false,
+      mySequence.push({ e: aClonedWSV._wsv,
+                        p: {left: (newLeft), top: (layoutInfo.topLeftCorner_top)},
+                        o: {duration: 1000,
+                            sequenceQueue: false,
 
-        complete: () => {
-          aClonedWSV._entity.setBBoxOfEntity();
-          aClonedWSV.setBBoxOfSparkline();
-          aClonedWSV.setBBoxOfWSV();
+                            complete: () => {
+                              aClonedWSV._entity.setBBoxOfEntity();
+                              aClonedWSV.setBBoxOfSparkline();
+                              aClonedWSV.setBBoxOfWSV();
 
-          // set all left and right for clonedWSV that are hidden to 0 ==> no horizontal scrolling possible
-          // inline styles takes priority over stylesheets
-          if (index === 0) {
-            aClonedWSV._wsv.classList.add('first')
-            // $(aClonedWSV._wsv).children('.entity').css('background-color', '#a6bddb');
-          } else if (index === (this._wsvsWithoutCurrentWSV.length - 1)) {
-            aClonedWSV._wsv.classList.add('last')
-          }
+                              // set all left and right for clonedWSV that are hidden to 0 ==> no horizontal scrolling possible
+                              // inline styles takes priority over stylesheets
+                              if (index === 0) {
+                                aClonedWSV._wsv.classList.add('first')
+                                // $(aClonedWSV._wsv).children('.entity').css('background-color', '#a6bddb');
+                              } else if (index === (this._wsvsWithoutCurrentWSV.length - 1)) {
+                                aClonedWSV._wsv.classList.add('last')
+                              }
 
-          let cellOfClonedWSV_left = aClonedWSV._wsvBBox.left - aClonedWSV._offsetEntity - layoutInfo.cellPadding;
-          let cellOfClonedWSV_right = aClonedWSV._wsvBBox.right + layoutInfo.cellPadding;
-          if ((cellOfClonedWSV_left < document.body.getBoundingClientRect().left) || (cellOfClonedWSV_right > document.body.getBoundingClientRect().right)) {
-            aClonedWSV.addClassToWSV('hide');
+                              let cellOfClonedWSV_left = aClonedWSV._wsvBBox.left - aClonedWSV._offsetEntity - layoutInfo.cellPadding;
+                              let cellOfClonedWSV_right = aClonedWSV._wsvBBox.right + layoutInfo.cellPadding;
+                              if ((cellOfClonedWSV_left < document.body.getBoundingClientRect().left) || (cellOfClonedWSV_right > document.body.getBoundingClientRect().right)) {
+                                aClonedWSV.addClassToWSV('hide');
 
-            backgroundElement.classList.add('hide');
-          }
-        }
-      }});
+                                backgroundElement.classList.add('hide');
+                              }
+                            }
+                          }
+                      });
 
-      mySequence.push({e: backgroundElement, p: {left: (newLeft - layoutInfo.cellPadding - aClonedWSV._offsetEntity), top: (layoutInfo.topLeftCorner_top - layoutInfo.cellPadding), opacity: 1}, o: {
-          duration: 1000,
-          sequenceQueue: false
-        }
-      });
+      mySequence.push({ e: backgroundElement,
+                        p: {left: (newLeft - layoutInfo.cellPadding - aClonedWSV._offsetEntity), top: (layoutInfo.topLeftCorner_top - layoutInfo.cellPadding), opacity: 1},
+                        o: { duration: 1000,
+                            sequenceQueue: false
+                          }
+                      });
 
     });
 

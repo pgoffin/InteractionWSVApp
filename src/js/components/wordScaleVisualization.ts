@@ -52,7 +52,7 @@ class WordScaleVisualization implements WordScaleVisualization {
   _offsetWhiteLayer: number;
   _distanceToCurrEntity: number;
 
-  _backgroundElement: HTMLElement;
+  _backgroundElement: HTMLElement | null;
   _clonedWSV: WordScaleVisualization | null;
   _originalWSV: WordScaleVisualization | null;
 
