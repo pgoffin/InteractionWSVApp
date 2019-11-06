@@ -1,18 +1,15 @@
-import WorldScaleVisualization from '../components/wordScaleVisualization';
-
-
+import WordScaleVisualization from '../components/wordScaleVisualization';
 
 
 interface Sorter {
 
+  sort(): Array<WordScaleVisualization>;
 
-  sort(): Array<WorldScaleVisualization>;
-
-  setComparator(): void;
+  setComparator(aWSV: WordScaleVisualization): void;
 
   getComparator(): any;
 
-  compare(): string;
+  compare(aWSV: WordScaleVisualization): string;
 
 }
 

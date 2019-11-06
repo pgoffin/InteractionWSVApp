@@ -1,6 +1,6 @@
 
 import Sorter from './sorter';
-import WorldScaleVisualization from '../components/wordScaleVisualization';
+import WordScaleVisualization from '../components/wordScaleVisualization';
 
 const dl = require('../../lib/datalib.min.js');
 
@@ -8,22 +8,25 @@ const dl = require('../../lib/datalib.min.js');
 
 class LastValueSort implements Sorter {
 
-  _dataToSort;
-  _comparator;
+  private _dataToSort: Array<WordScaleVisualization>;
+  private _refToText: Text;
+  private _comparator: number;
 
 
-  constructor(aDataToSort, aRefToText: Text) {
+
+  constructor(aDataToSort: Array<WordScaleVisualization>, aRefToText: Text) {
     this._dataToSort = aDataToSort
 
     this._refToText = aRefToText;
+    this._comparator = 0;
   }
 
 
 
-  sort(): Array<WorldScaleVisualization> {
+  sort(): Array<WordScaleVisualization> {
     console.log('sorting using last value');
 
-    this._dataToSort.forEach((aWSV: WorldScaleVisualization) => {
+    this._dataToSort.forEach((aWSV: WordScaleVisualization) => {
       let wsvsData = aWSV._rawWSVData;
       aWSV.lastDataValue = wsvsData[wsvsData.length - 1]['close']
     });
@@ -34,7 +37,7 @@ class LastValueSort implements Sorter {
   }
 
 
-  setComparator(aWSV) {
+  setComparator(aWSV: WordScaleVisualization) {
     this._comparator = aWSV._rawWSVData[aWSV._rawWSVData.length - 1]['close'];
   }
 
