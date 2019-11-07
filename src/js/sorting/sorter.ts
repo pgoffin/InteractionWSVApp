@@ -5,6 +5,8 @@ interface Sorter {
 
   sort(): Array<WordScaleVisualization>;
 
+  sortBackgroundElement(): void;
+
   setComparator(aWSV: WordScaleVisualization): void;
 
   getComparator(): any;

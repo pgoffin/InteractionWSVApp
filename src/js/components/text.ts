@@ -45,6 +45,7 @@ class Text implements Text {
 
       this.addEventsToDocument();
       // Text.addSuggestedInteractivityTags();
+      this.addBackgroundDiv();
     } else {
       console.log('ERROR: check why there is no dataset for this text');
     }
@@ -324,6 +325,19 @@ class Text implements Text {
 
   static getViewportInfo(): BBox {
     return document.body.getBoundingClientRect();
+  }
+
+
+  addBackgroundDiv() {
+    const textDiv = document.getElementById('text');
+
+    let backgroundLayerDiv = document.getElementById('backgroundLayer');
+    if (!backgroundLayerDiv) {
+      backgroundLayerDiv = document.createElement('div');
+      backgroundLayerDiv.id = 'backgroundLayer';
+
+      if (textDiv) textDiv.append(backgroundLayerDiv)
+    }
   }
 
 

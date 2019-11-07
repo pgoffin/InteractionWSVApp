@@ -65,6 +65,8 @@ abstract class LayoutCreator {
     this._wsvsThatHaveAClone = sortingFactory.sort();
     sortingFactory.setComparator(this._refToText.currentWSV);
 
+    if (this._refToText._isLayoutVisible) sortingFactory.sortBackgroundElement();
+
     const maxEntityWidth = LayoutCreator.getEntityMaxWidth(this._refToText.listOfWSVs);
 
     this._refToText._listOfWSVs.forEach(aWSV => {
@@ -307,11 +309,20 @@ abstract class LayoutCreator {
 
   static addWhiteLayer(width: number, height: number, oldTop: number, oldLeft: number) {
 
+    const textDiv = document.getElementById('text');
+
+    let backgroundLayerDiv = document.getElementById('backgroundLayer');
+    if (!backgroundLayerDiv) {
+      backgroundLayerDiv = document.createElement('div');
+      backgroundLayerDiv.id = 'backgroundLayer';
+
+      if (textDiv) textDiv.append(backgroundLayerDiv)
+    }
+
     const whiteLayerDiv = document.createElement('div');
     whiteLayerDiv.classList.add('whiteLayer');
 
-    const textDiv = document.getElementById('text');
-    if (textDiv) textDiv.append(whiteLayerDiv);
+    backgroundLayerDiv.append(whiteLayerDiv);
 
     whiteLayerDiv.style.width = width + 'px';
     whiteLayerDiv.style.height = height + 'px';

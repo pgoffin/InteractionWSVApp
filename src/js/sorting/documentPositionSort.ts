@@ -34,6 +34,13 @@ class DocumentPositionSort implements Sorter {
     return this._dataToSort;
   }
 
+  sortBackgroundElement(): void {
+    const backgroundLayerDiv = document.getElementById('backgroundLayer')!;
+    for (const aWSV of this._dataToSort) {
+      backgroundLayerDiv.append(aWSV._clonedWSV._backgroundElement);
+    }
+  }
+
 
   setComparator(aWSV: WordScaleVisualization) {
     this._comparator = aWSV._entity._entityBbox.top;

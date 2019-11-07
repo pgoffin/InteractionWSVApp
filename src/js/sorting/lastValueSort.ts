@@ -36,6 +36,13 @@ class LastValueSort implements Sorter {
     return this._dataToSort;
   }
 
+  sortBackgroundElement(): void {
+    const backgroundLayerDiv = document.getElementById('backgroundLayer')!;
+    for (const aWSV of this._dataToSort) {
+      backgroundLayerDiv.append(aWSV._clonedWSV._backgroundElement);
+    }
+  }
+
 
   setComparator(aWSV: WordScaleVisualization) {
     this._comparator = aWSV._rawWSVData[aWSV._rawWSVData.length - 1]['close'];

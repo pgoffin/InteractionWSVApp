@@ -35,6 +35,13 @@ class EntityNameSort implements Sorter {
     return this._dataToSort;
   }
 
+  sortBackgroundElement(): void {
+    const backgroundLayerDiv = document.getElementById('backgroundLayer')!;
+    for (const aWSV of this._dataToSort) {
+      backgroundLayerDiv.append(aWSV._clonedWSV._backgroundElement);
+    }
+  }
+
 
   setComparator(aWSV: WordScaleVisualization): void {
     this._comparator = aWSV._entity._entityName;
