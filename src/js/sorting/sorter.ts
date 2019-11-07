@@ -5,16 +5,14 @@ interface Sorter {
 
   sort(): Array<WordScaleVisualization>;
 
-  sortBackgroundElement(): void;
+  sortBackgroundElements(): void;
 
-  setComparator(aWSV: WordScaleVisualization): void;
+  getComparator(aWSV: WordScaleVisualization): any;
 
-  getComparator(): any;
+  getCurrentWSVComparator(): any;
 
-  compare(aWSV: WordScaleVisualization): string;
+  compareToCurrentWSV(aWSV: WordScaleVisualization): string;
 
 }
-
-
 
 export default Sorter

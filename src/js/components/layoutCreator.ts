@@ -63,9 +63,8 @@ abstract class LayoutCreator {
 
     const sortingFactory = sortingFactoryClass(sorting, this._wsvsThatHaveAClone, this._refToText)
     this._wsvsThatHaveAClone = sortingFactory.sort();
-    sortingFactory.setComparator(this._refToText.currentWSV);
 
-    if (this._refToText._isLayoutVisible) sortingFactory.sortBackgroundElement();
+    if (this._refToText._isLayoutVisible) sortingFactory.sortBackgroundElements();
 
     const maxEntityWidth = LayoutCreator.getEntityMaxWidth(this._refToText.listOfWSVs);
 
@@ -77,7 +76,7 @@ abstract class LayoutCreator {
 
     this._wsvsThatHaveAClone.forEach(aWSV => {
       // let aEntityBBox = aWSV.entity._entityBbox;
-      aWSV._aboveOrBelow = sortingFactory.compare(aWSV);
+      aWSV._aboveOrBelow = sortingFactory.compareToCurrentWSV(aWSV);
 
       // if (wsvInteractionConstants.positionType === 'right') {
       //   // aWSV._middleBoundOffset = currentEntity._entityBbox.width - aEntityBBox.width;

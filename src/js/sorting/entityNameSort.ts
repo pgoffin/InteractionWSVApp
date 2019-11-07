@@ -1,4 +1,3 @@
-
 import Sorter from './sorter';
 import Text from '../components/text'
 import WordScaleVisualization from '../components/wordScaleVisualization';
@@ -9,16 +8,13 @@ const dl = require('../../lib/datalib.min.js');
 
 class EntityNameSort implements Sorter {
   private _dataToSort: Array<WordScaleVisualization>;
-  // private _refToText: Text;
-  private _comparator: string;
-
+  private _refToText: Text;
 
 
 
   constructor(aDataToSort: Array<WordScaleVisualization>, aRefToText: Text) {
     this._dataToSort = aDataToSort;
-    this._comparator = '';
-    // this._refToText = aRefToText;
+    this._refToText = aRefToText;
   }
 
 
@@ -26,37 +22,34 @@ class EntityNameSort implements Sorter {
   sort(): Array<WordScaleVisualization> {
     console.log('sorting using entity name');
 
-    // this._dataToSort.forEach((aWSV: WordScaleVisualization) => {
-    //   aWSV.distanceToCurrEntity = this._refToText._currentEntity._entityBbox.top - aWSV._entity._entityBbox.top;
-    // });
-
     this._dataToSort.sort(dl.comparator(['+_entity._entityName']));
 
     return this._dataToSort;
   }
 
-  sortBackgroundElement(): void {
+
+  sortBackgroundElements(): void {
     const backgroundLayerDiv = document.getElementById('backgroundLayer')!;
     for (const aWSV of this._dataToSort) {
-      backgroundLayerDiv.append(aWSV._clonedWSV._backgroundElement);
+      let aClonedWSV = aWSV._clonedWSV;
+      if (aClonedWSV) backgroundLayerDiv.append(aClonedWSV._backgroundElement!);
     }
   }
 
 
-  setComparator(aWSV: WordScaleVisualization): void {
-    this._comparator = aWSV._entity._entityName;
-  }
-
-  getComparator(): string {
-    return this._comparator;
+  getComparator(aWSV: WordScaleVisualization): string {
+    return aWSV._entity._entityName;
   }
 
 
-  compare(aWSV: WordScaleVisualization): string {
-    return (aWSV._entity._entityName > this.getComparator()) ? 'below' : 'above';
+  getCurrentWSVComparator(): string {
+      return this.getComparator(this._refToText._currentEntity!._entityBelongsToWsv);
+  }
+
+
+  compareToCurrentWSV(aWSV: WordScaleVisualization): string {
+    return (this.getComparator(aWSV) > this.getCurrentWSVComparator()) ? 'below' : 'above';
   }
 }
-
-
 
 export default EntityNameSort

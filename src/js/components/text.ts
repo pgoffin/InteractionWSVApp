@@ -54,59 +54,59 @@ class Text implements Text {
 
   // getter/setter
   set nameOfTextFile(value: string | null) {
-      this._nameOfTextFile = value;
+    this._nameOfTextFile = value;
   }
   get nameOfTextFile(): string | null {
-      return this._nameOfTextFile;
+    return this._nameOfTextFile;
   }
 
   set isLayoutVisible(value: Boolean) {
-      this._isLayoutVisible = value;
+    this._isLayoutVisible = value;
   }
   get isLayoutVisible(): Boolean {
-      return this._isLayoutVisible;
+    return this._isLayoutVisible;
   }
 
   set currentWSV(value: WordScaleVisualization | null) {
-      this._currentWSV = value;
+    this._currentWSV = value;
   }
   get currentWSV(): WordScaleVisualization | null {
-      return this._currentWSV;
+    return this._currentWSV;
   }
 
   set dataForWSV(value: WsvDataObject) {
-      this._dataForWSV = value;
+    this._dataForWSV = value;
   }
   get dataForWSV(): WsvDataObject {
-      return this._dataForWSV;
+    return this._dataForWSV;
   }
 
   set listOfWSVs(value: Array<WordScaleVisualization>) {
-      this._listOfWSVs = value;
+    this._listOfWSVs = value;
   }
   get listOfWSVs(): Array<WordScaleVisualization> {
-      return this._listOfWSVs;
+    return this._listOfWSVs;
   }
 
   set currentEntity(value: Entity | null)  {
-      this._currentEntity = value;
+    this._currentEntity = value;
   }
   get currentEntity(): Entity | null {
-      return this._currentEntity;
+    return this._currentEntity;
   }
 
   set layoutCreator(value: LayoutCreator)  {
-      this._layoutCreator = value;
+    this._layoutCreator = value;
   }
   get layoutCreator(): LayoutCreator {
-      return this._layoutCreator;
+    return this._layoutCreator;
   }
 
   set contextualMenu(value: ContextualMenu)  {
-      this._contextualMenu = value;
+    this._contextualMenu = value;
   }
   get contextualMenu(): ContextualMenu {
-      return this._contextualMenu;
+    return this._contextualMenu;
   }
 
 
