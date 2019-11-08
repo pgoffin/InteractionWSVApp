@@ -37,7 +37,7 @@ class RowLayout implements Layout {
   }
 
 
-  applyLayout() {
+  applyLayout(anEventInitiatingLayoutChange) {
 
     const layoutInfo = this.layoutInfo;
     layoutInfo.type = 'row';
@@ -156,7 +156,9 @@ class RowLayout implements Layout {
       }
     });
 
-    this.addSuggestedInteractivity();
+    if (anEventInitiatingLayoutChange != 'sorting') {
+      this.addSuggestedInteractivity();
+    }
   }
 
 
@@ -189,9 +191,12 @@ class RowLayout implements Layout {
 
   addSuggestedInteractivity() {
 
-    const leftTriangleDiv = document.createElement("div");
-    leftTriangleDiv.setAttribute('id', 'triangle_left');
-    document.body.appendChild(leftTriangleDiv);
+    let leftTriangleDiv = document.getElementById('triangle_left');
+    if (!leftTriangleDiv) {
+      leftTriangleDiv = document.createElement("div");
+      leftTriangleDiv.setAttribute('id', 'triangle_left');
+      document.body.appendChild(leftTriangleDiv);
+    }
 
     leftTriangleDiv.classList.remove('hide');
     leftTriangleDiv.style.top = this.layoutInfo.topLeftCorner_top + 'px';
@@ -207,10 +212,12 @@ class RowLayout implements Layout {
     leftTriangleDiv.addEventListener('dblclick', this.preventDbclickEvent);
 
 
-
-    const rightTriangleDiv = document.createElement("div");
-    rightTriangleDiv.setAttribute('id', 'triangle_right');
-    document.body.appendChild(rightTriangleDiv);
+    let rightTriangleDiv = document.getElementById('triangle_right');
+    if (!rightTriangleDiv) {
+      rightTriangleDiv = document.createElement("div");
+      rightTriangleDiv.setAttribute('id', 'triangle_right');
+      document.body.appendChild(rightTriangleDiv);
+    }
 
     const viewportInfo = RowLayout.getViewportInfo()
 

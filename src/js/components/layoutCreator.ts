@@ -47,7 +47,7 @@ abstract class LayoutCreator {
   abstract layoutFactory(aLayoutName: string, layoutInfo: LayoutInfo, spaceAvailability: SpaceAvailability, refToText: Text, wsvsWithoutCurrentWSV: Array<WordScaleVisualization>): Layout
 
 
-  changeLayout(layoutType: string, sorting: string) {
+  changeLayout(layoutType: string, sorting: string, eventInitiatingLayoutChange: string) {
 
     this._layoutClass = layoutType;
 
@@ -64,7 +64,7 @@ abstract class LayoutCreator {
     const sortingFactory = sortingFactoryClass(sorting, this._wsvsThatHaveAClone, this._refToText)
     this._wsvsThatHaveAClone = sortingFactory.sort();
 
-    if (this._refToText._isLayoutVisible) sortingFactory.sortBackgroundElements();
+    if (eventInitiatingLayoutChange === 'sorting') sortingFactory.sortBackgroundElements();
 
     const maxEntityWidth = LayoutCreator.getEntityMaxWidth(this._refToText.listOfWSVs);
 
@@ -75,32 +75,13 @@ abstract class LayoutCreator {
 
 
     this._wsvsThatHaveAClone.forEach(aWSV => {
-      // let aEntityBBox = aWSV.entity._entityBbox;
       aWSV._aboveOrBelow = sortingFactory.compareToCurrentWSV(aWSV);
-
-      // if (wsvInteractionConstants.positionType === 'right') {
-      //   // aWSV._middleBoundOffset = currentEntity._entityBbox.width - aEntityBBox.width;
-      //   // aWSV._offsetWhiteLayer = layoutInfo.cellDimensions.width - aWSV._wsvBBox.width;
-      //
-      //   // max entity provides left most extension of an entity -> diff between max entity and the entity
-      //   // aWSV._offsetEntity = maxEntityWidth - aWSV._entity._entityBbox.width;
-      // }
-
-      // aWSV._distanceToCurrEntity = bboxCurrEntity.top - aEntityBBox.top;
     });
 
-    // // order first by above or below, then use distance to the currentEntity
-    // this._wsvsThatHaveAClone.sort(dl.comparator(['+_aboveOrBelow', '-_distanceToCurrEntity']));
-
-
-    // let rowAndColumnNumbers: ColsAndRowsNumber = this.spaceAvailabilityColsAndRowsNumber(currentEntity, wsvInteractionConstants.positionType, layoutType, 'middleBound', this._refToText.listOfWSVs, layoutInfo.cellDimensions, layoutInfo.cellPadding);
-    //
-    // layoutInfo.rowAndColumnNumbers = rowAndColumnNumbers;
-    // layoutInfo = ['numberOfColumns', rowAndColumnNumbers.totalNumberOfColumns];
     this.getUsableInteractiveSpace();
 
     this._theLayout = this.layoutFactory(layoutType, layoutInfo, this._spaceUsableInteractively, this._refToText, this._wsvsThatHaveAClone);
-    this._theLayout.applyLayout();
+    this._theLayout.applyLayout(eventInitiatingLayoutChange);
 
     this._refToText.isLayoutVisible = true;
   }

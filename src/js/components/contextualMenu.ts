@@ -153,11 +153,13 @@ class ContextualMenu {
 
         if (this.refToText.isCurrentEntitySet) {
 
+          const initialSorting = 'DocumentPositionSort'
+
           if (this.refToText._isLayoutVisible) {
             this.refToText.layoutCreator._theLayout.cleanUpAfterLayout();
-            this.refToText.layoutCreator.changeLayout(anElement.elementInteraction, 'DocumentPositionSort')
+            this.refToText.layoutCreator.changeLayout(anElement.elementInteraction, initialSorting, anElement.elementType)
           } else {
-            this.refToText.layoutCreator.changeLayout(anElement.elementInteraction, 'DocumentPositionSort')
+            this.refToText.layoutCreator.changeLayout(anElement.elementInteraction, initialSorting, anElement.elementType)
           }
 
         } else {
@@ -165,8 +167,7 @@ class ContextualMenu {
         }
 
       } else if (anElement.elementType === 'sorting') {
-        console.log('not yet implemented')
-        this.refToText.layoutCreator.changeLayout(this.refToText._layoutCreator._layoutClass, anElement.elementInteraction)
+        this.refToText.layoutCreator.changeLayout(this.refToText._layoutCreator._layoutClass, anElement.elementInteraction, anElement.elementType)
       }
     });
 

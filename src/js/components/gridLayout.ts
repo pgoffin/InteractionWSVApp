@@ -36,7 +36,7 @@ class GridLayout implements Layout {
   }
 
 
-  applyLayout() {
+  applyLayout(anEventInitiatingLayoutChange) {
 
     const layoutInfo = this.layoutInfo;
     layoutInfo.type = 'grid';
@@ -53,7 +53,7 @@ class GridLayout implements Layout {
     // get top left cornerDiffs
     const numUsedRowsAbove = Math.ceil(layoutInfo.counts.above/layoutInfo.numberOfColumns);
 
-    let topLeftCorner_left = 0;
+    let topLeftCorner_left: number;
     if (layoutInfo.rowAndColumnNumbers.currentEntityColumn == 0) {
       topLeftCorner_left = currentEntityBBox.left + (layoutInfo.cellDimensions.width);
     } else {

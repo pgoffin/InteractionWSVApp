@@ -36,7 +36,7 @@ class ColumnPanAlignedLayout implements Layout {
   }
 
 
-  applyLayout() {
+  applyLayout(anEventInitiatingLayoutChange) {
 
     const layoutInfo = this.layoutInfo;
     layoutInfo.type = 'column-pan-aligned';

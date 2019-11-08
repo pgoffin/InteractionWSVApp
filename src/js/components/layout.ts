@@ -11,7 +11,7 @@ interface Layout {
   _wsvsWithoutCurrentWSV: Array<WordScaleVisualization>;
 
 
-  applyLayout(): void;
+  applyLayout(eventInitiatingLayoutChange: string): void;
   cleanUpAfterLayout(): void;
   getRowAndColumnInfo(boundToWhat: string, aSpaceAvailability: SpaceAvailability): void;
 

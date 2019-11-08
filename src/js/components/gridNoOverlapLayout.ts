@@ -36,7 +36,7 @@ class GridNoOverlapLayout implements Layout {
   }
 
 
-  applyLayout() {
+  applyLayout(anEventInitiatingLayoutChange) {
 
     const layoutInfo = this.layoutInfo;
     layoutInfo.type = 'grid-no-overlap';
@@ -51,18 +51,20 @@ class GridNoOverlapLayout implements Layout {
     layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._wsvsWithoutCurrentWSV)
 
     // get the paragraph of the current entity
-    const currentEntityParagraph = this._refToText._currentEntity._entityElement.parentElement.parentElement;
+    const currentEntityParagraph = this._refToText._currentEntity!._entityElement.parentElement.parentElement;
 
-    const spacerNode = document.createElement("div");
-    spacerNode.setAttribute('id', 'spacer');
+    if (anEventInitiatingLayoutChange != 'sorting') {
+      const spacerNode = document.createElement("div");
+      spacerNode.setAttribute('id', 'spacer');
 
-    currentEntityParagraph.parentNode.insertBefore(spacerNode, currentEntityParagraph.nextSibling);
+      currentEntityParagraph.parentNode.insertBefore(spacerNode, currentEntityParagraph.nextSibling);
+    }
 
     const numTotal_rows = Math.floor(this._wsvsWithoutCurrentWSV.length/layoutInfo.numberOfColumns);
 
     const sizeSmallMultiples = this.getSizeOfSmallMultiple(layoutInfo.numberOfColumns, numTotal_rows, layoutInfo.cellDimensions.width, layoutInfo.cellDimensions.height);
 
-    document.getElementById('spacer').style.height = sizeSmallMultiples.height
+    document.getElementById('spacer').style.height = sizeSmallMultiples.height + 10;
 
     const shiftDown = currentEntityParagraph.getBoundingClientRect().bottom + document.body.scrollTop - (layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.bottom);
 
