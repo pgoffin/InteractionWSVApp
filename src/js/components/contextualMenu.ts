@@ -35,6 +35,7 @@ class ContextualMenu {
                                  wsvInteractionConstants.menuElement.orderByEntityNameElement,
                                  wsvInteractionConstants.menuElement.orderByDocPositionElement];
   _selectedLayoutMenuItem: HTMLElement | null;
+  _selectedSortingMenuItem: HTMLElement | null;
   _contextualMenuElements: Array<HTMLElement>;
   _contextualMenu: HTMLElement;
 
@@ -113,11 +114,13 @@ class ContextualMenu {
 
 
     elementLayoutDiv.addEventListener('click', event => {
+      const initialSorting = 'DocumentPositionSort';
 
       const element = event.currentTarget as HTMLElement
 
       const previousSelectedLayoutMenuItem = this._selectedLayoutMenuItem;
-      if (previousSelectedLayoutMenuItem && anElement.elementType === 'layout') {
+      const previousAppliedSortingMenuItem = this._selectedSortingMenuItem;
+      if (anElement.elementType === 'layout' && previousSelectedLayoutMenuItem) {
         ContextualMenu.makeSelectable(previousSelectedLayoutMenuItem);
         ContextualMenu.makeNotSelectable(element);
 
@@ -132,6 +135,21 @@ class ContextualMenu {
         });
 
         this._selectedLayoutMenuItem = element;
+      }
+
+
+      if (!previousAppliedSortingMenuItem) {
+        for (const aMenuItem of this._contextualMenuElements) {
+          if (aMenuItem.id === initialSorting) {
+            ContextualMenu.makeNotSelectable(aMenuItem);
+            this._selectedSortingMenuItem = aMenuItem;
+            break;
+          }
+        }
+      } else if (anElement.elementType === 'sorting' && previousAppliedSortingMenuItem !== element) {
+        ContextualMenu.makeSelectable(previousAppliedSortingMenuItem);
+        ContextualMenu.makeNotSelectable(element);
+        this._selectedSortingMenuItem = element;
       }
 
 
@@ -153,11 +171,12 @@ class ContextualMenu {
 
         if (this.refToText.isCurrentEntitySet) {
 
-          const initialSorting = 'DocumentPositionSort'
-
           if (this.refToText._isLayoutVisible) {
+            // get previously applied sorting and apply that sorting to new layout
+            const previousSorting = this._selectedSortingMenuItem.id
+
             this.refToText.layoutCreator._theLayout.cleanUpAfterLayout();
-            this.refToText.layoutCreator.changeLayout(anElement.elementInteraction, initialSorting, anElement.elementType)
+            this.refToText.layoutCreator.changeLayout(anElement.elementInteraction, previousSorting, anElement.elementType)
           } else {
             this.refToText.layoutCreator.changeLayout(anElement.elementInteraction, initialSorting, anElement.elementType)
           }
@@ -301,6 +320,7 @@ class ContextualMenu {
     });
 
     this._selectedLayoutMenuItem = null;
+    this._selectedSortingMenuItem = null;
   }
 
   private static getViewportInfo(): BBox {
