@@ -146,7 +146,20 @@ class Text implements Text {
 
         if (this.isCurrentEntitySet()) {
           this.contextualMenu.showContextMenu(this._currentEntity!);
-          this.layoutCreator.changeLayout(wsvInteractionConstants.defaultLayout, wsvInteractionConstants.defaultSorting)
+
+          for (const aMenuItem of this.contextualMenu._contextualMenuElements) {
+            if (aMenuItem.id === wsvInteractionConstants.defaultLayout) {
+              ContextualMenu.makeNotSelectable(aMenuItem);
+              this.contextualMenu._selectedLayoutMenuItem = aMenuItem;
+            } else if (aMenuItem.id === wsvInteractionConstants.defaultSorting) {
+              ContextualMenu.makeNotSelectable(aMenuItem);
+              this.contextualMenu._selectedSortingMenuItem = aMenuItem;
+            } else if (aMenuItem.classList.contains('sorting')) {
+              ContextualMenu.makeSelectable(aMenuItem);
+            }
+          }
+
+          this.layoutCreator.changeLayout(wsvInteractionConstants.defaultLayout, wsvInteractionConstants.defaultSorting, 'layout')
         } else {
           console.log('no current entity was found')
         }

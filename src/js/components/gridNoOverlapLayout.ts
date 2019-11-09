@@ -76,6 +76,11 @@ class GridNoOverlapLayout implements Layout {
     let mySequence: Array<VelocitySequence> = [];
     this._wsvsWithoutCurrentWSV.forEach((aWSV, index) => {
 
+      // update the bbox of the original wsvs
+      aWSV._entity.setBBoxOfEntity();
+      aWSV.setBBoxOfSparkline();
+      aWSV.setBBoxOfWSV();
+
       // cloning the wsv, and changing the position from relative to absolute
       let aClonedWSV: WordScaleVisualization;
       if (!this._refToText.isLayoutVisible) {
@@ -175,6 +180,14 @@ class GridNoOverlapLayout implements Layout {
     console.log('gridNoOverlap layout cleanup');
 
     this.removeSpacer();
+
+    // update the bbox of the original wsvs after space removed
+    for (const aWSV of this._wsvsWithoutCurrentWSV) {
+      aWSV._entity.setBBoxOfEntity();
+      aWSV.setBBoxOfSparkline();
+      aWSV.setBBoxOfWSV();
+
+    }
   }
 
 

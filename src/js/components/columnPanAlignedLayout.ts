@@ -50,8 +50,7 @@ class ColumnPanAlignedLayout implements Layout {
     layoutInfo.counts = LayoutCreator.getAboveBelowCounts(this._wsvsWithoutCurrentWSV)
 
     // where should the aligned column be put left or right, usually right, but if not enough space left
-    let topLeftCorner_left = 0;
-    let topLeftCorner_top = 0;
+    let topLeftCorner_left: number;
     const numUsedRowsAbove = Math.ceil(layoutInfo.counts.above/layoutInfo.numberOfColumns);
     let diffRight = document.body.getBoundingClientRect().right - layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.right;
 
@@ -65,7 +64,8 @@ class ColumnPanAlignedLayout implements Layout {
     }
 
     // get top left cornerDiffs
-    topLeftCorner_top = (layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.bottom + layoutInfo.cellPadding) - (numUsedRowsAbove * layoutInfo.cellDimensions.height);
+    // let topLeftCorner_top = (layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.bottom + layoutInfo.cellPadding) - (numUsedRowsAbove * layoutInfo.cellDimensions.height);
+    let topLeftCorner_top = (layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.top - layoutInfo.cellPadding) - (numUsedRowsAbove * layoutInfo.cellDimensions.height);
 
     layoutInfo.topLeftCorner_left = topLeftCorner_left;
     layoutInfo.topLeftCorner_top = topLeftCorner_top;
@@ -92,14 +92,15 @@ class ColumnPanAlignedLayout implements Layout {
       let newLeft = topLeftCorner_left + aWSV._offsetEntity + layoutInfo.cellPadding;
       if (aWSV._aboveOrBelow === 'above') {
 
-        newTop = (topLeftCorner_top + layoutInfo.cellPadding) + (Math.floor(aboveIndex/layoutInfo.numberOfColumns) * layoutInfo.cellDimensions.height);
+        // newTop = (topLeftCorner_top + layoutInfo.cellPadding) + (Math.floor(aboveIndex/layoutInfo.numberOfColumns) * layoutInfo.cellDimensions.height);
+        newTop = topLeftCorner_top + (Math.floor(aboveIndex/layoutInfo.numberOfColumns) * layoutInfo.cellDimensions.height);
         // newLeft = topLeftCorner_left + aWSV._offsetEntity + layoutInfo.cellPadding;
 
         aboveIndex += 1;
 
       } else if (aWSV._aboveOrBelow === 'below') {
 
-        newTop = layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.bottom + layoutInfo.cellPadding + (Math.floor(belowIndex/layoutInfo.numberOfColumns) * layoutInfo.cellDimensions.height) + layoutInfo.cellPadding;
+        newTop = topLeftCorner_top + (Math.floor((aboveIndex + belowIndex)/layoutInfo.numberOfColumns) * layoutInfo.cellDimensions.height);
 
         belowIndex += 1;
 

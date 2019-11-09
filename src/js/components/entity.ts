@@ -78,6 +78,7 @@ class Entity implements Entity {
 
           this._refToText._contextualMenu.showContextMenu(this);
 
+          if (this._refToText.currentEntity) this._refToText.currentEntity.unSetAsCurrentEntity();
           this.setAsCurrentEntity()
         }
       });

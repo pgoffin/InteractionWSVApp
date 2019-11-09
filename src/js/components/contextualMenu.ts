@@ -256,6 +256,7 @@ class ContextualMenu {
   hideContextualMenu(refToEntity: Entity) {
     // Don't hide if a layout is being displayed
     if(!this.refToText.isLayoutVisible) {
+    // if (refToEntity != this.refToText.currentEntity) {
 
       this.contextualMenu.classList.remove('wrapper');
       this.contextualMenu.classList.add('hide')
