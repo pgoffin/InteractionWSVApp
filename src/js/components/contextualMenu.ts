@@ -36,15 +36,19 @@ class ContextualMenu {
                                  wsvInteractionConstants.menuElement.orderByDocPositionElement];
   _selectedLayoutMenuItem: HTMLElement | null;
   _selectedSortingMenuItem: HTMLElement | null;
-  _contextualMenuElements: Array<HTMLElement>;
+
   _contextualMenu: HTMLElement;
+  _contextualMenuElements: Array<HTMLElement>;
+
+  _refToText: Text;
+  _isContextMenuSetUp: Boolean;
 
 // ['#grid', '#close', '#order-by-lastDataValue', '#order-by-entityName', '#order-by-docPosition','#selector', '#selector-ok', '#row', '#column', '#grid-no-overlap'];
 
 
   constructor(referenceToText: Text) {
 
-    this.refToText = referenceToText;
+    this._refToText = referenceToText;
     this._isContextMenuSetUp = false;
 
     this._contextualMenuBBox = {offset: -5,
@@ -56,19 +60,8 @@ class ContextualMenu {
 
     this._contextualMenuElements = [];
 
-    const menuDiv = document.createElement("div");
-    menuDiv.setAttribute('id', 'contextualMenu');
-    menuDiv.classList.add('hide');
-    this.contextualMenu = menuDiv;
-
-    this._menuItems.forEach((anElement: MenuItemType) => {
-      if (this._visibleMenuItems.includes(anElement.element)) {
-        this.createMenuElement(menuDiv, anElement);
-      }
-    });
-
-    // append to the end of the body
-    document.body.appendChild(menuDiv);
+    this._contextualMenu = document.createElement('div');
+    this.createMenu();
   }
 
 
@@ -88,6 +81,23 @@ class ContextualMenu {
   }
 
 
+  createMenu() {
+    // const menuDiv = document.createElement("div");
+    this.contextualMenu.setAttribute('id', 'contextualMenu');
+    this.contextualMenu.classList.add('hide');
+    // this.contextualMenu = menuDiv;
+
+    this._menuItems.forEach((anElement: MenuItemType) => {
+      if (this._visibleMenuItems.includes(anElement.element)) {
+        this.createMenuElement(this._contextualMenu, anElement);
+      }
+    });
+
+    // append to the end of the body
+    document.body.appendChild(this._contextualMenu);
+  }
+
+
   createMenuElement(aMenuDiv: HTMLElement, anElement: MenuItemType) {
 
     const styleAttr = 'width:width;height:height;'
@@ -97,20 +107,24 @@ class ContextualMenu {
     elementLayoutDiv.setAttribute('id', anElement.elementInteraction);
     aMenuDiv.appendChild(elementLayoutDiv);
 
-    if (anElement.elementType === 'sorting') {
-      ContextualMenu.makeNotSelectable(elementLayoutDiv);
-    } else {
-      ContextualMenu.makeSelectable(elementLayoutDiv);
-    }
-
     const elementImg = document.createElement("img");
     elementImg.setAttribute('class', 'icon');
     elementImg.setAttribute('src', anElement.iconUrl);
     elementImg.setAttribute('alt', anElement.elementInteraction);
     elementImg.setAttribute('title', anElement.elementInteraction);
+    elementImg.setAttribute('type', anElement.elementType);
     elementImg.setAttribute('style', styleAttr);
     elementLayoutDiv.appendChild(elementImg);
 
+    this._contextualMenuElements.push(elementLayoutDiv);
+
+
+
+    if (anElement.elementType === 'sorting') {
+      ContextualMenu.makeNotSelectable(elementLayoutDiv);
+    } else {
+      ContextualMenu.makeSelectable(elementLayoutDiv);
+    }
 
 
     elementLayoutDiv.addEventListener('click', event => {
@@ -118,39 +132,39 @@ class ContextualMenu {
 
       const element = event.currentTarget as HTMLElement
 
-      const previousSelectedLayoutMenuItem = this._selectedLayoutMenuItem;
-      const previousAppliedSortingMenuItem = this._selectedSortingMenuItem;
-      if (anElement.elementType === 'layout' && previousSelectedLayoutMenuItem) {
-        ContextualMenu.makeSelectable(previousSelectedLayoutMenuItem);
-        ContextualMenu.makeNotSelectable(element);
-
-        this._selectedLayoutMenuItem = element;
-
-      } else if (!previousSelectedLayoutMenuItem) {
-        // add class to selected menu item
-        ContextualMenu.makeNotSelectable(element);
-
-        this._contextualMenuElements.forEach(aMenuItem => {
-          if (aMenuItem.classList.contains('sorting')) ContextualMenu.makeSelectable(aMenuItem);
-        });
-
-        this._selectedLayoutMenuItem = element;
-      }
-
-
-      if (!previousAppliedSortingMenuItem) {
-        for (const aMenuItem of this._contextualMenuElements) {
-          if (aMenuItem.id === initialSorting) {
-            ContextualMenu.makeNotSelectable(aMenuItem);
-            this._selectedSortingMenuItem = aMenuItem;
-            break;
-          }
-        }
-      } else if (anElement.elementType === 'sorting' && previousAppliedSortingMenuItem !== element) {
-        ContextualMenu.makeSelectable(previousAppliedSortingMenuItem);
-        ContextualMenu.makeNotSelectable(element);
-        this._selectedSortingMenuItem = element;
-      }
+      // const previousSelectedLayoutMenuItem = this._selectedLayoutMenuItem;
+      // const previousAppliedSortingMenuItem = this._selectedSortingMenuItem;
+      // if (anElement.elementType === 'layout' && previousSelectedLayoutMenuItem) {
+      //   ContextualMenu.makeSelectable(previousSelectedLayoutMenuItem);
+      //   ContextualMenu.makeNotSelectable(element);
+      //
+      //   this._selectedLayoutMenuItem = element;
+      //
+      // } else if (!previousSelectedLayoutMenuItem) {
+      //   // add class to selected menu item
+      //   ContextualMenu.makeNotSelectable(element);
+      //
+      //   this._contextualMenuElements.forEach(aMenuItem => {
+      //     if (aMenuItem.classList.contains('sorting')) ContextualMenu.makeSelectable(aMenuItem);
+      //   });
+      //
+      //   this._selectedLayoutMenuItem = element;
+      // }
+      //
+      //
+      // if (!previousAppliedSortingMenuItem) {
+      //   for (const aMenuItem of this._contextualMenuElements) {
+      //     if (aMenuItem.id === initialSorting) {
+      //       ContextualMenu.makeNotSelectable(aMenuItem);
+      //       this._selectedSortingMenuItem = aMenuItem;
+      //       break;
+      //     }
+      //   }
+      // } else if (anElement.elementType === 'sorting' && previousAppliedSortingMenuItem !== element) {
+      //   ContextualMenu.makeSelectable(previousAppliedSortingMenuItem);
+      //   ContextualMenu.makeNotSelectable(element);
+      //   this._selectedSortingMenuItem = element;
+      // }
 
 
       // add the class 'selected' if no wsv has been selected (selected wsvs are the gathered ones)
@@ -164,33 +178,45 @@ class ContextualMenu {
 
       if (anElement.elementType === 'close') {
 
-        this.refToText._layoutCreator.giveUpLayout();
-        this.cleanupContextualMenu();
+        ContextualMenu.makeNotSelectable(element)
+        this.refToText._layoutCreator.giveUpLayout(() => this.cleanupContextualMenu());
+
 
       } else if (anElement.elementType === 'layout') {
 
-        if (this.refToText.isCurrentEntitySet) {
+        ContextualMenu.makeNotSelectable(element)
 
-          if (this.refToText._isLayoutVisible) {
-            // get previously applied sorting and apply that sorting to new layout
-            const previousSorting = this._selectedSortingMenuItem.id
+        if (this.refToText._isLayoutVisible) {
+          // get previously applied sorting and apply that sorting to new layout
 
-            this.refToText.layoutCreator._theLayout.cleanUpAfterLayout();
-            this.refToText.layoutCreator.changeLayout(anElement.elementInteraction, previousSorting, anElement.elementType)
-          } else {
-            this.refToText.layoutCreator.changeLayout(anElement.elementInteraction, initialSorting, anElement.elementType)
-          }
+          ContextualMenu.makeSelectable(this._selectedLayoutMenuItem)
+
+          this.refToText.layoutCreator._theLayout.cleanUpAfterLayout();
+          this.refToText.layoutCreator.changeLayout(anElement.elementInteraction, this._selectedSortingMenuItem.id, anElement.elementType)
 
         } else {
-          console.log('ERROR: no currentEntity, there should be one as contextualMenu is called on the currentEntity')
+          for (const aMenuItem of this._contextualMenuElements) {
+            if (aMenuItem.id !== initialSorting && aMenuItem.classList.contains('sorting')) {
+              ContextualMenu.makeSelectable(aMenuItem);
+            } else if (aMenuItem.id === initialSorting) {
+              this._selectedSortingMenuItem = aMenuItem;
+            }
+          }
+
+          this.refToText.layoutCreator.changeLayout(anElement.elementInteraction, initialSorting, anElement.elementType)
         }
 
+        this._selectedLayoutMenuItem = element;
+
       } else if (anElement.elementType === 'sorting') {
+        ContextualMenu.makeNotSelectable(element)
+        ContextualMenu.makeSelectable(this._selectedSortingMenuItem)
+
         this.refToText.layoutCreator.changeLayout(this.refToText._layoutCreator._layoutClass, anElement.elementInteraction, anElement.elementType)
+
+        this._selectedSortingMenuItem = element
       }
     });
-
-    this._contextualMenuElements.push(elementLayoutDiv);
   }
 
 
@@ -310,8 +336,8 @@ class ContextualMenu {
   }
 
 
-  cleanupContextualMenu() {
-    // go through all menu items and reset their class to selectable
+  setInitialMenuState() {
+    // go through all menu items and reset their class to selectable but not the sorting menu items
     this._contextualMenuElements.forEach((aMenuElement: HTMLElement) => {
       if (aMenuElement.classList.contains('sorting')) {
         ContextualMenu.makeNotSelectable(aMenuElement);
@@ -319,10 +345,60 @@ class ContextualMenu {
         ContextualMenu.makeSelectable(aMenuElement);
       }
     });
+  }
+
+
+  // setVisibilityOfMenuItems(aMenuElement: HTMLElement, aPreviousLayout: HTMLElement, aPreviousSorting: HTMLElement) {
+  //
+  //   if (aMenuElement.elementType === 'close' ) {
+  //     ContextualMenu.makeNotSelectable(aMenuItem);
+  //   } else if (aMenuItem.elementType === 'layout') {
+  //
+  //     if (aPreviousLayout === null) {
+  //       ContextualMenu.makeNotSelectable(aMenuItem);
+  //       // keep initial sorting not selectable
+  //       // make not clicked sortings selectable
+  //     } else {
+  //       // make previous layout selectable again
+  //       // make clicked layout not selectable
+  //       // keep clicked sorting not selectable
+  //     }
+  //   } else if (aMenuItem.elementType === 'sorting') {
+  //     // make previous sorting selectable again
+  //     // make clicked sorting not selectable
+  //   }
+  // }
+
+  // setLayoutMenuItemVisibility(aMenuElement: HTMLElement, aPreviousLayoutMenuItem: HTMLElement) {
+  //   if (aPreviousLayoutMenuItem === null) {
+  //     ContextualMenu.makeNotSelectable(aMenuElement);
+  //   } else {
+  //     ContextualMenu.makeSelectable(aPreviousLayoutMenuItem);
+  //   }
+  // }
+  //
+  //
+  // setSortingMenuItemVisibility(aMenuElement: HTMLElement, aPreviousSortingMenuItem: HTMLElement, anInitialSortingMenuItem: HTMLElement) {
+  //   if (aPreviousSortingMenuItem === null) {
+  //     ContextualMenu.makeNotSelectable(anInitialSortingMenuItem);
+  //   } else {
+  //     ContextualMenu.makeSelectable(aPreviousSortingMenuItem);
+  //   }
+  // }
+
+  // setOtherMenuItemVisibility(aMenuElement: HTMLElement) {
+  //   ContextualMenu.makeNotSelectable(aMenuElement);
+  // }
+
+
+  cleanupContextualMenu() {
+    console.log('cleanup the menu');
+    this.setInitialMenuState()
 
     this._selectedLayoutMenuItem = null;
     this._selectedSortingMenuItem = null;
   }
+
 
   private static getViewportInfo(): BBox {
     return document.body.getBoundingClientRect();

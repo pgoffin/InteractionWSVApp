@@ -119,8 +119,8 @@ class Text implements Text {
 
         console.log('event: click (give up layout)');
 
-        this.layoutCreator.giveUpLayout();
-        this.contextualMenu.cleanupContextualMenu();
+        this.layoutCreator.giveUpLayout(() => this._contextualMenu.cleanupContextualMenu());
+        // this.contextualMenu.cleanupContextualMenu();
       }
     });
 
@@ -132,8 +132,8 @@ class Text implements Text {
 
         console.log('event: click (give up layout)');
 
-        this.layoutCreator.giveUpLayout();
-        this.contextualMenu.cleanupContextualMenu();
+        this.layoutCreator.giveUpLayout(() => this._contextualMenu.cleanupContextualMenu());
+        // this.contextualMenu.cleanupContextualMenu();
 
       } else {
         // summon grid layout when dblclicking somewhere on the canvas

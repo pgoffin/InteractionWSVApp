@@ -87,7 +87,7 @@ abstract class LayoutCreator {
   }
 
 
-  giveUpLayout() {
+  giveUpLayout(cleaningUpMenu) {
 
     const giveUpAnimationSequence: Array<VelocitySequence> = [];
 
@@ -113,7 +113,7 @@ abstract class LayoutCreator {
                                         }
                                     });
 
-
+        // is it the last element in the list, yes add code to the complete function, hack to get stuff done after all the wsvs have moved
         if (Object.is(this._wsvsThatHaveAClone.length - 1, index)) {
           giveUpAnimationSequence.push({e: backgroundElement,
                                         p: {left: originalWSVBBox.left, top: originalWSVBBox.top, opacity: 0},
@@ -129,6 +129,8 @@ abstract class LayoutCreator {
 
                                               this.cleanupAfterLayout();
                                               this._theLayout.cleanUpAfterLayout();
+                                              // use callback for cleaning up menu when all animations are done
+                                              cleaningUpMenu();
                                             }
                                           }
                                       });
@@ -154,6 +156,7 @@ abstract class LayoutCreator {
       $.Velocity.RunSequence(giveUpAnimationSequence);
     } else {
       this.cleanupAfterLayout();
+      cleaningUpMenu();
     }
   }
 
