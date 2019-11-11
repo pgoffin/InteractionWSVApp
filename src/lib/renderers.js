@@ -3,7 +3,7 @@
 **/
 
 module.exports = {
-	
+
 	/**
 	* Builds a classic sparkline (word-scale visualization) without or with interaction.
 	* this.element and this.options is alvailable in the renderer if needed
@@ -238,11 +238,11 @@ module.exports = {
 		var sparkContainer = d3.select(sparkSpan.get(0));
 
 		var chart;
-		if (sparkContainer.select('.lineChart').empty()) {
+		if (sparkContainer.select('.sparklineChart').empty()) {
 			chart = sparkContainer.append('svg')
 				.attr('width', widthVis + 'px')
 				.attr('height', heightVis + 'px')
-				.attr('class', 'lineChart');
+				.attr('class', 'sparklineChart');
 		}
 
 		var x = d3.scaleLinear()
@@ -409,11 +409,12 @@ module.exports = {
 		}
 
 		var thePath = voronoiGroup.selectAll('path')
-			.data(voronoi(data[0].values.map(function(d, i) {
-				return [i, d.close] })));
-
-		thePath.enter().append('path')
-				.attr('d', function(d) { return d ? 'M' + d.join('L') + 'Z' : null; });
+			.data(voronoi.polygons(data[0].values.map(function(d, i) {
+				return [i, d.close] })))
+			.enter().append('path')
+			.attr('d', function(d) { return d ? 'M' + d.join('L') + 'Z' : null; })
+			.on('mouseover', mouseover)
+			.on('mouseout', mouseout);
 
 		// Handle opacity to suggest interaction
 		if (!interaction) {
@@ -427,53 +428,51 @@ module.exports = {
 
 
 		function mouseover(d) {
-			if (!action) { // if for example no diff dragging is happening brushing and linking is ok
+			console.log("brushing and linking")
 
-				// Find the currently selected sparkline
-				var currentSparklineSpan = this.parentElement.parentElement.parentElement.parentElement;
+			// Find the currently selected sparkline
+			var currentSparklineSpan = this.parentElement.parentElement.parentElement.parentElement;
 
-				if (((environment === 'not_cloned') && !d3.select(currentSparklineSpan).classed('clonedWSV')) ||
-					((environment === 'only_cloned') && (d3.select(currentSparklineSpan).classed('clonedWSV') ||
-						d3.select(currentSparklineSpan).classed('currentEntity')))) {
+			if (((environment === 'not_cloned') && !d3.select(currentSparklineSpan).classed('clonedWSV')) ||
+			((environment === 'only_cloned') && (d3.select(currentSparklineSpan).classed('clonedWSV') ||
+			d3.select(currentSparklineSpan).classed('currentEntity')))) {
 
-					// Iterate through all similar sparklines and apply a brushing highlight
-					var theSelector = '';
-					if (environment === 'not_cloned') {
-						theSelector = '.sparkline:not(.clonedWSV) .lineChart';
-					} else if (environment === 'only_cloned') {
-						theSelector = '.sparkline.clonedWSV .lineChart, .sparkline.currentEntity .lineChart';
-					}
-					d3.selectAll(theSelector).each(function(a){
-
-						var theHoverCircle = d3.select(this).selectAll('.hoverCircle');
-						theHoverCircle.classed('hide', false);
-						theHoverCircle.each(function(aCircle, i) {
-
-							var theData = d3.select(this).datum();
-
-							var newXscale = d3.scale.linear()
-								.domain([0, theData.values.length-1])
-								.range([margin.left, widthVis-margin.left-margin.right]);
-
-							var newYscale = d3.scale.linear()
-								.domain([d3.min(theData.values, function(d) { return d.close }), d3.max(theData.values, function(d) { return d.close })])
-								//.domain([-15, 18])
-								.range([heightVis-margin.top-margin.bottom, margin.bottom]);
-
-							// Check to see if this sparkline has a matching X
-							if(d.point[0] >= 0 && d.point[0] < theData.values.length){
-								// Get X and Y values
-								var dataX = d.point[0];
-								var dataY = theData.values[d.point[0]].close;
-								// Update label and reposition
-								d3.select(this).selectAll("text").text(dataY.toFixed(2) + "%");
-								d3.select(this).attr('transform', 'translate(' + newXscale(dataX) + ',' +
-																		     newYscale(dataY) + ')');
-							}
-							else theHoverCircle.classed('hide', true);
-						});
-					});
+				// Iterate through all similar sparklines and apply a brushing highlight
+				var theSelector = '';
+				if (environment === 'not_cloned') {
+					theSelector = '.sparkline:not(.clonedWSV) .sparklineChart';
+				} else if (environment === 'only_cloned') {
+					theSelector = '.sparkline.clonedWSV .sparklineChart, .sparkline.currentEntity .sparklineChart';
 				}
+				d3.selectAll(theSelector).each(function(a){
+
+					var theHoverCircle = d3.select(this).selectAll('.hoverCircle');
+					theHoverCircle.classed('hide', false);
+					theHoverCircle.each(function(aCircle, i) {
+
+						var theData = d3.select(this).datum();
+
+						var newXscale = d3.scaleLinear()
+															.domain([0, theData.values.length-1])
+															.range([margin.left, widthVis-margin.left-margin.right]);
+
+						var newYscale = d3.scaleLinear()
+															.domain([d3.min(theData.values, function(d) { return d.close }), d3.max(theData.values, function(d) { return d.close })])
+															//.domain([-15, 18])
+															.range([heightVis-margin.top-margin.bottom, margin.bottom]);
+
+						// Check to see if this sparkline has a matching X
+						if (d.data[0] >= 0 && d.data[0] < theData.values.length) {
+							// Get X and Y values
+							var dataX = d.data[0];
+							var dataY = theData.values[d.data[0]].close;
+							// Update label and reposition
+							d3.select(this).selectAll("text").text(dataY.toFixed(2) + "%");
+							d3.select(this).attr('transform', 'translate(' + newXscale(dataX) + ',' + newYscale(dataY) + ')');
+						}
+						else theHoverCircle.classed('hide', true);
+					});
+				});
 			}
 		}
 
