@@ -79,7 +79,7 @@ class Entity implements Entity {
           this._refToText._contextualMenu.showContextMenu(this);
 
           if (this._refToText.currentEntity) this._refToText.currentEntity.unSetAsCurrentEntity();
-          this.setAsCurrentEntity()
+          this.setAsCurrentEntity();
         }
       });
 
@@ -110,6 +110,8 @@ class Entity implements Entity {
     // only the entity gets class 'currentEntity'
     this.entityElement.classList.add('currentEntity');
 
+    this._entityBelongsToWsv._wsv.classList.add('currentWSV');
+
     if (this.entityElement.classList.contains('selected')) {
       this.entityElement.classList.remove('selected');
     }
@@ -122,7 +124,9 @@ class Entity implements Entity {
 
 
   unSetAsCurrentEntity() {
-    this.entityElement.classList.remove('currentEntity')
+    this.entityElement.classList.remove('currentEntity');
+
+    this._entityBelongsToWsv._wsv.classList.remove('currentWSV');
 
     this._refToText.currentEntity = null;
 

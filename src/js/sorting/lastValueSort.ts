@@ -24,7 +24,7 @@ class LastValueSort implements Sorter {
 
     this._dataToSort.forEach((aWSV: WordScaleVisualization) => {
       let wsvsData = aWSV._rawWSVData;
-      aWSV.lastDataValue = wsvsData[wsvsData.length - 1]['close']
+      aWSV.lastDataValue = wsvsData[wsvsData.length - 1]['changeToFirst']
     });
 
     this._dataToSort.sort(dl.comparator(['-lastDataValue']));
@@ -43,7 +43,7 @@ class LastValueSort implements Sorter {
 
 
   getComparator(aWSV: WordScaleVisualization): number {
-    return aWSV._rawWSVData[aWSV._rawWSVData.length - 1]['close'];
+    return aWSV._rawWSVData[aWSV._rawWSVData.length - 1]['changeToFirst'];
   }
 
 
@@ -53,7 +53,7 @@ class LastValueSort implements Sorter {
 
 
   compareToCurrentWSV(aWSV: WordScaleVisualization): string {
-    return (this.getComparator(aWSV) > this.getCurrentWSVComparator()) ? 'below' : 'above';
+    return (this.getComparator(aWSV) < this.getCurrentWSVComparator()) ? 'below' : 'above';
   }
 }
 

@@ -9,6 +9,9 @@ import LayoutCreator from './layoutCreator'
 import 'velocity-animate';
 import 'velocity-ui-pack';
 
+// require('webpack-jquery-ui/widgets');
+// require('../../lib/jquery.sparklificator');
+
 
 
 class GridLayout implements Layout {
@@ -75,7 +78,7 @@ class GridLayout implements Layout {
     let belowIndex = 0;
     layoutInfo.startIndex_below = 0;
 
-    this._wsvsWithoutCurrentWSV.forEach(aWSV => {
+    this._wsvsWithoutCurrentWSV.forEach((aWSV, index) => {
 
       // cloning the wsv, and changing the position from relative to absolute
       let aClonedWSV: WordScaleVisualization;
@@ -135,16 +138,34 @@ class GridLayout implements Layout {
                           }
                       });
 
+
+
+      // if (Object.is(this._wsvsWithoutCurrentWSV.length - 1, index)) {
+      //
+      //   mySequence.push({ e: backgroundElement,
+      //                     p: {left: (newLeft - layoutInfo.cellPadding - aWSV._offsetEntity), top: (newTop - layoutInfo.cellPadding), opacity: 1},
+      //                     o: {duration: 1000,
+      //                         sequenceQueue: false,
+      //                         complete: () => {
+      //                           $('.entity').sparklificator();
+      //                           $('.entity').sparklificator('option', 'environment', 'only_cloned')
+      //                         }
+      //                       }
+      //                   });
+      // } else {
       mySequence.push({ e: backgroundElement,
                         p: {left: (newLeft - layoutInfo.cellPadding - aWSV._offsetEntity), top: (newTop - layoutInfo.cellPadding), opacity: 1},
                         o: {duration: 1000,
                             sequenceQueue: false
                             }
                       });
+      // }
 
     });
 
     $.Velocity.RunSequence(mySequence);
+    // set the envirnoment variable to Onnly_cloned so the brushing and linking works
+    // $('.entity').sparklificator('option', 'environment', 'only_cloned')
   }
 
   // based on available space around the current Entity and the layout, provide number of columns and rows to be used

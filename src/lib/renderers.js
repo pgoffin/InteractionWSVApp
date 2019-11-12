@@ -439,10 +439,17 @@ module.exports = {
 
 				// Iterate through all similar sparklines and apply a brushing highlight
 				var theSelector = '';
-				if (environment === 'not_cloned') {
-					theSelector = '.sparkline:not(.clonedWSV) .sparklineChart';
-				} else if (environment === 'only_cloned') {
-					theSelector = '.sparkline.clonedWSV .sparklineChart, .sparkline.currentEntity .sparklineChart';
+				// if (environment === 'not_cloned') {
+				// 	theSelector = '.sparkline:not(.cloned) .sparklineChart';
+				// } else if (environment === 'only_cloned') {
+				// 	theSelector = '.sparkline.cloned .sparklineChart, .currentWSV .sparklineChart';
+				// }
+				if (!d3.select('.hasClone').empty()) {
+					// if there are cloned wsvs
+					theSelector = '.sparkline.cloned .sparklineChart, .currentWSV .sparklineChart';
+				} else {
+					// no cloned wsvs
+					theSelector = '.sparkline:not(.cloned) .sparklineChart';
 				}
 				d3.selectAll(theSelector).each(function(a){
 
