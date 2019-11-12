@@ -225,9 +225,6 @@ class WordScaleVisualization implements WordScaleVisualization {
 
     clonedWSV._isAClone = true;
 
-    // clonedWSV.entity.entityElement.classList.add('cloned');
-    // clonedWSV._wsv.classList.add('cloned');
-    // clonedWSV._visualization.classList.add('cloned');
     clonedWSV.addClassToWSV('cloned')
 
     clonedWSV.addEventsToWSV();

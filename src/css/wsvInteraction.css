@@ -44,7 +44,7 @@ body {
 	background-color: #ffcf40;
 }
 
-.entity:hover {
+.entity:hover:not(.nodataForWSV) {
 	background: #ffecb3;
 }
 

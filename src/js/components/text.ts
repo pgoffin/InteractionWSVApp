@@ -147,6 +147,8 @@ class Text implements Text {
         if (this.isCurrentEntitySet()) {
           this.contextualMenu.showContextMenu(this._currentEntity!);
 
+          this._contextualMenu.markAllEntitiesForUseInLayout();
+
           for (const aMenuItem of this.contextualMenu._contextualMenuElements) {
             if (aMenuItem.id === wsvInteractionConstants.defaultLayout) {
               ContextualMenu.makeNotSelectable(aMenuItem);

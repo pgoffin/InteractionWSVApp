@@ -93,6 +93,12 @@ class ContextualMenu {
 
     // append to the end of the body
     document.body.appendChild(this._contextualMenu);
+
+    this._contextualMenu.addEventListener('dblclick', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      console.log('dblclick on contextual menu')
+    });
   }
 
 
@@ -145,13 +151,7 @@ class ContextualMenu {
 
         } else {
 
-          // add the class 'useInLayout' if no wsv has been selected (selected wsvs are the gathered ones)
-          const entitiesUseInLayout = document.querySelectorAll('.entity.useInLayout');
-          if (entitiesUseInLayout.length === 0) {
-            document.querySelectorAll('.entity:not(.currentEntity):not(.nodataForWSV)').forEach(useEntityInLayout => {
-              useEntityInLayout.classList.add('useInLayout');
-            });
-          }
+          this.markAllEntitiesForUseInLayout();
 
           for (const aMenuItem of this._contextualMenuElements) {
             if (aMenuItem.id !== initialSorting && aMenuItem.classList.contains('sorting')) {
@@ -190,6 +190,17 @@ class ContextualMenu {
         }
       }
     });
+  }
+
+
+  markAllEntitiesForUseInLayout() {
+    // add the class 'useInLayout' if no wsv has been selected (selected wsvs are the gathered ones)
+    const entitiesUseInLayout = document.querySelectorAll('.entity.useInLayout');
+    if (entitiesUseInLayout.length === 0) {
+      document.querySelectorAll('.entity:not(.currentEntity):not(.nodataForWSV)').forEach(useEntityInLayout => {
+        useEntityInLayout.classList.add('useInLayout');
+      });
+    }
   }
 
 
