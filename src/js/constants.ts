@@ -31,7 +31,8 @@ export const wsvInteractionConstants = {
                  rowElement: '#row',
                  orderByLastDataValueElement: '#order-by-lastDataValue',
                  orderByEntityNameElement: '#order-by-entityName',
-                 orderByDocPositionElement: '#order-by-docPosition'},
+                 orderByDocPositionElement: '#order-by-docPosition',
+                 selector: '#selector'},
 
   closeInteraction: 'close',
   closeType: 'close',

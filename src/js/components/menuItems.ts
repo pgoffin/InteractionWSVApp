@@ -46,11 +46,11 @@ menuItems: [{element: '#close',
              iconUrl: './src/data/icons/sort-doc.svg'},
             {element: '#selector',
              elementType: 'selection',
-             elementInteraction: 'select_interaction',
+             elementInteraction: 'SelectWSV',
              iconUrl: './src/data/icons/selector.svg'},
             {element: '#selector',
-             elementType: 'selection hide',
-             elementInteraction: 'unselect_interaction',
+             elementType: 'selection',
+             elementInteraction: 'UnselectWSV',
              iconUrl: './src/data/icons/selector-ok.svg'}]
 
 }

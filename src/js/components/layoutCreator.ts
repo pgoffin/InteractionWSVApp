@@ -60,6 +60,8 @@ abstract class LayoutCreator {
     layoutInfo.cellDimensions = this.getCellDimensions();
 
     this._wsvsThatHaveAClone = this._refToText.listOfWSVs.filter(aWSV => aWSV != this._refToText._currentWSV);
+    // only use selected wsvs -> wsvs that have entities with class 'useInLayout'
+    this._wsvsThatHaveAClone = this._wsvsThatHaveAClone.filter(aWSV => aWSV._entity._entityElement.classList.contains('useInLayout'));
 
     const sortingFactory = sortingFactoryClass(sorting, this._wsvsThatHaveAClone, this._refToText)
     this._wsvsThatHaveAClone = sortingFactory.sort();
@@ -92,6 +94,9 @@ abstract class LayoutCreator {
     const giveUpAnimationSequence: Array<VelocitySequence> = [];
 
     this._wsvsThatHaveAClone.forEach((aWSV, index) => {
+
+      // remove useInLayout class
+      aWSV._entity._entityElement.classList.remove('useInLayout');
 
       let clonedWSV = aWSV._clonedWSV;
 
