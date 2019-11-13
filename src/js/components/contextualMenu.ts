@@ -20,10 +20,9 @@ interface ContextualMenuBBox {
 
 class ContextualMenu {
 
-  _contextualMenuBBox: ContextualMenuBBox;
   // Internal variables for delayed menu hiding
   _menuHideTimer: number;
-  _menuHideDelay: number = 2000;
+  _menuHideDelay: number;
   _menuItems: Array<MenuItemType> = menuItems.menuItems;
   _visibleMenuItems: string[] = [wsvInteractionConstants.menuElement.gridElement,
                                  wsvInteractionConstants.menuElement.closeElement,
@@ -38,11 +37,13 @@ class ContextualMenu {
   _selectedLayoutMenuItem: HTMLElement | null;
   _selectedSortingMenuItem: HTMLElement | null;
 
+  _isContextMenuSetUp: Boolean;
   _contextualMenu: HTMLElement;
   _contextualMenuElements: Array<HTMLElement>;
+  _contextualMenuBBox: ContextualMenuBBox;
 
   _refToText: Text;
-  _isContextMenuSetUp: Boolean;
+
 
 
 
@@ -59,6 +60,11 @@ class ContextualMenu {
                                 bottom: 0}
 
     this._contextualMenuElements = [];
+
+    this._menuHideDelay = 2000;
+
+    this._selectedLayoutMenuItem = null;
+    this._selectedSortingMenuItem = null;
 
     this._contextualMenu = document.createElement('div');
     this.createMenu();
@@ -138,8 +144,9 @@ class ContextualMenu {
 
       } else if (anElement.elementType === 'layout') {
 
-        this.hideSetOfMenuItems('selection')
-        ContextualMenu.makeNotSelectable(element)
+        this.hideSetOfMenuItems('selection');
+        this.positionMenu(this._refToText._currentEntity!);
+        ContextualMenu.makeNotSelectable(element);
 
         if (this.refToText._isLayoutVisible) {
           // get previously applied sorting and apply that sorting to new layout
@@ -147,7 +154,7 @@ class ContextualMenu {
           ContextualMenu.makeSelectable(this._selectedLayoutMenuItem)
 
           this.refToText.layoutCreator._theLayout.cleanUpAfterLayout();
-          this.refToText.layoutCreator.changeLayout(anElement.elementInteraction, this._selectedSortingMenuItem.id, anElement.elementType)
+          this.refToText.layoutCreator.changeLayout(anElement.elementInteraction, this._selectedSortingMenuItem!.id, anElement.elementType)
 
         } else {
 
@@ -195,8 +202,7 @@ class ContextualMenu {
 
   markAllEntitiesForUseInLayout() {
     // add the class 'useInLayout' if no wsv has been selected (selected wsvs are the gathered ones)
-    const entitiesUseInLayout = document.querySelectorAll('.entity.useInLayout');
-    if (entitiesUseInLayout.length === 0) {
+    if (document.querySelectorAll('.entity.useInLayout').length === 0) {
       document.querySelectorAll('.entity:not(.currentEntity):not(.nodataForWSV)').forEach(useEntityInLayout => {
         useEntityInLayout.classList.add('useInLayout');
       });
@@ -232,7 +238,7 @@ class ContextualMenu {
     this.contextualMenu.classList.remove('hide')
     this.contextualMenu.classList.add('wrapper')
 
-    this.getContextualMenuBBox(entityMenuIsCalledOn);
+    // this.getContextualMenuBBox(entityMenuIsCalledOn);
     this.positionMenu(entityMenuIsCalledOn);
 
     if (entityMenuIsCalledOn._entityElement.classList.contains('useInLayout')) {
@@ -296,6 +302,8 @@ class ContextualMenu {
 
   positionMenu(entityMenuIsCalledOn: Entity) {
 
+    this.getContextualMenuBBox(entityMenuIsCalledOn)
+
     if (this._contextualMenuBBox.left < ContextualMenu.getViewportInfo().left) {
       this._contextualMenuBBox.left = entityMenuIsCalledOn._entityBbox.right + this._contextualMenuBBox.offset;
       this.contextualMenu.classList.remove('leftPos');
@@ -316,16 +324,21 @@ class ContextualMenu {
   }
 
 
-  static makeNotSelectable(menuItem: HTMLElement) {
-    menuItem.classList.remove('selectable');
-    menuItem.classList.add('notSelectable');
+  static makeNotSelectable(menuItem: HTMLElement | null) {
+    if (menuItem) {
+      menuItem.classList.remove('selectable');
+      menuItem.classList.add('notSelectable');
+    }
   }
 
 
-  static makeSelectable(menuItem: HTMLElement) {
-    menuItem.classList.remove('notSelectable');
-    menuItem.classList.add('selectable');
+  static makeSelectable(menuItem: HTMLElement | null) {
+    if (menuItem) {
+      menuItem.classList.remove('notSelectable');
+      menuItem.classList.add('selectable');
+    }
   }
+
 
   hideSetOfMenuItems(menuItemType: string) {
     this._contextualMenuElements.forEach((aMenuElement: HTMLElement) => {
