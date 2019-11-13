@@ -275,8 +275,8 @@ class WordScaleVisualization implements WordScaleVisualization {
         // give up the layout, but exclude the dbclicked clones wsv
         const aLayoutCreator = this._refToText._layoutCreator
         aLayoutCreator._wsvsThatHaveAClone = aLayoutCreator._wsvsThatHaveAClone.filter(aWSV => aWSV !== this._originalWSV);
-        aLayoutCreator.giveUpLayout(() => this._refToText.contextualMenu.cleanupContextualMenu());
 
+        aLayoutCreator.giveUpLayout(() => this._refToText.contextualMenu.cleanupContextualMenu());
 
 
         animationSequence.push({e: this._originalWSV._wsv,

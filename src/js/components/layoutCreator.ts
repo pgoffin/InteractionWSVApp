@@ -95,9 +95,6 @@ abstract class LayoutCreator {
 
     this._wsvsThatHaveAClone.forEach((aWSV, index) => {
 
-      // remove useInLayout class
-      aWSV._entity._entityElement.classList.remove('useInLayout');
-
       let clonedWSV = aWSV._clonedWSV;
 
       if (clonedWSV) {
@@ -175,6 +172,11 @@ abstract class LayoutCreator {
     // this.layoutInfo.bandLength = 0;
     // this.layoutInfo.startOffsetRowlayout = 0;
     // this.layoutInfo.snapPositions = [];
+
+    // remove useInLayout class
+    document.querySelectorAll('.useInLayout').forEach(anEntityElement => {
+      anEntityElement.classList.remove('useInLayout');
+    })
 
     this._wsvsThatHaveAClone = [];
   }
