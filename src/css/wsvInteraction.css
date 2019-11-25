@@ -25,6 +25,8 @@ body {
 	position: relative;
 	z-index: 2;
 	background-color: #ffdf80;
+	/* display: inline-block; */
+	display: inline;
 }
 
 .entity.nodataForWSV {
@@ -33,7 +35,10 @@ body {
 
 .entity.cloned {
 	cursor: pointer;
-	position: absolute;
+	position: relative;
+  /* display: inline-block; */
+	display: inline;
+	line-height: 1.5;
 }
 
 .entity.currentEntity {
@@ -49,19 +54,27 @@ body {
 }
 
 .entity.useInLayout {
-	border-style: solid;
-	border-width: 1px;
+	/* border-style: solid;
+	border-width: 1px; */
 	border-color: #ffca2b;
+	line-height: 1.5;
 }
 
 .entity.showInLayout {
 	background-color: #e6ac00;
 }
 
+.sparkline.cloned {
+  /* display: inline-block; */
+	display: inline;
+	position: relative;
+}
+
 .sparklificated {
 	position: relative;
 	white-space: nowrap;
-	display: inline-block;
+	/* display: inline-block; */
+	display: inline;
   opacity: 1;
 }
 
@@ -72,7 +85,8 @@ body {
 .sparklificated.cloned {
 	position: absolute;
 	white-space: nowrap;
-	display: inline-block;
+	/* display: inline-block; */
+	display: inline;
 	z-index: 6;
 }
 

@@ -287,7 +287,8 @@ module.exports = {
 
 		var bottomLine = d3.line()
 			.x(function(d, i) { return x(d.x); })
-			.y(function(d, i) { return 21; }); //FIXME: redefine in terms of heightVis & margin
+			// .y(function(d, i) { return 21; }); //FIXME: redefine in terms of heightVis & margin
+			.y(function(d, i) { return heightVis; }); //FIXME: redefine in terms of heightVis & margin
 
 		var voronoi = d3.voronoi()
 			.x(function(d) { return x(d[0]); })
@@ -346,12 +347,14 @@ module.exports = {
 		var minDropLinePath = gWsv.append('path')
 			.attr('class', 'dropLine')
 			.attr('d', function(d) {
-				return dropLine([{x:minX,y:y(minY)},{x:minX, y:22}]); //FIXME: redefine in terms of heightVis & margin
+				// return dropLine([{x:minX,y:y(minY)},{x:minX, y:22}]); //FIXME: redefine in terms of heightVis & margin
+				return dropLine([{x:minX,y:y(minY)},{x:minX, y:heightVis+1}]); //FIXME: redefine in terms of heightVis & margin
 			});
 		var maxDropLinePath = gWsv.append('path')
 			.attr('class', 'dropLine')
 			.attr('d', function(d) {
-				return dropLine([{x:maxX,y:y(maxY)},{x:maxX, y:22}]); //FIXME: redefine in terms of heightVis & margin
+				// return dropLine([{x:maxX,y:y(maxY)},{x:maxX, y:22}]); //FIXME: redefine in terms of heightVis & margin
+				return dropLine([{x:maxX,y:y(maxY)},{x:maxX, y:heightVis+1}]); //FIXME: redefine in terms of heightVis & margin
 			});
 
 		// Highlight the range between lowest and highest points in the background

@@ -58,7 +58,7 @@
 	    	// sparklificatedSPAN.css('white-space', 'nowrap');
 			// sparklificatedSPAN.css('display', 'inline-block');
 
-	    	// sparklineSPAN is the the span around the word-scale visualization
+	    	// sparklineSPAN is the span around the word-scale visualization
 	    	var sparklineSPAN = $('<span class="sparkline"></span>');
 			sparklificatedSPAN.append(sparklineSPAN);
 
@@ -81,7 +81,7 @@
 		**/
 		_setOption: function(option, value) {
 			this._super(option, value);
-        	this.refresh(option);
+    	this.refresh(option);
 		},
 
 
@@ -213,8 +213,9 @@
 			if (newPosition === 'top'){
 				yOffset = diffTopPos - height;
 			} else if (newPosition === 'right') {
-				xOffset = +lengthOfEntity + +lengthOfNBSP;
-				yOffset = diffTopPosRight;
+				// xOffset = +lengthOfEntity + +lengthOfNBSP;
+				xOffset = +lengthOfNBSP;
+				yOffset = diffTopPosRight/2;
 			} else if (newPosition === 'baseline'){
 				yOffset = diffTopPosRight;
 			} else if (newPosition === 'left'){
@@ -238,7 +239,7 @@
 			sparklineSPAN.css('top', yOffset + 'px');
 			sparklineSPAN.css('left', xOffset + 'px');
 			sparklificatedSPAN.css('margin-top', marginTop);
-			sparklificatedSPAN.css('margin-right', marginRight);
+			// sparklificatedSPAN.css('margin-right', marginRight);
 			sparklificatedSPAN.css('margin-left', marginLeft);
 			sparklificatedSPAN.css('margin-bottom', marginBottom);
 

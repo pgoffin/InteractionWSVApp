@@ -2,7 +2,9 @@
 
 
 .sparkline {
-	position: absolute;
+	position: relative;
+	/* display: inline-block; */
+	display: inline;
 }
 
 .sparkline svg {
@@ -31,7 +33,7 @@
 
 .sparkline .lowestHighestLine{
 	stroke: #666;
-	stroke-width: 1;
+	stroke-width: 1px;
 	shape-rendering: crispEdges;
 }
 
@@ -68,7 +70,7 @@
 }
 
 .sparkline .hoverCircle text{
-	font-size:8pt;
-	stroke:#333;
+	font-size: 8pt;
+	stroke: #333;
 	font-weight: 100;
 }

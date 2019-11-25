@@ -56,8 +56,8 @@ abstract class LayoutCreator {
     const currentEntity: Entity = this._refToText.currentEntity!;
     layoutInfo.currentEntity = currentEntity;
 
-    // get dimensions of cell, where a cell is a rectangle around the wsv
-    layoutInfo.cellDimensions = this.getCellDimensions();
+    // // get dimensions of cell, where a cell is a rectangle around the wsv
+    // layoutInfo.cellDimensions = this.getCellDimensions();
 
     this._wsvsThatHaveAClone = this._refToText.listOfWSVs.filter(aWSV => aWSV != this._refToText._currentWSV);
     // only use selected wsvs -> wsvs that have entities with class 'useInLayout'
@@ -81,6 +81,24 @@ abstract class LayoutCreator {
     });
 
     this.getUsableInteractiveSpace();
+
+    // layoutInfo.cellDimensions = LayoutCreator.getClonedCellDimensions(this._wsvsWithoutCurrentWSV, layoutInfo);
+
+    // clone the WSVs
+    this._wsvsThatHaveAClone.forEach(aWSV => {
+
+      // cloning the wsv, and changing the position from relative to absolute
+      let aClonedWSV: WordScaleVisualization;
+      if (!aWSV._clonedWSV) {
+        aClonedWSV = aWSV.cloneWSV();
+        aClonedWSV._offsetEntity = maxEntityWidth - aClonedWSV._entity._entityBbox.width;
+      }
+    });
+
+    // clone the WSVs before getting the cell dimensions, because when cloning sparklificated spans
+    // get position: absolute which result in a different height than when position is relative
+    // get dimensions of cell, where a cell is a rectangle around the wsv
+    layoutInfo.cellDimensions = this.getClonedCellDimensions();
 
     this._theLayout = this.layoutFactory(layoutType, layoutInfo, this._spaceUsableInteractively, this._refToText, this._wsvsThatHaveAClone);
     this._theLayout.applyLayout(eventInitiatingLayoutChange);
@@ -186,19 +204,19 @@ abstract class LayoutCreator {
   * A cell is where the wsv (sparkline + entity) is embedded + padding.
   * @return {object} - custom object with the height and width of the cell
   */
-  getCellDimensions(): CellDimension {
+  getClonedCellDimensions(): CellDimension {
 
     // initialize the return object
     const cellDimensions = {height: 0,
                             width: 0}
 
     // get the max wsv height
-    cellDimensions.height = Math.max.apply(null, this._refToText.listOfWSVs.map(aWSV => aWSV._wsvBBox.height));
-    cellDimensions.height = cellDimensions.height + (2 * this._layoutInfo.cellPadding);
+    cellDimensions.height = Math.max.apply(null, this._wsvsThatHaveAClone.map(aWSV => aWSV._clonedWSV!._wsvBBox.height));
+    cellDimensions.height = cellDimensions.height + (2 * this.layoutInfo.cellPadding);
 
     // get the max wsv width
-    cellDimensions.width = Math.max.apply(null, this._refToText.listOfWSVs.map(aWSV => aWSV._wsvBBox.width));
-    cellDimensions.width = cellDimensions.width + (2 * this._layoutInfo.cellPadding);
+    cellDimensions.width = Math.max.apply(null, this._wsvsThatHaveAClone.map(aWSV => aWSV._clonedWSV!._wsvBBox.width));
+    cellDimensions.width = cellDimensions.width + (2 * this.layoutInfo.cellPadding);
 
     return cellDimensions;
   }

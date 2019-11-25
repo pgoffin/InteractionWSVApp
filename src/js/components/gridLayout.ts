@@ -40,8 +40,27 @@ class GridLayout implements Layout {
 
 
   applyLayout(anEventInitiatingLayoutChange) {
-
     const layoutInfo = this.layoutInfo;
+
+    // const maxEntityWidth = LayoutCreator.getEntityMaxWidth(this._refToText.listOfWSVs);
+    // // layoutInfo.cellDimensions = LayoutCreator.getClonedCellDimensions(this._wsvsWithoutCurrentWSV, layoutInfo);
+    // this._wsvsWithoutCurrentWSV.forEach((aWSV, index) => {
+    //
+    //   // cloning the wsv, and changing the position from relative to absolute
+    //   let aClonedWSV: WordScaleVisualization;
+    //   if (!this._refToText.isLayoutVisible) {
+    //     aClonedWSV = aWSV.cloneWSV();
+    //     aClonedWSV._offsetEntity = maxEntityWidth - aClonedWSV._entity._entityBbox.width;
+    //   } else {
+    //     aClonedWSV = aWSV._clonedWSV!;
+    //     aClonedWSV.removeClassOffWSV('hide');
+    //   }
+    // });
+    //
+    //
+    // // get dimensions of cell, where a cell is a rectangle around the wsv
+    // layoutInfo.cellDimensions = LayoutCreator.getClonedCellDimensions(this._wsvsWithoutCurrentWSV, layoutInfo);
+
     layoutInfo.type = 'grid';
 
     const currentEntityBBox = layoutInfo.currentEntity._entityBbox;
@@ -63,7 +82,8 @@ class GridLayout implements Layout {
       topLeftCorner_left = (currentEntityBBox.left - currentWSV._offsetEntity - layoutInfo.cellPadding) - (layoutInfo.rowAndColumnNumbers.leftNumbColumn * (layoutInfo.cellDimensions.width));
     }
 
-    let topLeftCorner_top = layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.top - layoutInfo.cellPadding - (numUsedRowsAbove * layoutInfo.cellDimensions.height);
+    let diff = (layoutInfo.cellDimensions.height - (2 * layoutInfo.cellPadding) - layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.height)/2;
+    let topLeftCorner_top = layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.top - diff - layoutInfo.cellPadding - (numUsedRowsAbove * layoutInfo.cellDimensions.height);
 
     layoutInfo.topLeftCorner_left = topLeftCorner_left;
     layoutInfo.topLeftCorner_top = topLeftCorner_top;
@@ -72,23 +92,26 @@ class GridLayout implements Layout {
     let aboveIndex = GridLayout.getGridStartIndex(layoutInfo.counts.above, layoutInfo.numberOfColumns)
     layoutInfo.startIndex_above = aboveIndex;
 
-    const maxEntityWidth = LayoutCreator.getEntityMaxWidth(this._refToText.listOfWSVs);
+    // const maxEntityWidth = LayoutCreator.getEntityMaxWidth(this._refToText.listOfWSVs);
 
     let mySequence: Array<VelocitySequence> = [];
     let belowIndex = 0;
     layoutInfo.startIndex_below = 0;
 
-    this._wsvsWithoutCurrentWSV.forEach((aWSV, index) => {
+    this._wsvsWithoutCurrentWSV.forEach(aWSV => {
 
-      // cloning the wsv, and changing the position from relative to absolute
-      let aClonedWSV: WordScaleVisualization;
-      if (!this._refToText.isLayoutVisible) {
-        aClonedWSV = aWSV.cloneWSV();
-        aClonedWSV._offsetEntity = maxEntityWidth - aClonedWSV._entity._entityBbox.width;
-      } else {
-        aClonedWSV = aWSV._clonedWSV!;
-        aClonedWSV.removeClassOffWSV('hide');
-      }
+      // // cloning the wsv, and changing the position from relative to absolute
+      // let aClonedWSV: WordScaleVisualization;
+      // if (!this._refToText.isLayoutVisible) {
+      //   aClonedWSV = aWSV.cloneWSV();
+      //   aClonedWSV._offsetEntity = maxEntityWidth - aClonedWSV._entity._entityBbox.width;
+      // } else {
+      //   aClonedWSV = aWSV._clonedWSV!;
+      //   aClonedWSV.removeClassOffWSV('hide');
+      // }
+
+      let aClonedWSV = aWSV._clonedWSV!;
+      aClonedWSV.removeClassOffWSV('hide');
 
 
       let newTop = 0;
@@ -102,7 +125,7 @@ class GridLayout implements Layout {
 
       } else if (aWSV._aboveOrBelow === 'below') {
 
-        newTop = (layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.bottom + layoutInfo.cellPadding) + (Math.floor(belowIndex/layoutInfo.numberOfColumns) * layoutInfo.cellDimensions.height) + layoutInfo.cellPadding;
+        newTop = (layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.bottom + diff + layoutInfo.cellPadding) + (Math.floor(belowIndex/layoutInfo.numberOfColumns) * layoutInfo.cellDimensions.height) + layoutInfo.cellPadding;
 
         newLeft = topLeftCorner_left + ((belowIndex % layoutInfo.numberOfColumns) * layoutInfo.cellDimensions.width) + layoutInfo.cellPadding + aClonedWSV._offsetEntity;
         belowIndex += 1;
