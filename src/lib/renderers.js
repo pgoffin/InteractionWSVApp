@@ -293,7 +293,8 @@ module.exports = {
 		var voronoi = d3.voronoi()
 			.x(function(d) { return x(d[0]); })
 			.y(function(d) { return y(d[1]); })
-			.extent([[-margin.left, -margin.top], [widthVis + margin.right, heightVis + margin.bottom]]);
+			// .extent([[-margin.left, -margin.top], [widthVis + margin.right, heightVis + margin.bottom]]);
+			.extent([[0, 0], [widthVis, heightVis]]);
 
 		var maxX = d3.scan(data[0].values, function(a,b){return b.close - a.close});
 		var maxY = d3.max(data[0].values, function(d){return d.close});

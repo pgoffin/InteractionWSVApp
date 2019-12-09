@@ -20,7 +20,7 @@ export const wsvInteractionConstants = {
   // stock line chart constants
   numberOfMarks: 31,
   stockLineChartSize: { markWidth: 6,
-                        heightWordScaleVis: 20},
+                        heightWordScaleVis: 30},
 
 
   menuElement: { gridElement: '#grid',

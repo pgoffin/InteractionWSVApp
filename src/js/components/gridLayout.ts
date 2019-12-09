@@ -83,6 +83,7 @@ class GridLayout implements Layout {
     }
 
     let diff = (layoutInfo.cellDimensions.height - (2 * layoutInfo.cellPadding) - layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.height)/2;
+    diff = 0;
     let topLeftCorner_top = layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.top - diff - layoutInfo.cellPadding - (numUsedRowsAbove * layoutInfo.cellDimensions.height);
 
     layoutInfo.topLeftCorner_left = topLeftCorner_left;

@@ -195,8 +195,11 @@
 			var diffTopPos = topPosSpanToSpark - topPosSpark;
 
 			// difference between right positions of the 2 containers
-			var diffTopPosRight = (topPosSpanToSpark + fontSize) - (topPosSpark + height);
-
+			// var diffTopPosRight = (topPosSpanToSpark + elementSPAN[0].getBoundingClientRect().height) - (topPosSpark + height);
+			// var diffTopPosRight = elementSPAN[0].getBoundingClientRect().height - height + ());
+			// var diffTopPosRight = (topPosSpanToSpark - sparklificatedSPAN[0].getBoundingClientRect().top) + (elementSPAN[0].getBoundingClientRect().height - height)/2;
+			var diffTopPosRight = elementSPAN[0].offsetTop + elementSPAN[0].getBoundingClientRect().height/2 - height/2
+			console.log('diffTopPosRight', diffTopPosRight)
 
 			// calculate length of nbsp (space between entity and sparkline)
 			var tmpNBSPNode = $('<span display=none></span>').append('&nbsp;');
@@ -215,7 +218,7 @@
 			} else if (newPosition === 'right') {
 				// xOffset = +lengthOfEntity + +lengthOfNBSP;
 				xOffset = +lengthOfNBSP;
-				yOffset = diffTopPosRight/2;
+				yOffset = diffTopPosRight;
 			} else if (newPosition === 'baseline'){
 				yOffset = diffTopPosRight;
 			} else if (newPosition === 'left'){
@@ -237,6 +240,7 @@
 			marginBottom = o.paddingHeight ? Math.max(yOffset - (currentLineHeight - fontSize), 0) : 0;
 
 			sparklineSPAN.css('top', yOffset + 'px');
+			// sparklineSPAN.css('vertical-align', 'middle');
 			sparklineSPAN.css('left', xOffset + 'px');
 			sparklificatedSPAN.css('margin-top', marginTop);
 			// sparklificatedSPAN.css('margin-right', marginRight);

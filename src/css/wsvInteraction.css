@@ -38,11 +38,13 @@ body {
 	position: relative;
   /* display: inline-block; */
 	display: inline;
+	z-index: 2;
 	line-height: 1.5;
 }
 
 .entity.currentEntity {
-	z-index: 6;
+	/* z-index: 6; */
+	z-index: 2;
 }
 
 .currentEntity:not(.sparkline) {
@@ -57,7 +59,7 @@ body {
 	/* border-style: solid;
 	border-width: 1px; */
 	border-color: #ffca2b;
-	line-height: 1.5;
+	/* line-height: 1.5; */
 }
 
 .entity.showInLayout {
@@ -65,17 +67,19 @@ body {
 }
 
 .sparkline.cloned {
-  /* display: inline-block; */
-	display: inline;
+  display: inline-block;
 	position: relative;
+	/* display: inline; */
+	z-index: 2;
 }
 
 .sparklificated {
 	position: relative;
 	white-space: nowrap;
-	/* display: inline-block; */
-	display: inline;
+	display: inline-block;
+	/* display: inline; */
   opacity: 1;
+	z-index: 3;
 }
 
 .sparklificated.hasClone {
@@ -85,8 +89,8 @@ body {
 .sparklificated.cloned {
 	position: absolute;
 	white-space: nowrap;
-	/* display: inline-block; */
-	display: inline;
+	display: inline-block;
+	/* display: inline; */
 	z-index: 6;
 }
 

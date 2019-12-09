@@ -86,11 +86,14 @@ class WordScaleVisualization implements WordScaleVisualization {
     this._wsv = this.entity.entityElement.parentElement;
     if (isAClone) this._wsv.classList.add('cloned');
     $(this.entity.entityElement).sparklificator('option', this.wsvClass._settings);
+    let sparklineSVG = this.entity.entityElement.nextElementSibling.firstElementChild
+    $(sparklineSVG).unwrap()
+    $(sparklineSVG).addClass('sparkline')
 
     // this._wsv = this.entity.entityElement.parentElement;
 
     if (this._wsv) {
-      this._visualization = this._wsv.querySelector('span.sparkline');
+      this._visualization = this._wsv.querySelector('.sparkline');
     }
 
     this.typeOfWSV = wsvInteractionConstants.typeOfWSV;

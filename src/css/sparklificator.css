@@ -1,10 +1,10 @@
 
 
-
 .sparkline {
 	position: relative;
-	/* display: inline-block; */
-	display: inline;
+	display: inline-block;
+	/* display: inline; */
+	z-index: 2;
 }
 
 .sparkline svg {
