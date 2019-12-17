@@ -1,6 +1,4 @@
-when first starting use:
-npm install
-
-then do
-
-npm run dev
+After the download:
+1) npm install
+2) npm run build
+3) npm run serve

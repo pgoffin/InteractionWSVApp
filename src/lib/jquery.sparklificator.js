@@ -59,8 +59,9 @@
 			// sparklificatedSPAN.css('display', 'inline-block');
 
 	    	// sparklineSPAN is the span around the word-scale visualization
-	    	var sparklineSPAN = $('<span class="sparkline"></span>');
-			sparklificatedSPAN.append(sparklineSPAN);
+	    	// var sparklineSPAN = $('<span class="sparkline"></span>');
+				var sparklineSPAN = $('<svg class="sparkline"></svg>')
+				sparklificatedSPAN.append(sparklineSPAN);
 
 	    	//set the other basic properties of the container and sparkline
 	    	// sparklineSPAN.css('position', 'absolute');
@@ -238,6 +239,8 @@
 			marginRight = o.paddingWidth ? Math.max(xOffset + width - lengthOfEntity, 0) : 0;
 			marginLeft = o.paddingWidth ? Math.max(-xOffset, 0) : 0;
 			marginBottom = o.paddingHeight ? Math.max(yOffset - (currentLineHeight - fontSize), 0) : 0;
+			// quick fix
+			marginBottom = 0
 
 			sparklineSPAN.css('top', yOffset + 'px');
 			// sparklineSPAN.css('vertical-align', 'middle');

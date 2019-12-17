@@ -5,6 +5,8 @@
 	display: inline-block;
 	/* display: inline; */
 	z-index: 2;
+
+	vertical-align: bottom;
 }
 
 .sparkline svg {

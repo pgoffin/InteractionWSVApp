@@ -237,13 +237,16 @@ module.exports = {
 
 		var sparkContainer = d3.select(sparkSpan.get(0));
 
-		var chart;
-		if (sparkContainer.select('.sparklineChart').empty()) {
-			chart = sparkContainer.append('svg')
-				.attr('width', widthVis + 'px')
-				.attr('height', heightVis + 'px')
-				.attr('class', 'sparklineChart');
-		}
+		// var chart;
+		// if (sparkContainer.select('.sparklineChart').empty()) {
+		// 	chart = sparkContainer.append('svg')
+		// 		.attr('width', widthVis + 'px')
+		// 		.attr('height', heightVis + 'px')
+		// 		.attr('class', 'sparklineChart');
+		// }
+		var chart = sparkContainer.attr('width', widthVis + 'px')
+									.attr('height', heightVis + 'px')
+									.classed('sparklineChart', true);
 
 		var x = d3.scaleLinear()
 			.domain([0, data[0].values.length-1])

@@ -82,9 +82,14 @@ class GridLayout implements Layout {
       topLeftCorner_left = (currentEntityBBox.left - currentWSV._offsetEntity - layoutInfo.cellPadding) - (layoutInfo.rowAndColumnNumbers.leftNumbColumn * (layoutInfo.cellDimensions.width));
     }
 
-    let diff = (layoutInfo.cellDimensions.height - (2 * layoutInfo.cellPadding) - layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.height)/2;
-    diff = 0;
-    let topLeftCorner_top = layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.top - diff - layoutInfo.cellPadding - (numUsedRowsAbove * layoutInfo.cellDimensions.height);
+    // let diff = (layoutInfo.cellDimensions.height - (2 * layoutInfo.cellPadding) - layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.height)/2;
+    let diff = 0;
+    // let topLeftCorner_top = layoutInfo.currentEntity._entityBelongsToWsv._wsvBBox.top - diff - layoutInfo.cellPadding - (numUsedRowsAbove * layoutInfo.cellDimensions.height);
+
+
+    let spaceTopEntityToCellTop = (layoutInfo.cellDimensions.height - layoutInfo.currentEntity._entityBbox.height) / 2;
+    let topLeftCorner_top = layoutInfo.currentEntity._entityBbox.top - spaceTopEntityToCellTop - (numUsedRowsAbove * layoutInfo.cellDimensions.height);
+
 
     layoutInfo.topLeftCorner_left = topLeftCorner_left;
     layoutInfo.topLeftCorner_top = topLeftCorner_top;
@@ -114,12 +119,14 @@ class GridLayout implements Layout {
       let aClonedWSV = aWSV._clonedWSV!;
       aClonedWSV.removeClassOffWSV('hide');
 
+      let wsvOffSetTop = spaceTopEntityToCellTop - aWSV._entity._entityElement.offsetTop;
 
       let newTop = 0;
       let newLeft = 0;
       if (aWSV._aboveOrBelow === 'above') {
 
-        newTop = topLeftCorner_top + (Math.floor(aboveIndex/layoutInfo.numberOfColumns) * layoutInfo.cellDimensions.height) + layoutInfo.cellPadding;
+        // newTop = topLeftCorner_top + (Math.floor(aboveIndex/layoutInfo.numberOfColumns) * layoutInfo.cellDimensions.height) + layoutInfo.cellPadding;
+        newTop = topLeftCorner_top + (Math.floor(aboveIndex/layoutInfo.numberOfColumns) * layoutInfo.cellDimensions.height) + wsvOffSetTop;
         newLeft = topLeftCorner_left + ((aboveIndex % layoutInfo.numberOfColumns) * layoutInfo.cellDimensions.width) + layoutInfo.cellPadding + aClonedWSV._offsetEntity;
 
         aboveIndex += 1;
@@ -138,7 +145,7 @@ class GridLayout implements Layout {
 
       let backgroundElement: HTMLElement;
       if (!this._refToText.isLayoutVisible) {
-        backgroundElement = LayoutCreator.addWhiteLayer(layoutInfo.cellDimensions.width, layoutInfo.cellDimensions.height, aWSV._wsvBBox.top - layoutInfo.cellPadding, aWSV._wsvBBox.left - aWSV._offsetEntity - layoutInfo.cellPadding);
+        backgroundElement = LayoutCreator.addWhiteLayer(layoutInfo.cellDimensions.width, layoutInfo.cellDimensions.height, aWSV._wsvBBox.top - wsvOffSetTop, aWSV._wsvBBox.left - aWSV._offsetEntity - layoutInfo.cellPadding);
 
         aClonedWSV._backgroundElement = backgroundElement;
       } else {
@@ -178,7 +185,7 @@ class GridLayout implements Layout {
       //                   });
       // } else {
       mySequence.push({ e: backgroundElement,
-                        p: {left: (newLeft - layoutInfo.cellPadding - aWSV._offsetEntity), top: (newTop - layoutInfo.cellPadding), opacity: 1},
+                        p: {left: (newLeft - layoutInfo.cellPadding - aWSV._offsetEntity), top: (newTop - wsvOffSetTop), opacity: 1},
                         o: {duration: 1000,
                             sequenceQueue: false
                             }
